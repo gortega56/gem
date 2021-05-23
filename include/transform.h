@@ -4,23 +4,30 @@
 
 namespace gem
 {
-#pragma region transform3f
+#pragma region transform3f  
 
+    /// <summary>
+    /// Affine transform of the form: M + t, where t is a translation vector and M is a linear transform.    
+    /// Transforms can be concatenated in the form (A + a)B + b = AB + (aB + b).
+    /// Points are transformed via pM + t.
+    /// </summary>
     struct transform3f
     {
-        quatf rotation;
-        float3 translation;
-        float3 scale;
+        quatf q;
+        float3 t;
+        float3 s;
 
         static transform3f identity();
 
-        transform3f(const quatf& q, const float3& t, const float3& s);
+        static transform3f GEM_VECTORCALL set(const quatf& q, const float3& t, const float3& s);
 
-        transform3f(const transform3f& o);
+        static transform3f GEM_VECTORCALL set(const transform3f& o);
 
         transform3f() = default;
 
-        transform3f& GEM_VECTORCALL concatenate(const transform3f rhs);
+        transform3f& GEM_VECTORCALL concatenate(const transform3f& b);
+
+        float3 GEM_VECTORCALL transform_point(const float3& p);
 
         float4x3 matrix4x3();
 
@@ -29,67 +36,81 @@ namespace gem
         transform3f& GEM_VECTORCALL operator=(const transform3f& o);
     };
 
-    transform3f GEM_VECTORCALL transform_mul3f(const transform3f& lhs, const transform3f& rhs);
+    transform3f GEM_VECTORCALL concatenate(const transform3f& a, const transform3f& b);
 
     GEM_INLINE transform3f transform3f::identity()
     {
-        return transform3f(quatf::identity(), float3(0, 0, 0), float3(1, 1, 1));
+        return
+        {
+            quatf::identity(), 
+            float3(0, 0, 0), 
+            float3(1, 1, 1) 
+        };
     }
 
-    GEM_INLINE transform3f::transform3f(const quatf& q, const float3& t, const float3& s)
-        : rotation(q)
-        , translation(t)
-        , scale(s)
+    GEM_INLINE transform3f GEM_VECTORCALL transform3f::set(const quatf& q, const float3& t, const float3& s)
     {
-
+        return
+        {
+            q,
+            t,
+            s
+        };
     }
 
-    GEM_INLINE transform3f::transform3f(const transform3f& o)
-        : rotation(o.rotation)
-        , translation(o.translation)
-        , scale(o.scale)
+    GEM_INLINE transform3f GEM_VECTORCALL transform3f::set(const transform3f& o)
     {
-
+        return
+        {
+            o.q,
+            o.t,
+            o.s
+        };
     }
 
-    GEM_INLINE transform3f& GEM_VECTORCALL transform3f::concatenate(const transform3f rhs)
+    GEM_INLINE transform3f& GEM_VECTORCALL transform3f::concatenate(const transform3f& b)
     {
-        quatf q = rotation * rhs.rotation;
-        float3 t = rhs.translation + (rhs.rotation * (translation * rhs.scale));
-        float3 s = scale * rhs.scale;
+        quatf  _q = q * b.q;
+        float3 _t = b.t + (b.q * (t * b.s));
+        float3 _s = s * b.s;
 
-        rotation = q;
-        translation = t;
-        scale = s;
+        q = _q;
+        t = _t;
+        s = _s;
         
         return *this;
     }
 
+    float3 GEM_VECTORCALL transform3f::transform_point(const float3& p)
+    {
+        return ((q * p) * s) + t;
+    }
+
     GEM_INLINE float4x3 transform3f::matrix4x3()
     {
-        return rotation.matrix4x3() * float4x3::scale(scale) * float4x3::translate(translation);
+        return q.matrix4x3() * float4x3::scale(s) * float4x3::translate(t);
     }
 
     GEM_INLINE float4x4 transform3f::matrix4x4()
     {
-        return rotation.matrix4x4() * float4x4::scale(scale) * float4x4::translate(translation);
+        return q.matrix4x4() * float4x4::scale(s) * float4x4::translate(t);
     }
 
     GEM_INLINE transform3f& GEM_VECTORCALL transform3f::operator=(const transform3f& o)
     {
-        rotation = o.rotation;
-        translation = o.translation;
-        scale = o.scale;
+        q = o.q;
+        t = o.t;
+        s = o.s;
         return *this;
     }
 
-    GEM_INLINE transform3f GEM_VECTORCALL transform_mul3f(const transform3f& lhs, const transform3f& rhs)
+    GEM_INLINE transform3f GEM_VECTORCALL concatenate(const transform3f& a, const transform3f& b)
     {
         return
         {
-            lhs.rotation * rhs.rotation,
-            rhs.translation + (rhs.rotation * (lhs.translation * rhs.scale)),
-            lhs.scale * rhs.scale
+            a.q * b.q,
+            b.t + (b.q * (a.t * b.s)),
+            a.s * b.s
         };
     }
 
@@ -97,21 +118,28 @@ namespace gem
 
 #pragma region transform1f
 
+    /// <summary>
+    /// Affine transform of the form: M + t, where t is a translation vector and M is a linear transform with rotation and uniform scale.    
+    /// Transforms can be concatenated in the form (A + a)B + b = AB + (aB + b).
+    /// Points are transformed via pM + t.
+    /// </summary>
     struct transform1f
     {
-        quatf rotation;
-        float3 translation;
-        float scale;
+        quatf q;
+        float3 t;
+        float s;
 
         static transform1f identity();
 
-        transform1f(const quatf& q, const float3& t, const float s);
+        static transform1f GEM_VECTORCALL set(const quatf& q, const float3& t, const float s);
 
-        transform1f(const transform1f& o);
+        static transform1f GEM_VECTORCALL set(const transform1f& o);
 
         transform1f() = default;
 
-        transform1f& GEM_VECTORCALL concatenate(const transform1f rhs);
+        transform1f& GEM_VECTORCALL concatenate(const transform1f& b);
+
+        float3 GEM_VECTORCALL transform_point(const float3& p);
 
         float4x3 matrix4x3();
 
@@ -120,67 +148,81 @@ namespace gem
         transform1f& GEM_VECTORCALL operator=(const transform1f & o);
     };
 
-    transform1f GEM_VECTORCALL transform_mul1f(const transform1f& lhs, const transform1f& rhs);
+    transform1f GEM_VECTORCALL concatenate(const transform1f& a, const transform1f& b);
 
     GEM_INLINE transform1f transform1f::identity()
     {
-        return transform1f(quatf::identity(), float3(0, 0, 0), 1);
+        return
+        {
+            quatf::identity(),
+            float3(0, 0, 0),
+            1
+        };
     }
 
-    GEM_INLINE transform1f::transform1f(const quatf& q, const float3& t, const float s)
-        : rotation(q)
-        , translation(t)
-        , scale(s)
+    GEM_INLINE transform1f GEM_VECTORCALL transform1f::set(const quatf& q, const float3& t, const float s)
     {
-
+        return
+        {
+            q,
+            t,
+            s
+        };
     }
 
-    GEM_INLINE transform1f::transform1f(const transform1f& o)
-        : rotation(o.rotation)
-        , translation(o.translation)
-        , scale(o.scale)
+    GEM_INLINE transform1f GEM_VECTORCALL transform1f::set(const transform1f& o)
     {
-
+        return
+        {
+            o.q,
+            o.t,
+            o.s
+        };
     }
 
-    GEM_INLINE transform1f& GEM_VECTORCALL transform1f::concatenate(const transform1f rhs)
+    GEM_INLINE transform1f& GEM_VECTORCALL transform1f::concatenate(const transform1f& b)
     {
-        quatf q = rotation * rhs.rotation;
-        float3 t = rhs.translation + (rhs.rotation * (translation * rhs.scale));
-        float s = scale * rhs.scale;
+        quatf  _q = q * b.q;
+        float3 _t = b.t + (b.q * (t * b.s));
+        float  _s = s * b.s;
 
-        rotation = q;
-        translation = t;
-        scale = s;
+        q = _q;
+        t = _t;
+        s = _s;
 
         return *this;
+    }
+
+    float3 GEM_VECTORCALL transform1f::transform_point(const float3& p)
+    {
+        return ((q * p) * s) + t;
     }
 
     GEM_INLINE float4x3 transform1f::matrix4x3()
     {
-        return rotation.matrix4x3() * float4x3::scale(scale) * float4x3::translate(translation);
+        return q.matrix4x3() * float4x3::scale(s) * float4x3::translate(t);
     }
 
     GEM_INLINE float4x4 transform1f::matrix4x4()
     {
-        return rotation.matrix4x4() * float4x4::scale(scale) * float4x4::translate(translation);
+        return q.matrix4x4() * float4x4::scale(s) * float4x4::translate(t);
     }
 
     GEM_INLINE transform1f& GEM_VECTORCALL transform1f::operator=(const transform1f& o)
     {
-        rotation = o.rotation;
-        translation = o.translation;
-        scale = o.scale;
+        q = o.q;
+        t = o.t;
+        s = o.s;
         return *this;
     }
 
-    GEM_INLINE transform1f GEM_VECTORCALL transform_mul1f(const transform1f& lhs, const transform1f& rhs)
+    GEM_INLINE transform1f GEM_VECTORCALL concatenate(const transform1f& a, const transform1f& b)
     {
         return
         {
-            lhs.rotation * rhs.rotation,
-            rhs.translation + (rhs.rotation * (lhs.translation * rhs.scale)),
-            lhs.scale * rhs.scale
+            a.q * b.q,
+            b.t + (b.q * (a.t * b.s)),
+            a.s * b.s
         };
     }
 

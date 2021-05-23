@@ -18,7 +18,7 @@ namespace gem
             float components[2];
         };
 
-        float2(const float x, const float y);
+        float2(const float ix, const float iy);
 
         float2(const float* p_components);
 
@@ -89,9 +89,9 @@ namespace gem
 
     float2 GEM_VECTORCALL operator*(const float lhs, const float2& rhs);
 
-    GEM_INLINE float2::float2(const float x, const float y)
-        : x(x)
-        , y(y)
+    GEM_INLINE float2::float2(const float ix, const float iy)
+        : x(ix)
+        , y(iy)
     {
 
     }
@@ -366,7 +366,7 @@ namespace gem
             float components[3];
         };
 
-        float3(const float x, const float y, const float z);
+        float3(const float ix, const float iy, const float iz);
 
         float3(const float* p_components);
 
@@ -439,10 +439,10 @@ namespace gem
 
     float3 GEM_VECTORCALL operator*(const float lhs, const float3& rhs);
 
-    GEM_INLINE float3::float3(const float x, const float y, const float z)
-        : x(x)
-        , y(y)
-        , z(z)
+    GEM_INLINE float3::float3(const float ix, const float iy, const float iz)
+        : x(ix)
+        , y(iy)
+        , z(iz)
     {
 
     }
@@ -753,7 +753,7 @@ namespace gem
             float components[4];
         };
 
-        float4(const float x, const float y, const float z, const float w);
+        float4(const float ix, const float iy, const float iz, const float iw);
 
         float4(const float* p_components);
 
@@ -828,11 +828,11 @@ namespace gem
 
     float4 GEM_VECTORCALL operator*(const float lhs, const float4& rhs);
 
-    GEM_INLINE float4::float4(const float x, const float y, const float z, const float w)
-        : x(x)
-        , y(y)
-        , z(z)
-        , w(w)
+    GEM_INLINE float4::float4(const float ix, const float iy, const float iz, const float iw)
+        : x(ix)
+        , y(iy)
+        , z(iz)
+        , w(iw)
     {
 
     }
@@ -1171,7 +1171,7 @@ namespace gem
             double components[2];
         };
 
-        double2(const double x, const double y);
+        double2(const double ix, const double iy);
 
         double2(const double* p_components);
 
@@ -1242,9 +1242,9 @@ namespace gem
 
     double2 GEM_VECTORCALL operator*(const double lhs, const double2& rhs);
 
-    GEM_INLINE double2::double2(const double x, const double y)
-        : x(x)
-        , y(y)
+    GEM_INLINE double2::double2(const double ix, const double iy)
+        : x(ix)
+        , y(iy)
     {
 
     }
@@ -1519,7 +1519,7 @@ namespace gem
             double components[3];
         };
 
-        double3(const double x, const double y, const double z);
+        double3(const double ix, const double iy, const double iz);
 
         double3(const double* p_components);
 
@@ -1592,10 +1592,10 @@ namespace gem
 
     double3 GEM_VECTORCALL operator*(const double lhs, const double3& rhs);
 
-    GEM_INLINE double3::double3(const double x, const double y, const double z)
-        : x(x)
-        , y(y)
-        , z(z)
+    GEM_INLINE double3::double3(const double ix, const double iy, const double iz)
+        : x(ix)
+        , y(iy)
+        , z(iz)
     {
 
     }
@@ -1906,7 +1906,7 @@ namespace gem
             double components[4];
         };
 
-        double4(const double x, const double y, const double z, const double w);
+        double4(const double ix, const double iy, const double iz, const double iw);
 
         double4(const double* p_components);
 
@@ -1981,11 +1981,11 @@ namespace gem
 
     double4 GEM_VECTORCALL operator*(const double lhs, const double4& rhs);
 
-    GEM_INLINE double4::double4(const double x, const double y, const double z, const double w)
-        : x(x)
-        , y(y)
-        , z(z)
-        , w(w)
+    GEM_INLINE double4::double4(const double ix, const double iy, const double iz, const double iw)
+        : x(ix)
+        , y(iy)
+        , z(iz)
+        , w(iw)
     {
 
     }
@@ -2324,7 +2324,7 @@ namespace gem
             int components[2];
         };
 
-        int2(const int x, const int y);
+        int2(const int ix, const int iy);
 
         int2(const int* p_components);
 
@@ -2373,9 +2373,9 @@ namespace gem
 
     int2 GEM_VECTORCALL operator*(const int lhs, const int2& rhs);
 
-    GEM_INLINE int2::int2(const int x, const int y)
-        : x(x)
-        , y(y)
+    GEM_INLINE int2::int2(const int ix, const int iy)
+        : x(ix)
+        , y(iy)
     {
 
     }
@@ -2585,7 +2585,7 @@ namespace gem
             int components[3];
         };
 
-        int3(const int x, const int y, const int z);
+        int3(const int ix, const int iy, const int iz);
 
         int3(const int* p_components);
 
@@ -2636,10 +2636,10 @@ namespace gem
 
     int3 GEM_VECTORCALL operator*(const int lhs, const int3& rhs);
 
-    GEM_INLINE int3::int3(const int x, const int y, const int z)
-        : x(x)
-        , y(y)
-        , z(z)
+    GEM_INLINE int3::int3(const int ix, const int iy, const int iz)
+        : x(ix)
+        , y(iy)
+        , z(iz)
     {
 
     }
@@ -2881,7 +2881,7 @@ namespace gem
             int components[4];
         };
 
-        int4(const int x, const int y, const int z, const int w);
+        int4(const int ix, const int iy, const int iz, const int iw);
 
         int4(const int* p_components);
 
@@ -2940,11 +2940,11 @@ namespace gem
 
     int4 GEM_VECTORCALL operator*(const int lhs, const int4& rhs);
 
-    GEM_INLINE int4::int4(const int x, const int y, const int z, const int w)
-        : x(x)
-        , y(y)
-        , z(z)
-        , w(w)
+    GEM_INLINE int4::int4(const int ix, const int iy, const int iz, const int iw)
+        : x(ix)
+        , y(iy)
+        , z(iz)
+        , w(iw)
     {
 
     }

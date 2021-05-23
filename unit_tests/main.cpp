@@ -6,9 +6,11 @@
 #include "../include/vector.h"
 #include "../include/matrix.h"
 #include "../include/quaternion.h"
+#include "../include/transform.h"
 
 #include "matrix.h"
 #include "vector.h"
+#include "quaternion.h"
 
 #define GEM_ASSERT 1
 
@@ -41,11 +43,13 @@ namespace gem
 		typedef lina::vector<float, 2> control_float2;
 		typedef lina::vector<float, 3> control_float3;
 		typedef lina::vector<float, 4> control_float4;
-
+		
 		typedef lina::matrix<float, 2, 2> control_float2x2;
 		typedef lina::matrix<float, 3, 3> control_float3x3;
 		typedef lina::matrix<float, 4, 3> control_float4x3;
 		typedef lina::matrix<float, 4, 4> control_float4x4;
+
+		typedef lina::quaternion<float> control_quatf;
 
 		typedef float1 vary_float1;
 		typedef float2 vary_float2;
@@ -56,6 +60,8 @@ namespace gem
 		typedef float3x3 vary_float3x3;
 		typedef float4x3 vary_float4x3;
 		typedef float4x4 vary_float4x4;
+
+		typedef quatf vary_quatf;
 
 		static std::random_device rd;
 		static std::mt19937 gen(rd());
@@ -174,7 +180,7 @@ namespace gem
 			vary_op actual([](vary_operand_type0& a, vary_operand_type1& b) { return (operation); });\
 			test_binary_op<underlying_type, control_op, vary_op, num_components_return_type, num_components_operand_type0, num_components_operand_type1>(gen, expected, actual, tolerance)
 
-#define RUN_BINARY_OPERATION_CASE1(underlying_type,  return_type, operand_type0, operand_type1, num_components_return_type, num_components_operand_type0, num_components_operand_type1, tolerance, operation)\
+#define RUN_BINARY_OPERATION_CASE1(underlying_type, return_type, operand_type0, operand_type1, num_components_return_type, num_components_operand_type0, num_components_operand_type1, tolerance, operation)\
 			typedef control_ ## return_type control_return_type;\
 			typedef control_ ## operand_type0 control_operand_type0;\
 			typedef control_ ## operand_type1 control_operand_type1;\
@@ -187,7 +193,7 @@ namespace gem
 			vary_op actual([](vary_operand_type0& a, vary_operand_type1& b) { return (operation); });\
 			test_binary_op<underlying_type, control_op, vary_op, num_components_return_type, num_components_operand_type0, num_components_operand_type1>(gen, expected, actual, tolerance)
 
-
+#define EXPECT_NEAR_ARRAY(underlying_type, num_components, expected, actual, tolerance) expect_near<underlying_type, num_components>(reinterpret_cast<underlying_type*>(&expected), reinterpret_cast<underlying_type*>(&actual), tolerance)
 		TEST(float2, addition)
 		{
 			RUN_BINARY_OPERATION_CASE0(float, 2, 2, 2, 0.001f, a + b);
@@ -386,6 +392,122 @@ namespace gem
 		TEST(float4x4, transpose)
 		{
 			RUN_UNARY_OPERATION_CASE1(float, float4x4, float4x4, 1, 16, 0.001f, a.transpose());
+		}
+
+		TEST(quatf, multiplication)
+		{
+			RUN_BINARY_OPERATION_CASE1(float, quatf, quatf, quatf, 4, 4, 4, 0.001f, a * b);
+		}
+
+		TEST(quatf, transformation)
+		{
+			RUN_BINARY_OPERATION_CASE1(float, float3, float3, quatf, 3, 3, 4, 0.001f, b * a);
+		}
+
+		TEST(transform3f, concatenation)
+		{
+			float3 euler = float3(0.261799f, 0.261799f, 0.261799f);
+			float3 scale = float3(0.3f, 0.4f, 1.2f);
+			float3 xlate = float3(-10.0f, 59.0f, -2.0f);
+
+			float4x3 expected;
+			{
+				float4x3 q = float4x3::rotate_euler(euler.x, euler.y, euler.z);
+				float4x3 s = float4x3::scale(scale);
+				float4x3 t = float4x3::translate(xlate);
+				expected = (q * s * t);
+			}
+
+			float4x3 actual;
+			{
+				transform3f q = transform3f::set(quatf::rotate_euler(euler.x, euler.y, euler.z), float3(0, 0, 0), float3(1, 1, 1));
+				transform3f s = transform3f::set(quatf::identity(), float3(0, 0, 0), scale);
+				transform3f t = transform3f::set(quatf::identity(), xlate, float3(1, 1, 1));
+				transform3f xform = transform3f::identity();
+				xform.concatenate(q);
+				xform.concatenate(s);
+				xform.concatenate(t);
+				actual = xform.matrix4x3();
+			}
+
+			EXPECT_NEAR_ARRAY(float, 12, expected, actual, 0.001f);
+		}
+
+		TEST(transform3f, transformation)
+		{
+			float3 euler = float3(0.261799f, 0.261799f, 0.261799f);
+			float3 scale = float3(0.3f, 0.4f, 1.2f);
+			float3 xlate = float3(-10.0f, 59.0f, -2.0f);
+			float3 pos = float3(-73.0f, 0.5f, 14.8f);
+
+			float3 expected;
+			{
+				float4x3 q = float4x3::rotate_euler(euler.x, euler.y, euler.z);
+				float4x3 s = float4x3::scale(scale);
+				float4x3 t = float4x3::translate(xlate);
+				expected = pos * (q * s * t);
+			}
+
+			float3 actual;
+			{
+				transform3f xform = transform3f::set(quatf::rotate_euler(euler.x, euler.y, euler.z), xlate, scale);
+				actual = xform.transform_point(pos);
+			}
+
+			EXPECT_NEAR_ARRAY(float, 3, expected, actual, 0.001f);
+		}
+
+		TEST(transform1f, concatenation)
+		{
+			float  scale = 1.2f;
+			float3 euler = float3(0.261799f, 0.261799f, 0.261799f);
+			float3 xlate = float3(-10.0f, 59.0f, -2.0f);
+
+			float4x3 expected;
+			{
+				float4x3 q = float4x3::rotate_euler(euler.x, euler.y, euler.z);
+				float4x3 s = float4x3::scale(scale);
+				float4x3 t = float4x3::translate(xlate);
+				expected = (q * s * t);
+			}
+
+			float4x3 actual;
+			{
+				transform1f q = transform1f::set(quatf::rotate_euler(euler.x, euler.y, euler.z), float3(0, 0, 0), 1);
+				transform1f s = transform1f::set(quatf::identity(), float3(0, 0, 0), scale);
+				transform1f t = transform1f::set(quatf::identity(), xlate, 1);
+				transform1f xform = transform1f::identity();
+				xform.concatenate(q);
+				xform.concatenate(s);
+				xform.concatenate(t);
+				actual = xform.matrix4x3();
+			}
+
+			EXPECT_NEAR_ARRAY(float, 12, expected, actual, 0.001f);
+		}
+
+		TEST(transform1f, transformation)
+		{
+			float  scale = 1.2f;
+			float3 euler = float3(0.261799f, 0.261799f, 0.261799f);
+			float3 xlate = float3(-10.0f, 59.0f, -2.0f);
+			float3 pos = float3(-73.0f, 0.5f, 14.8f);
+
+			float3 expected;
+			{
+				float4x3 q = float4x3::rotate_euler(euler.x, euler.y, euler.z);
+				float4x3 s = float4x3::scale(scale);
+				float4x3 t = float4x3::translate(xlate);
+				expected = pos * (q * s * t);
+			}
+
+			float3 actual;
+			{
+				transform1f xform = transform1f::set(quatf::rotate_euler(euler.x, euler.y, euler.z), xlate, scale);
+				actual = xform.transform_point(pos);
+			}
+
+			EXPECT_NEAR_ARRAY(float, 3, expected, actual, 0.001f);
 		}
 	}
 }

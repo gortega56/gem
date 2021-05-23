@@ -32,7 +32,7 @@ namespace gem
 
         static quatf GEM_VECTORCALL rotate_matrix(const float3x3& m);
 
-        quatf(const float x, const float y, const float z, const float w);
+        quatf(const float ix, const float iy, const float iz, const float iw);
 
         quatf(const float* o);
 
@@ -226,11 +226,11 @@ namespace gem
         return o;
     }
 
-    GEM_INLINE quatf::quatf(const float x, const float y, const float z, const float w)
-        : x(x)
-        , y(y)
-        , z(z)
-        , w(w)
+    GEM_INLINE quatf::quatf(const float ix, const float iy, const float iz, const float iw)
+        : x(ix)
+        , y(iy)
+        , z(iz)
+        , w(iw)
     {
 
     }
