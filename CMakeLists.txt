@@ -16,9 +16,11 @@ set(SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/vector.h
 )
 
 target_sources(${PROJECT_NAME} INTERFACE "$<BUILD_INTERFACE:${SOURCE_FILES}>")
+
 target_include_directories(${PROJECT_NAME} SYSTEM INTERFACE 
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include">
     "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+
 add_custom_target(game_engine_math SOURCES ${SOURCE_FILES})
 
 enable_testing()
