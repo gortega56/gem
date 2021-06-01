@@ -12,7 +12,7 @@ include(FetchContent)
 FetchContent_Declare(
   lina
   GIT_REPOSITORY https://github.com/gortega56/lina.git
-  GIT_TAG        release-1.0.0
+  GIT_TAG        release-1.0.1
 )
 
 FetchContent_Declare(

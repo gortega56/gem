@@ -60,6 +60,8 @@ namespace gem
 
         float3 euler() const;
 
+        float3 GEM_VECTORCALL transform_point(const float3& p) const;
+
         quatf& GEM_VECTORCALL operator=(const quatf& rhs);
 
         quatf& GEM_VECTORCALL operator+=(const quatf& rhs);
@@ -96,10 +98,6 @@ namespace gem
     quatf GEM_VECTORCALL operator-(const quatf& lhs, const quatf& rhs);
 
     quatf GEM_VECTORCALL operator*(const quatf& lhs, const quatf& rhs);
-
-    float3 GEM_VECTORCALL operator*(const float3& lhs, const quatf& rhs);
-
-    float3 GEM_VECTORCALL operator*(const quatf& lhs, const float3& rhs);
 
     quatf GEM_VECTORCALL operator*(const quatf& lhs, const float rhs);
 
@@ -412,6 +410,22 @@ namespace gem
         return o;
     }
 
+    GEM_INLINE float3 GEM_VECTORCALL quatf::transform_point(const float3& p) const
+    {
+        // Given q is a unit vector:
+        // qvq* = (b + c)(v + 0)(-b + c)
+        //      = v + 2c(bxv) + 2(bxbxv)
+
+        float3 bxv = cross(v, p);
+        float3 bxbxv = cross(v, bxv);
+        return 
+        {
+            p.x + ((bxv.x * w) + bxbxv.x) * 2.0f,
+            p.y + ((bxv.y * w) + bxbxv.y) * 2.0f,
+            p.z + ((bxv.z * w) + bxbxv.z) * 2.0f
+        };
+    }
+
     GEM_INLINE quatf& GEM_VECTORCALL quatf::operator=(const quatf& rhs)
     {
         x = rhs.x;
@@ -585,29 +599,21 @@ namespace gem
 
     GEM_INLINE quatf GEM_VECTORCALL operator*(const quatf& lhs, const quatf& rhs)
     {
+        float3 v = cross(lhs.v, rhs.v) + (lhs.w * rhs.v) + (rhs.w * lhs.v);
+        quatf a = { v.x, v.y, v.z, (lhs.w * rhs.w) - dot(lhs.v, rhs.v) };
+        quatf b = 
+        {
+        (lhs.w * rhs.x) + (lhs.x * rhs.w) + ((lhs.y * rhs.z) - (lhs.z * rhs.y)),
+        (lhs.w * rhs.y) + (lhs.y * rhs.w) + ((lhs.z * rhs.x) - (lhs.x * rhs.z)),
+        (lhs.w * rhs.z) + (lhs.z * rhs.w) + ((lhs.x * rhs.y) - (lhs.y * rhs.x)),
+        (lhs.w * rhs.w) - ((lhs.x * rhs.x) + (lhs.y * rhs.y) + (lhs.z * rhs.z))
+        };
         return
         {
             (lhs.w * rhs.x) + (lhs.x * rhs.w) + ((lhs.y * rhs.z) - (lhs.z * rhs.y)),
             (lhs.w * rhs.y) + (lhs.y * rhs.w) + ((lhs.z * rhs.x) - (lhs.x * rhs.z)),
             (lhs.w * rhs.z) + (lhs.z * rhs.w) + ((lhs.x * rhs.y) - (lhs.y * rhs.x)),
             (lhs.w * rhs.w) - ((lhs.x * rhs.x) + (lhs.y * rhs.y) + (lhs.z * rhs.z))
-        };
-    }
-
-    GEM_INLINE float3 GEM_VECTORCALL operator*(const float3& lhs, const quatf& rhs)
-    {
-        return rhs * lhs;
-    }
-
-    GEM_INLINE float3 GEM_VECTORCALL operator*(const quatf& lhs, const float3& rhs)
-    {
-        float3 vxp = cross(lhs.v, rhs);
-        float3 vxpxv = cross(lhs.v, vxp);
-        return
-        {
-            rhs.x + ((vxp.x * lhs.w) + vxpxv.x) * 2.0f,
-            rhs.y + ((vxp.y * lhs.w) + vxpxv.y) * 2.0f,
-            rhs.z + ((vxp.z * lhs.w) + vxpxv.z) * 2.0f
         };
     }
 
@@ -702,6 +708,8 @@ namespace gem
         double4x4 matrix4x4() const;
 
         double3 euler() const;
+
+        double3 GEM_VECTORCALL transform_point(const double3& p) const;
 
         quatd& GEM_VECTORCALL operator=(const quatd& rhs);
 
@@ -1055,6 +1063,20 @@ namespace gem
         return o;
     }
 
+    GEM_INLINE double3 GEM_VECTORCALL quatd::transform_point(const double3& p) const
+    {
+        // qvq* = (b + c)(v + 0)(-b + c)
+        //      = v + 2c(bxv) + 2(bxbxv)
+        double3 bxv = cross(v, p);
+        double3 bxbxv = cross(v, bxv);
+        return
+        {
+            p.x + ((bxv.x * w) + bxbxv.x) * 2.0,
+            p.y + ((bxv.y * w) + bxbxv.y) * 2.0,
+            p.z + ((bxv.z * w) + bxbxv.z) * 2.0
+        };
+    }
+
     GEM_INLINE quatd& GEM_VECTORCALL quatd::operator=(const quatd& rhs)
     {
         x = rhs.x;
@@ -1234,23 +1256,6 @@ namespace gem
             (lhs.w * rhs.y) + (lhs.y * rhs.w) + ((lhs.z * rhs.x) - (lhs.x * rhs.z)),
             (lhs.w * rhs.z) + (lhs.z * rhs.w) + ((lhs.x * rhs.y) - (lhs.y * rhs.x)),
             (lhs.w * rhs.w) - ((lhs.x * rhs.x) + (lhs.y * rhs.y) + (lhs.z * rhs.z))
-        };
-    }
-
-    GEM_INLINE double3 GEM_VECTORCALL operator*(const double3& lhs, const quatd& rhs)
-    {
-        return rhs * lhs;
-    }
-
-    GEM_INLINE double3 GEM_VECTORCALL operator*(const quatd& lhs, const double3& rhs)
-    {
-        double3 vxp = cross(lhs.v, rhs);
-        double3 vxpxv = cross(lhs.v, vxp);
-        return
-        {
-            rhs.x + ((vxp.x * lhs.w) + vxpxv.x) * 2.0f,
-            rhs.y + ((vxp.y * lhs.w) + vxpxv.y) * 2.0f,
-            rhs.z + ((vxp.z * lhs.w) + vxpxv.z) * 2.0f
         };
     }
 

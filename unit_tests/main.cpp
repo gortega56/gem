@@ -401,7 +401,7 @@ namespace gem
 
 		TEST(quatf, transformation)
 		{
-			RUN_BINARY_OPERATION_CASE1(float, float3, float3, quatf, 3, 3, 4, 0.001f, b * a);
+			RUN_BINARY_OPERATION_CASE1(float, float3, float3, quatf, 3, 3, 4, 0.001f, b.normalize().transform_point(a));
 		}
 
 		TEST(transform3f, concatenation)
