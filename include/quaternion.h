@@ -599,15 +599,6 @@ namespace gem
 
     GEM_INLINE quatf GEM_VECTORCALL operator*(const quatf& lhs, const quatf& rhs)
     {
-        float3 v = cross(lhs.v, rhs.v) + (lhs.w * rhs.v) + (rhs.w * lhs.v);
-        quatf a = { v.x, v.y, v.z, (lhs.w * rhs.w) - dot(lhs.v, rhs.v) };
-        quatf b = 
-        {
-        (lhs.w * rhs.x) + (lhs.x * rhs.w) + ((lhs.y * rhs.z) - (lhs.z * rhs.y)),
-        (lhs.w * rhs.y) + (lhs.y * rhs.w) + ((lhs.z * rhs.x) - (lhs.x * rhs.z)),
-        (lhs.w * rhs.z) + (lhs.z * rhs.w) + ((lhs.x * rhs.y) - (lhs.y * rhs.x)),
-        (lhs.w * rhs.w) - ((lhs.x * rhs.x) + (lhs.y * rhs.y) + (lhs.z * rhs.z))
-        };
         return
         {
             (lhs.w * rhs.x) + (lhs.x * rhs.w) + ((lhs.y * rhs.z) - (lhs.z * rhs.y)),
