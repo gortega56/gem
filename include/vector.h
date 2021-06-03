@@ -425,6 +425,8 @@ namespace gem
 
     float3 GEM_VECTORCALL reject(const float3& lhs, const float3& rhs);
 
+    float3 GEM_VECTORCALL rotate_axis_angle(const float3& v, const float3& a, const float angle);
+
     float3 GEM_VECTORCALL cross(const float3& lhs, const float3& rhs);
 
     float3 GEM_VECTORCALL operator+(const float3& lhs, const float3& rhs);
@@ -664,6 +666,15 @@ namespace gem
             lhs.y - rhs.y * t,
             lhs.z - rhs.z * t
         };
+    }
+
+    float3 GEM_VECTORCALL rotate_axis_angle(const float3& v, const float3& a, const float angle)
+    {
+        // v' = (v project a) + (v reject a) * cos(theta) + (a x v) * sin(theta)
+        float c0 = cosf(angle);
+        float c1 = (1.0f - c0) * dot(v, a);
+        float c2 = sinf(angle);
+        return (v * c0) + (a * c1) + cross(a, v) * c2;
     }
 
     GEM_INLINE float3 GEM_VECTORCALL cross(const float3& lhs, const float3& rhs)
@@ -1576,6 +1587,8 @@ namespace gem
 
     double3 GEM_VECTORCALL project(const double3& lhs, const double3& rhs);
 
+    double3 GEM_VECTORCALL rotate_axis_angle(const double3& v, const double3& a, const double angle);
+
     double3 GEM_VECTORCALL reject(const double3& lhs, const double3& rhs);
 
     double3 GEM_VECTORCALL cross(const double3& lhs, const double3& rhs);
@@ -1817,6 +1830,15 @@ namespace gem
             lhs.y - rhs.y * t,
             lhs.z - rhs.z * t
         };
+    }
+
+    double3 GEM_VECTORCALL rotate_axis_angle(const double3& v, const double3& a, const double angle)
+    {
+        // v' = (v project a) + (v reject a) * cos(theta) + (a x v) * sin(theta)
+        double c0 = cos(angle);
+        double c1 = (1.0 - c0) * dot(v, a);
+        double c2 = sin(angle);
+        return (v * c0) + (a * c1) + cross(a, v) * c2;
     }
 
     GEM_INLINE double3 GEM_VECTORCALL cross(const double3& lhs, const double3& rhs)

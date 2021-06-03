@@ -259,6 +259,22 @@ namespace gem
 			RUN_UNARY_OPERATION_CASE0(float, 1, 3, 0.001f, float1(length(a)));
 		}
 
+		TEST(float3, cross)
+		{
+			RUN_BINARY_OPERATION_CASE0(float, 3, 3, 3, 0.001f, cross(a, b));
+		}
+
+		TEST(float3, rotate)
+		{
+			float angle = 0.645772f;
+			float3 axis = float3(1.0f / sqrt(3.0f));
+			float3 vector = float3(-17.0f, 10.0f, -20.0f);
+
+			float3 expected = vector * float3x3::rotate_axis_angle(axis, angle);
+			float3 actual = rotate_axis_angle(vector, axis, angle);
+			EXPECT_NEAR_ARRAY(float, 3, expected, actual, 0.001f);
+		}
+
 		TEST(float4, addition)
 		{
 			RUN_BINARY_OPERATION_CASE0(float, 4, 4, 4, 0.001f, a + b);
