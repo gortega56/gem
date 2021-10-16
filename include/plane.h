@@ -1,4 +1,5 @@
 #pragma once
+#include "vector.h"
 #include "line.h"
 
 namespace gem
@@ -18,7 +19,7 @@ namespace gem
 
         plane4f& normalize();
 
-        float GEM_VECTORCALL distance_from_origin() const;
+        float distance_from_origin() const;
 
         bool GEM_VECTORCALL intersects_plane(const plane4f& plane, line3f* p_line, float tolerance = 0.001f) const;
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "common/defines.h"
 #include "quaternion.h"
+#include "ray.h"
 #include "line.h"
 #include "plane.h"
 
@@ -29,11 +30,15 @@ namespace gem
 
         transform3f& GEM_VECTORCALL concatenate(const transform3f& b);
 
+        float3 GEM_VECTORCALL transform_vector(const float3& p);
+
         float3 GEM_VECTORCALL transform_point(const float3& p);
 
-        float3 GEM_VECTORCALL transform_line(const line3f& p);
+        ray3f GEM_VECTORCALL transform_ray(const ray3f& p);
 
-        float3 GEM_VECTORCALL transform_plane(const plane4f& p);
+        line3f GEM_VECTORCALL transform_line(const line3f& p);
+
+        plane4f GEM_VECTORCALL transform_plane(const plane4f& p);
 
         float4x3 matrix4x3();
 
@@ -87,9 +92,33 @@ namespace gem
         return *this;
     }
 
-    float3 GEM_VECTORCALL transform3f::transform_point(const float3& p)
+    GEM_INLINE float3 GEM_VECTORCALL transform3f::transform_vector(const float3& p)
+    {
+        return q.transform_point(p) * s;
+    }
+
+    GEM_INLINE float3 GEM_VECTORCALL transform3f::transform_point(const float3& p)
     {
         return (q.transform_point(p) * s) + t;
+    }
+
+    GEM_INLINE ray3f GEM_VECTORCALL transform3f::transform_ray(const ray3f& p)
+    {
+        return { transform_point(p.p), transform_vector(p.v) };
+    }
+
+    GEM_INLINE line3f GEM_VECTORCALL transform3f::transform_line(const line3f& p)
+    {
+        float4x3 h = matrix4x3().inverse().transpose();
+        return { transform_vector(p.v), p.m * h };
+    }
+
+    GEM_INLINE plane4f GEM_VECTORCALL transform3f::transform_plane(const plane4f& p)
+    {
+        float4x4 m = matrix4x4().inverse().transpose();
+        float4 q = { p.x, p.y, p.z, p.d };
+        float4 r = q * m;
+        return { r.x, r.y, r.z, r.w };
     }
 
     GEM_INLINE float4x3 transform3f::matrix4x3()
@@ -145,7 +174,15 @@ namespace gem
 
         transform1f& GEM_VECTORCALL concatenate(const transform1f& b);
 
+        float3 GEM_VECTORCALL transform_vector(const float3& p);
+
         float3 GEM_VECTORCALL transform_point(const float3& p);
+
+        ray3f GEM_VECTORCALL transform_ray(const ray3f& p);
+
+        line3f GEM_VECTORCALL transform_line(const line3f& p);
+
+        plane4f GEM_VECTORCALL transform_plane(const plane4f& p);
 
         float4x3 matrix4x3();
 
@@ -199,9 +236,33 @@ namespace gem
         return *this;
     }
 
-    float3 GEM_VECTORCALL transform1f::transform_point(const float3& p)
+    GEM_INLINE float3 GEM_VECTORCALL transform1f::transform_vector(const float3& p)
+    {
+        return q.transform_point(p) * s;
+    }
+
+    GEM_INLINE float3 GEM_VECTORCALL transform1f::transform_point(const float3& p)
     {
         return (q.transform_point(p) * s) + t;
+    }
+
+    GEM_INLINE ray3f GEM_VECTORCALL transform1f::transform_ray(const ray3f& p)
+    {
+        return { transform_point(p.p), transform_vector(p.v) };
+    }
+
+    GEM_INLINE line3f GEM_VECTORCALL transform1f::transform_line(const line3f& p)
+    {
+        float4x3 h = matrix4x3().inverse().transpose();
+        return { transform_vector(p.v), p.m * h };
+    }
+
+    GEM_INLINE plane4f GEM_VECTORCALL transform1f::transform_plane(const plane4f& p)
+    {
+        float4x4 m = matrix4x4().inverse().transpose();
+        float4 q = { p.x, p.y, p.z, p.d };
+        float4 r = q * m;
+        return { r.x, r.y, r.z, r.w };
     }
 
     GEM_INLINE float4x3 transform1f::matrix4x3()

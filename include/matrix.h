@@ -1,5 +1,4 @@
 #pragma once
-#include "common/defines.h"
 #include "vector.h"
 
 namespace gem
