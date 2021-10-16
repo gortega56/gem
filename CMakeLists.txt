@@ -12,6 +12,10 @@ set(SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/vector.h
                  ${CMAKE_CURRENT_SOURCE_DIR}/include/matrix.h
                  ${CMAKE_CURRENT_SOURCE_DIR}/include/quaternion.h
                  ${CMAKE_CURRENT_SOURCE_DIR}/include/transform.h
+                 ${CMAKE_CURRENT_SOURCE_DIR}/include/ray.h
+                 ${CMAKE_CURRENT_SOURCE_DIR}/include/line.h
+                 ${CMAKE_CURRENT_SOURCE_DIR}/include/plane.h
+                 ${CMAKE_CURRENT_SOURCE_DIR}/include/range.h
                  ${CMAKE_CURRENT_SOURCE_DIR}/include/common/defines.h
 )
 

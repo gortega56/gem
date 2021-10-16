@@ -1,6 +1,8 @@
 #pragma once
 #include "common/defines.h"
 #include "quaternion.h"
+#include "line.h"
+#include "plane.h"
 
 namespace gem
 {
@@ -28,6 +30,10 @@ namespace gem
         transform3f& GEM_VECTORCALL concatenate(const transform3f& b);
 
         float3 GEM_VECTORCALL transform_point(const float3& p);
+
+        float3 GEM_VECTORCALL transform_line(const line3f& p);
+
+        float3 GEM_VECTORCALL transform_plane(const plane4f& p);
 
         float4x3 matrix4x3();
 
