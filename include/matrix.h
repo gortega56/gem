@@ -7,23 +7,8 @@ namespace gem
 
     struct float2x2
     {
-        union
-        {
-            struct
-            {
-                float m00, m01;
-                float m10, m11;
-            };
-
-            struct
-            {
-                float2 u, v;
-            };
-
-            float2 rows[2];
-            float entries1d[4];
-            float entries2d[2][2];
-        };
+        float m00, m01;
+        float m10, m11;
 
         float2x2(const float u1, const float u2, const float v1, const float v2);
 
@@ -110,12 +95,12 @@ namespace gem
     GEM_INLINE float2x2 float2x2::inverse() const
     {
         float2x2 out;
-        float det = (entries1d[0] * entries1d[3]) - (entries1d[1] * entries1d[2]);
+        float det = (m00 * m11) - (m01 * m10);
         float inv = 1.0f / det;
-        out.entries1d[0] = +entries1d[3] * inv;
-        out.entries1d[1] = -entries1d[1] * inv;
-        out.entries1d[2] = -entries1d[2] * inv;
-        out.entries1d[3] = +entries1d[0] * inv;
+        out.m00 = +m11 * inv;
+        out.m01 = -m01 * inv;
+        out.m10 = -m10 * inv;
+        out.m11 = +m00 * inv;
         return out;
     }
 
@@ -123,7 +108,7 @@ namespace gem
     {
         //     0 1      
         // det 2 3 =    (0 * 3) - (1 - 2)     
-        return (entries1d[0] * entries1d[3]) - (entries1d[1] * entries1d[2]);
+        return (m00 * m11) - (m01 * m10);
     }
 
     GEM_INLINE float2x2& GEM_VECTORCALL float2x2::operator+=(const float2x2& rhs)
@@ -165,25 +150,25 @@ namespace gem
 
     GEM_INLINE float2& GEM_VECTORCALL float2x2::operator[](const unsigned int index)
     {
-        return rows[index];
+        return reinterpret_cast<float2*>(this)[index];
     }
 
     GEM_INLINE float2 GEM_VECTORCALL float2x2::operator[](const unsigned int index) const
     {
-        return rows[index];
+        return reinterpret_cast<const float2*>(this)[index];
     }
 
     GEM_INLINE float GEM_VECTORCALL float2x2::operator()(const unsigned int row, const unsigned int column)
     {
-        return entries2d[row][column];
+        return reinterpret_cast<float2*>(this)[row][column];
     }
 
     GEM_INLINE float2x2 GEM_VECTORCALL operator+(const float2x2& lhs, const float2x2& rhs)
     {
         return
         {
-            lhs.entries1d[0] + rhs.entries1d[0], lhs.entries1d[1] + rhs.entries1d[1],
-            lhs.entries1d[2] + rhs.entries1d[2], lhs.entries1d[3] + rhs.entries1d[3]
+            lhs.m00 + rhs.m00, lhs.m01 + rhs.m01,
+            lhs.m10 + rhs.m10, lhs.m11 + rhs.m11
         };
     }
 
@@ -191,8 +176,8 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] - rhs.entries1d[0], lhs.entries1d[1] - rhs.entries1d[1],
-            lhs.entries1d[2] - rhs.entries1d[2], lhs.entries1d[3] - rhs.entries1d[3]
+            lhs.m00 - rhs.m00, lhs.m01 - rhs.m01,
+            lhs.m10 - rhs.m10, lhs.m11 - rhs.m11
         };
     }
 
@@ -200,10 +185,10 @@ namespace gem
     {
         return
         {
-            (lhs.entries1d[0] * rhs.entries1d[0]) + (lhs.entries1d[1] * rhs.entries1d[2]),
-            (lhs.entries1d[0] * rhs.entries1d[1]) + (lhs.entries1d[1] * rhs.entries1d[3]),
-            (lhs.entries1d[2] * rhs.entries1d[0]) + (lhs.entries1d[3] * rhs.entries1d[2]),
-            (lhs.entries1d[2] * rhs.entries1d[1]) + (lhs.entries1d[3] * rhs.entries1d[3])
+            (lhs.m00 * rhs.m00) + (lhs.m01 * rhs.m10),
+            (lhs.m00 * rhs.m01) + (lhs.m01 * rhs.m11),
+            (lhs.m10 * rhs.m00) + (lhs.m11 * rhs.m10),
+            (lhs.m10 * rhs.m01) + (lhs.m11 * rhs.m11)
         };
     }
 
@@ -211,8 +196,8 @@ namespace gem
     {
         return
         {
-            (lhs.components[0] * rhs.entries1d[0]) + (lhs.components[1] * rhs.entries1d[2]),
-            (lhs.components[0] * rhs.entries1d[1]) + (lhs.components[1] * rhs.entries1d[3])
+            (lhs.x * rhs.m00) + (lhs.y * rhs.m10),
+            (lhs.x * rhs.m01) + (lhs.y * rhs.m11)
         };
     }
 
@@ -220,8 +205,8 @@ namespace gem
     {
         return
         {
-            rhs.entries1d[0] * lhs, rhs.entries1d[1] * lhs,
-            rhs.entries1d[2] * lhs, rhs.entries1d[3] * lhs
+            rhs.m00 * lhs, rhs.m01 * lhs,
+            rhs.m10 * lhs, rhs.m11 * lhs
         };
     }
 
@@ -229,8 +214,8 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] * rhs, lhs.entries1d[1] * rhs,
-            lhs.entries1d[2] * rhs, lhs.entries1d[3] * rhs
+            lhs.m00 * rhs, lhs.m01 * rhs,
+            lhs.m10 * rhs, lhs.m11 * rhs
         };
     }
 
@@ -240,24 +225,9 @@ namespace gem
 
     struct float3x3
     {
-        union
-        {
-            struct
-            {
-                float m00, m01, m02;
-                float m10, m11, m12;
-                float m20, m21, m22;
-            };
-
-            struct
-            {
-                float3 u, v, w;
-            };
-
-            float3 rows[3];
-            float entries1d[9];
-            float entries2d[3][3];
-        };
+        float m00, m01, m02;
+        float m10, m11, m12;
+        float m20, m21, m22;
 
         static float3x3 identity();
 
@@ -475,30 +445,30 @@ namespace gem
         float3x3 out;
 
         float det =
-            (((entries1d[1] * entries1d[5]) - (entries1d[2] * entries1d[4])) * entries1d[6]) +
-            (((entries1d[2] * entries1d[3]) - (entries1d[0] * entries1d[5])) * entries1d[7]) +
-            (((entries1d[0] * entries1d[4]) - (entries1d[1] * entries1d[3])) * entries1d[8]);
+            (((m01 * m12) - (m02 * m11)) * m20) +
+            (((m02 * m10) - (m00 * m12)) * m21) +
+            (((m00 * m11) - (m01 * m10)) * m22);
 
-        float c11 = +((entries1d[4] * entries1d[8]) - (entries1d[5] * entries1d[7]));
-        float c12 = -((entries1d[3] * entries1d[8]) - (entries1d[5] * entries1d[6]));
-        float c13 = +((entries1d[3] * entries1d[7]) - (entries1d[4] * entries1d[6]));
-        float c21 = -((entries1d[1] * entries1d[8]) - (entries1d[2] * entries1d[7]));
-        float c22 = +((entries1d[0] * entries1d[8]) - (entries1d[2] * entries1d[6]));
-        float c23 = -((entries1d[0] * entries1d[7]) - (entries1d[1] * entries1d[6]));
-        float c31 = +((entries1d[1] * entries1d[5]) - (entries1d[2] * entries1d[4]));
-        float c32 = -((entries1d[0] * entries1d[5]) - (entries1d[2] * entries1d[3]));
-        float c33 = +((entries1d[0] * entries1d[4]) - (entries1d[1] * entries1d[3]));
+        float c11 = +((m11 * m22) - (m12 * m21));
+        float c12 = -((m10 * m22) - (m12 * m20));
+        float c13 = +((m10 * m21) - (m11 * m20));
+        float c21 = -((m01 * m22) - (m02 * m21));
+        float c22 = +((m00 * m22) - (m02 * m20));
+        float c23 = -((m00 * m21) - (m01 * m20));
+        float c31 = +((m01 * m12) - (m02 * m11));
+        float c32 = -((m00 * m12) - (m02 * m10));
+        float c33 = +((m00 * m11) - (m01 * m10));
 
         float inv = 1.0f / det;
-        out.entries1d[0] = c11 * inv;
-        out.entries1d[1] = c21 * inv;
-        out.entries1d[2] = c31 * inv;
-        out.entries1d[3] = c12 * inv;
-        out.entries1d[4] = c22 * inv;
-        out.entries1d[5] = c32 * inv;
-        out.entries1d[6] = c13 * inv;
-        out.entries1d[7] = c23 * inv;
-        out.entries1d[8] = c33 * inv;
+        out.m00 = c11 * inv;
+        out.m01 = c21 * inv;
+        out.m02 = c31 * inv;
+        out.m10 = c12 * inv;
+        out.m11 = c22 * inv;
+        out.m12 = c32 * inv;
+        out.m20 = c13 * inv;
+        out.m21 = c23 * inv;
+        out.m22 = c33 * inv;
         return out;
     }
 
@@ -510,15 +480,15 @@ namespace gem
         // (ax*by - ay*bx) * cz
 
         return
-            (((entries1d[1] * entries1d[5]) - (entries1d[2] * entries1d[4])) * entries1d[6]) +
-            (((entries1d[2] * entries1d[3]) - (entries1d[0] * entries1d[5])) * entries1d[7]) +
-            (((entries1d[0] * entries1d[4]) - (entries1d[1] * entries1d[3])) * entries1d[8]);
+            (((m01 * m12) - (m02 * m11)) * m20) +
+            (((m02 * m10) - (m00 * m12)) * m21) +
+            (((m00 * m11) - (m01 * m10)) * m22);
     }
 
     GEM_INLINE float3 float3x3::euler() const
     {
         float3 out;
-        float sp = -entries1d[7];
+        float sp = -m21;
         if (sp <= 1.0f)
         {
             out.x = -1.570796f;
@@ -535,12 +505,12 @@ namespace gem
         if (abs(sp) > 0.9999f)
         {
             out.z = 0.0f;
-            out.y = atan2(-entries1d[2], entries1d[0]);
+            out.y = atan2(-m02, m00);
         }
         else
         {
-            out.y = atan2(entries1d[6], entries1d[8]);
-            out.z = atan2(entries1d[1], entries1d[4]);
+            out.y = atan2(m20, m22);
+            out.z = atan2(m01, m11);
         }
         return out;
     }
@@ -579,17 +549,17 @@ namespace gem
 
     GEM_INLINE float3& GEM_VECTORCALL float3x3::operator[](const unsigned int index)
     {
-        return rows[index];
+        return reinterpret_cast<float3*>(this)[index];
     }
 
     GEM_INLINE float3 GEM_VECTORCALL float3x3::operator[](const unsigned int index) const
     {
-        return rows[index];
+        return reinterpret_cast<const float3*>(this)[index];
     }
 
     GEM_INLINE float GEM_VECTORCALL float3x3::operator()(const unsigned int row, const unsigned int column)
     {
-        return entries2d[row][column];
+        return reinterpret_cast<float3*>(this)[row][column];
     }
 
     GEM_INLINE float3x3 float3x3::operator-() const
@@ -606,9 +576,9 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] + rhs.entries1d[0], lhs.entries1d[1] + rhs.entries1d[1], lhs.entries1d[2] + rhs.entries1d[2],
-            lhs.entries1d[3] + rhs.entries1d[3], lhs.entries1d[4] + rhs.entries1d[4], lhs.entries1d[5] + rhs.entries1d[5],
-            lhs.entries1d[6] + rhs.entries1d[6], lhs.entries1d[7] + rhs.entries1d[7], lhs.entries1d[8] + rhs.entries1d[8],
+            lhs.m00 + rhs.m00, lhs.m01 + rhs.m01, lhs.m02 + rhs.m02,
+            lhs.m10 + rhs.m10, lhs.m11 + rhs.m11, lhs.m12 + rhs.m12,
+            lhs.m20 + rhs.m20, lhs.m21 + rhs.m21, lhs.m22 + rhs.m22,
         };
     }
 
@@ -616,9 +586,9 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] - rhs.entries1d[0], lhs.entries1d[1] - rhs.entries1d[1], lhs.entries1d[2] - rhs.entries1d[2],
-            lhs.entries1d[3] - rhs.entries1d[3], lhs.entries1d[4] - rhs.entries1d[4], lhs.entries1d[5] - rhs.entries1d[5],
-            lhs.entries1d[6] - rhs.entries1d[6], lhs.entries1d[7] - rhs.entries1d[7], lhs.entries1d[8] - rhs.entries1d[8],
+            lhs.m00 - rhs.m00, lhs.m01 - rhs.m01, lhs.m02 - rhs.m02,
+            lhs.m10 - rhs.m10, lhs.m11 - rhs.m11, lhs.m12 - rhs.m12,
+            lhs.m20 - rhs.m20, lhs.m21 - rhs.m21, lhs.m22 - rhs.m22,
         };
     }
 
@@ -626,15 +596,15 @@ namespace gem
     {
         return
         {
-            (lhs.entries1d[0] * rhs.entries1d[0]) + (lhs.entries1d[1] * rhs.entries1d[3]) + (lhs.entries1d[2] * rhs.entries1d[6]),
-            (lhs.entries1d[0] * rhs.entries1d[1]) + (lhs.entries1d[1] * rhs.entries1d[4]) + (lhs.entries1d[2] * rhs.entries1d[7]),
-            (lhs.entries1d[0] * rhs.entries1d[2]) + (lhs.entries1d[1] * rhs.entries1d[5]) + (lhs.entries1d[2] * rhs.entries1d[8]),
-            (lhs.entries1d[3] * rhs.entries1d[0]) + (lhs.entries1d[4] * rhs.entries1d[3]) + (lhs.entries1d[5] * rhs.entries1d[6]),
-            (lhs.entries1d[3] * rhs.entries1d[1]) + (lhs.entries1d[4] * rhs.entries1d[4]) + (lhs.entries1d[5] * rhs.entries1d[7]),
-            (lhs.entries1d[3] * rhs.entries1d[2]) + (lhs.entries1d[4] * rhs.entries1d[5]) + (lhs.entries1d[5] * rhs.entries1d[8]),
-            (lhs.entries1d[6] * rhs.entries1d[0]) + (lhs.entries1d[7] * rhs.entries1d[3]) + (lhs.entries1d[8] * rhs.entries1d[6]),
-            (lhs.entries1d[6] * rhs.entries1d[1]) + (lhs.entries1d[7] * rhs.entries1d[4]) + (lhs.entries1d[8] * rhs.entries1d[7]),
-            (lhs.entries1d[6] * rhs.entries1d[2]) + (lhs.entries1d[7] * rhs.entries1d[5]) + (lhs.entries1d[8] * rhs.entries1d[8])
+            (lhs.m00 * rhs.m00) + (lhs.m01 * rhs.m10) + (lhs.m02 * rhs.m20),
+            (lhs.m00 * rhs.m01) + (lhs.m01 * rhs.m11) + (lhs.m02 * rhs.m21),
+            (lhs.m00 * rhs.m02) + (lhs.m01 * rhs.m12) + (lhs.m02 * rhs.m22),
+            (lhs.m10 * rhs.m00) + (lhs.m11 * rhs.m10) + (lhs.m12 * rhs.m20),
+            (lhs.m10 * rhs.m01) + (lhs.m11 * rhs.m11) + (lhs.m12 * rhs.m21),
+            (lhs.m10 * rhs.m02) + (lhs.m11 * rhs.m12) + (lhs.m12 * rhs.m22),
+            (lhs.m20 * rhs.m00) + (lhs.m21 * rhs.m10) + (lhs.m22 * rhs.m20),
+            (lhs.m20 * rhs.m01) + (lhs.m21 * rhs.m11) + (lhs.m22 * rhs.m21),
+            (lhs.m20 * rhs.m02) + (lhs.m21 * rhs.m12) + (lhs.m22 * rhs.m22)
         };
     }
 
@@ -643,9 +613,9 @@ namespace gem
         return
         {
 
-            (lhs.components[0] * rhs.entries1d[0]) + (lhs.components[1] * rhs.entries1d[3]) + (lhs.components[2] * rhs.entries1d[6]),
-            (lhs.components[0] * rhs.entries1d[1]) + (lhs.components[1] * rhs.entries1d[4]) + (lhs.components[2] * rhs.entries1d[7]),
-            (lhs.components[0] * rhs.entries1d[2]) + (lhs.components[1] * rhs.entries1d[5]) + (lhs.components[2] * rhs.entries1d[8])
+            (lhs.x * rhs.m00) + (lhs.y * rhs.m10) + (lhs.z * rhs.m20),
+            (lhs.x * rhs.m01) + (lhs.y * rhs.m11) + (lhs.z * rhs.m21),
+            (lhs.x * rhs.m02) + (lhs.y * rhs.m12) + (lhs.z * rhs.m22)
         };
     }
 
@@ -653,9 +623,9 @@ namespace gem
     {
         return
         {
-            rhs.entries1d[0] * lhs, rhs.entries1d[1] * lhs, rhs.entries1d[2] * lhs,
-            rhs.entries1d[3] * lhs, rhs.entries1d[4] * lhs, rhs.entries1d[5] * lhs,
-            rhs.entries1d[6] * lhs, rhs.entries1d[7] * lhs, rhs.entries1d[8] * lhs
+            rhs.m00 * lhs, rhs.m01 * lhs, rhs.m02 * lhs,
+            rhs.m10 * lhs, rhs.m11 * lhs, rhs.m12 * lhs,
+            rhs.m20 * lhs, rhs.m21 * lhs, rhs.m22 * lhs
         };
     }
 
@@ -663,9 +633,9 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] * rhs, lhs.entries1d[1] * rhs, lhs.entries1d[2] * rhs,
-            lhs.entries1d[3] * rhs, lhs.entries1d[4] * rhs, lhs.entries1d[5] * rhs,
-            lhs.entries1d[6] * rhs, lhs.entries1d[7] * rhs, lhs.entries1d[8] * rhs
+            lhs.m00 * rhs, lhs.m01 * rhs, lhs.m02 * rhs,
+            lhs.m10 * rhs, lhs.m11 * rhs, lhs.m12 * rhs,
+            lhs.m20 * rhs, lhs.m21 * rhs, lhs.m22 * rhs
         };
     }
 
@@ -675,25 +645,10 @@ namespace gem
 
     struct float4x3
     {
-        union
-        {
-            struct
-            {
-                float m00, m01, m02;
-                float m10, m11, m12;
-                float m20, m21, m22;
-                float m30, m31, m32;
-            };
-
-            struct
-            {
-                float3 u, v, w, t;
-            };
-
-            float3 rows[4];
-            float entries1d[12];
-            float entries2d[4][3];
-        };
+        float m00, m01, m02;
+        float m10, m11, m12;
+        float m20, m21, m22;
+        float m30, m31, m32;
 
         static float4x3 identity();
 
@@ -942,59 +897,59 @@ namespace gem
     GEM_INLINE float4x3 float4x3::inverse() const
     {
         float4x3 out;
-        float c11 = +((entries1d[4] * entries1d[8]) - (entries1d[5] * entries1d[7]));
-        float c12 = -((entries1d[3] * entries1d[8]) - (entries1d[5] * entries1d[6]));
-        float c13 = +((entries1d[3] * entries1d[7]) - (entries1d[4] * entries1d[6]));
-        float c14 = -((((entries1d[4] * entries1d[8]) - (entries1d[5] * entries1d[7])) * entries1d[9]) + (((entries1d[5] * entries1d[6]) - (entries1d[3] * entries1d[8])) * entries1d[10]) + (((entries1d[3] * entries1d[7]) - (entries1d[4] * entries1d[6])) * entries1d[11]));
+        float c11 = +((m11 * m22) - (m12 * m21));
+        float c12 = -((m10 * m22) - (m12 * m20));
+        float c13 = +((m10 * m21) - (m11 * m20));
+        float c14 = -((((m11 * m22) - (m12 * m21)) * m30) + (((m12 * m20) - (m10 * m22)) * m31) + (((m10 * m21) - (m11 * m20)) * m32));
 
-        float det = (entries1d[0] * c11) + (entries1d[1] * c12) + (entries1d[2] * c13);
+        float det = (m00 * c11) + (m01 * c12) + (m02 * c13);
 
-        float c21 = -((entries1d[1] * entries1d[8]) - (entries1d[2] * entries1d[7]));
-        float c22 = +((entries1d[0] * entries1d[8]) - (entries1d[2] * entries1d[6]));
-        float c23 = -((entries1d[0] * entries1d[7]) - (entries1d[1] * entries1d[6]));
-        float c24 = +((((entries1d[1] * entries1d[8]) - (entries1d[2] * entries1d[7])) * entries1d[9]) + (((entries1d[2] * entries1d[6]) - (entries1d[0] * entries1d[8])) * entries1d[10]) + (((entries1d[0] * entries1d[7]) - (entries1d[1] * entries1d[6])) * entries1d[11]));
+        float c21 = -((m01 * m22) - (m02 * m21));
+        float c22 = +((m00 * m22) - (m02 * m20));
+        float c23 = -((m00 * m21) - (m01 * m20));
+        float c24 = +((((m01 * m22) - (m02 * m21)) * m30) + (((m02 * m20) - (m00 * m22)) * m31) + (((m00 * m21) - (m01 * m20)) * m32));
 
-        float c31 = +((entries1d[1] * entries1d[5]) - (entries1d[2] * entries1d[4]));
-        float c32 = -((entries1d[0] * entries1d[5]) - (entries1d[2] * entries1d[3]));
-        float c33 = +((entries1d[0] * entries1d[4]) - (entries1d[1] * entries1d[3]));
-        float c34 = -((((entries1d[1] * entries1d[5]) - (entries1d[2] * entries1d[4])) * entries1d[9]) + (((entries1d[2] * entries1d[3]) - (entries1d[0] * entries1d[5])) * entries1d[10]) + (((entries1d[0] * entries1d[4]) - (entries1d[1] * entries1d[3])) * entries1d[11]));
+        float c31 = +((m01 * m12) - (m02 * m11));
+        float c32 = -((m00 * m12) - (m02 * m10));
+        float c33 = +((m00 * m11) - (m01 * m10));
+        float c34 = -((((m01 * m12) - (m02 * m11)) * m30) + (((m02 * m10) - (m00 * m12)) * m31) + (((m00 * m11) - (m01 * m10)) * m32));
 
         // float c41 = float(0);
         // float c42 = float(0);
         // float c43 = float(0);
-        float c44 = +((((entries1d[1] * entries1d[5]) - (entries1d[2] * entries1d[4])) * entries1d[6]) + (((entries1d[2] * entries1d[3]) - (entries1d[0] * entries1d[5])) * entries1d[7]) + (((entries1d[0] * entries1d[4]) - (entries1d[1] * entries1d[3])) * entries1d[8]));
+        float c44 = +((((m01 * m12) - (m02 * m11)) * m20) + (((m02 * m10) - (m00 * m12)) * m21) + (((m00 * m11) - (m01 * m10)) * m22));
 
         float inv = 1.0f / det;
 
-        out.entries1d[0] = c11 * inv;
-        out.entries1d[1] = c21 * inv;
-        out.entries1d[2] = c31 * inv;
-        out.entries1d[3] = c12 * inv;
-        out.entries1d[4] = c22 * inv;
-        out.entries1d[5] = c32 * inv;
-        out.entries1d[6] = c13 * inv;
-        out.entries1d[7] = c23 * inv;
-        out.entries1d[8] = c33 * inv;
-        out.entries1d[9] = c14 * inv;
-        out.entries1d[10] = c24 * inv;
-        out.entries1d[11] = c34 * inv;
+        out.m00 = c11 * inv;
+        out.m01 = c21 * inv;
+        out.m02 = c31 * inv;
+        out.m10 = c12 * inv;
+        out.m11 = c22 * inv;
+        out.m12 = c32 * inv;
+        out.m20 = c13 * inv;
+        out.m21 = c23 * inv;
+        out.m22 = c33 * inv;
+        out.m30 = c14 * inv;
+        out.m31 = c24 * inv;
+        out.m32 = c34 * inv;
         return out;
     }
 
     GEM_INLINE float float4x3::determinant() const
     {
-        float c11 = +((entries1d[4] * entries1d[8]) - (entries1d[5] * entries1d[7]));
-        float c12 = -((entries1d[3] * entries1d[8]) - (entries1d[5] * entries1d[6]));
-        float c13 = +((entries1d[3] * entries1d[7]) - (entries1d[4] * entries1d[6]));
-        float c14 = -((((entries1d[4] * entries1d[8]) - (entries1d[5] * entries1d[7])) * entries1d[9]) + (((entries1d[5] * entries1d[6]) - (entries1d[3] * entries1d[8])) * entries1d[10]) + (((entries1d[3] * entries1d[7]) - (entries1d[4] * entries1d[6])) * entries1d[11]));
+        float c11 = +((m11 * m22) - (m12 * m21));
+        float c12 = -((m10 * m22) - (m12 * m20));
+        float c13 = +((m10 * m21) - (m11 * m20));
+        float c14 = -((((m11 * m22) - (m12 * m21)) * m30) + (((m12 * m20) - (m10 * m22)) * m31) + (((m10 * m21) - (m11 * m20)) * m32));
 
-        return (entries1d[0] * c11) + (entries1d[1] * c12) + (entries1d[2] * c13);
+        return (m00 * c11) + (m01 * c12) + (m02 * c13);
     }
 
     GEM_INLINE float3 float4x3::euler() const
     {
         float3 out;
-        float sp = -entries1d[7];
+        float sp = -m21;
         if (sp <= 1.0f)
         {
             out.x = -1.570796f;
@@ -1011,12 +966,12 @@ namespace gem
         if (abs(sp) > 0.9999f)
         {
             out.z = 0.0f;
-            out.y = atan2(-entries1d[2], entries1d[0]);
+            out.y = atan2(-m02, m00);
         }
         else
         {
-            out.y = atan2(entries1d[6], entries1d[8]);
-            out.z = atan2(entries1d[1], entries1d[4]);
+            out.y = atan2(m20, m22);
+            out.z = atan2(m01, m11);
         }
         return out;
     }
@@ -1059,17 +1014,17 @@ namespace gem
 
     GEM_INLINE float3& GEM_VECTORCALL float4x3::operator[](const unsigned int index)
     {
-        return rows[index];
+        return reinterpret_cast<float3*>(this)[index];
     }
 
     GEM_INLINE float3 GEM_VECTORCALL float4x3::operator[](const unsigned int index) const
     {
-        return rows[index];
+        return reinterpret_cast<const float3*>(this)[index];
     }
 
     GEM_INLINE float GEM_VECTORCALL float4x3::operator()(const unsigned int row, const unsigned int column)
     {
-        return entries2d[row][column];
+        return reinterpret_cast<float3*>(this)[row][column];
     }
 
     GEM_INLINE float4x3 float4x3::operator-() const
@@ -1087,10 +1042,10 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] + rhs.entries1d[0], lhs.entries1d[1] + rhs.entries1d[1], lhs.entries1d[2] + rhs.entries1d[2],
-            lhs.entries1d[3] + rhs.entries1d[3], lhs.entries1d[4] + rhs.entries1d[4], lhs.entries1d[5] + rhs.entries1d[5],
-            lhs.entries1d[6] + rhs.entries1d[6], lhs.entries1d[7] + rhs.entries1d[7], lhs.entries1d[8] + rhs.entries1d[8],
-            lhs.entries1d[9] + rhs.entries1d[9], lhs.entries1d[10] + rhs.entries1d[10], lhs.entries1d[11] + rhs.entries1d[11]
+            lhs.m00 + rhs.m00, lhs.m01 + rhs.m01, lhs.m02 + rhs.m02,
+            lhs.m10 + rhs.m10, lhs.m11 + rhs.m11, lhs.m12 + rhs.m12,
+            lhs.m20 + rhs.m20, lhs.m21 + rhs.m21, lhs.m22 + rhs.m22,
+            lhs.m30 + rhs.m30, lhs.m31 + rhs.m31, lhs.m32 + rhs.m32
         };
     }
 
@@ -1098,10 +1053,10 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] - rhs.entries1d[0], lhs.entries1d[1] - rhs.entries1d[1], lhs.entries1d[2] - rhs.entries1d[2],
-            lhs.entries1d[3] - rhs.entries1d[3], lhs.entries1d[4] - rhs.entries1d[4], lhs.entries1d[5] - rhs.entries1d[5],
-            lhs.entries1d[6] - rhs.entries1d[6], lhs.entries1d[7] - rhs.entries1d[7], lhs.entries1d[8] - rhs.entries1d[8],
-            lhs.entries1d[9] - rhs.entries1d[9], lhs.entries1d[10] - rhs.entries1d[10], lhs.entries1d[11] - rhs.entries1d[11]
+            lhs.m00 - rhs.m00, lhs.m01 - rhs.m01, lhs.m02 - rhs.m02,
+            lhs.m10 - rhs.m10, lhs.m11 - rhs.m11, lhs.m12 - rhs.m12,
+            lhs.m20 - rhs.m20, lhs.m21 - rhs.m21, lhs.m22 - rhs.m22,
+            lhs.m30 - rhs.m30, lhs.m31 - rhs.m31, lhs.m32 - rhs.m32
         };
     }
 
@@ -1109,18 +1064,18 @@ namespace gem
     {
         return
         {
-            (lhs.entries1d[0] * rhs.entries1d[0]) + (lhs.entries1d[1] * rhs.entries1d[3]) + (lhs.entries1d[2] * rhs.entries1d[6]),
-            (lhs.entries1d[0] * rhs.entries1d[1]) + (lhs.entries1d[1] * rhs.entries1d[4]) + (lhs.entries1d[2] * rhs.entries1d[7]),
-            (lhs.entries1d[0] * rhs.entries1d[2]) + (lhs.entries1d[1] * rhs.entries1d[5]) + (lhs.entries1d[2] * rhs.entries1d[8]),
-            (lhs.entries1d[3] * rhs.entries1d[0]) + (lhs.entries1d[4] * rhs.entries1d[3]) + (lhs.entries1d[5] * rhs.entries1d[6]),
-            (lhs.entries1d[3] * rhs.entries1d[1]) + (lhs.entries1d[4] * rhs.entries1d[4]) + (lhs.entries1d[5] * rhs.entries1d[7]),
-            (lhs.entries1d[3] * rhs.entries1d[2]) + (lhs.entries1d[4] * rhs.entries1d[5]) + (lhs.entries1d[5] * rhs.entries1d[8]),
-            (lhs.entries1d[6] * rhs.entries1d[0]) + (lhs.entries1d[7] * rhs.entries1d[3]) + (lhs.entries1d[8] * rhs.entries1d[6]),
-            (lhs.entries1d[6] * rhs.entries1d[1]) + (lhs.entries1d[7] * rhs.entries1d[4]) + (lhs.entries1d[8] * rhs.entries1d[7]),
-            (lhs.entries1d[6] * rhs.entries1d[2]) + (lhs.entries1d[7] * rhs.entries1d[5]) + (lhs.entries1d[8] * rhs.entries1d[8]),
-            (lhs.entries1d[9] * rhs.entries1d[0]) + (lhs.entries1d[10] * rhs.entries1d[3]) + (lhs.entries1d[11] * rhs.entries1d[6]) + rhs.entries1d[9],
-            (lhs.entries1d[9] * rhs.entries1d[1]) + (lhs.entries1d[10] * rhs.entries1d[4]) + (lhs.entries1d[11] * rhs.entries1d[7]) + rhs.entries1d[10],
-            (lhs.entries1d[9] * rhs.entries1d[2]) + (lhs.entries1d[10] * rhs.entries1d[5]) + (lhs.entries1d[11] * rhs.entries1d[8]) + rhs.entries1d[11]
+            (lhs.m00 * rhs.m00) + (lhs.m01 * rhs.m10) + (lhs.m02 * rhs.m20),
+            (lhs.m00 * rhs.m01) + (lhs.m01 * rhs.m11) + (lhs.m02 * rhs.m21),
+            (lhs.m00 * rhs.m02) + (lhs.m01 * rhs.m12) + (lhs.m02 * rhs.m22),
+            (lhs.m10 * rhs.m00) + (lhs.m11 * rhs.m10) + (lhs.m12 * rhs.m20),
+            (lhs.m10 * rhs.m01) + (lhs.m11 * rhs.m11) + (lhs.m12 * rhs.m21),
+            (lhs.m10 * rhs.m02) + (lhs.m11 * rhs.m12) + (lhs.m12 * rhs.m22),
+            (lhs.m20 * rhs.m00) + (lhs.m21 * rhs.m10) + (lhs.m22 * rhs.m20),
+            (lhs.m20 * rhs.m01) + (lhs.m21 * rhs.m11) + (lhs.m22 * rhs.m21),
+            (lhs.m20 * rhs.m02) + (lhs.m21 * rhs.m12) + (lhs.m22 * rhs.m22),
+            (lhs.m30 * rhs.m00) + (lhs.m31 * rhs.m10) + (lhs.m32 * rhs.m20) + rhs.m30,
+            (lhs.m30 * rhs.m01) + (lhs.m31 * rhs.m11) + (lhs.m32 * rhs.m21) + rhs.m31,
+            (lhs.m30 * rhs.m02) + (lhs.m31 * rhs.m12) + (lhs.m32 * rhs.m22) + rhs.m32
         };
     }
 
@@ -1128,10 +1083,10 @@ namespace gem
     {
         return
         {
-            rhs.entries1d[0] * lhs, rhs.entries1d[ 1] * lhs, rhs.entries1d[ 2] * lhs,
-            rhs.entries1d[3] * lhs, rhs.entries1d[ 4] * lhs, rhs.entries1d[ 5] * lhs,
-            rhs.entries1d[6] * lhs, rhs.entries1d[ 7] * lhs, rhs.entries1d[ 8] * lhs,
-            rhs.entries1d[9] * lhs, rhs.entries1d[10] * lhs, rhs.entries1d[11] * lhs
+            rhs.m00 * lhs, rhs.m01 * lhs, rhs.m02 * lhs,
+            rhs.m10 * lhs, rhs.m11 * lhs, rhs.m12 * lhs,
+            rhs.m20 * lhs, rhs.m21 * lhs, rhs.m22 * lhs,
+            rhs.m30 * lhs, rhs.m31 * lhs, rhs.m32 * lhs
         };
     }
 
@@ -1139,10 +1094,10 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] * rhs, lhs.entries1d[1] * rhs, lhs.entries1d[2] * rhs,
-            lhs.entries1d[3] * rhs, lhs.entries1d[4] * rhs, lhs.entries1d[5] * rhs,
-            lhs.entries1d[6] * rhs, lhs.entries1d[7] * rhs, lhs.entries1d[8] * rhs,
-            lhs.entries1d[9] * rhs, lhs.entries1d[10] * rhs, lhs.entries1d[11] * rhs
+            lhs.m00 * rhs, lhs.m01 * rhs, lhs.m02 * rhs,
+            lhs.m10 * rhs, lhs.m11 * rhs, lhs.m12 * rhs,
+            lhs.m20 * rhs, lhs.m21 * rhs, lhs.m22 * rhs,
+            lhs.m30 * rhs, lhs.m31 * rhs, lhs.m32 * rhs
         };
     }
 
@@ -1150,9 +1105,9 @@ namespace gem
     {
         return
         {
-            (lhs.components[0] * rhs.entries1d[0]) + (lhs.components[1] * rhs.entries1d[3]) + (lhs.components[2] * rhs.entries1d[6]) + rhs.entries1d[9],
-            (lhs.components[0] * rhs.entries1d[1]) + (lhs.components[1] * rhs.entries1d[4]) + (lhs.components[2] * rhs.entries1d[7]) + rhs.entries1d[10],
-            (lhs.components[0] * rhs.entries1d[2]) + (lhs.components[1] * rhs.entries1d[5]) + (lhs.components[2] * rhs.entries1d[8]) + rhs.entries1d[11]
+            (lhs.x * rhs.m00) + (lhs.y * rhs.m10) + (lhs.z * rhs.m20) + rhs.m30,
+            (lhs.x * rhs.m01) + (lhs.y * rhs.m11) + (lhs.z * rhs.m21) + rhs.m31,
+            (lhs.x * rhs.m02) + (lhs.y * rhs.m12) + (lhs.z * rhs.m22) + rhs.m32
         };
     }
 
@@ -1162,25 +1117,10 @@ namespace gem
 
     struct float4x4
     {
-        union
-        {
-            struct
-            {
-                float m00, m01, m02, m03;
-                float m10, m11, m12, m13;
-                float m20, m21, m22, m23;
-                float m30, m31, m32, m33;
-            };
-
-            struct
-            {
-                float4 u, v, w, t;
-            };
-
-            float4 rows[4];
-            float entries1d[16];
-            float entries2d[4][4];
-        };
+        float m00, m01, m02, m03;
+        float m10, m11, m12, m13;
+        float m20, m21, m22, m23;
+        float m30, m31, m32, m33;
 
         static float4x4 identity();
 
@@ -1614,64 +1554,64 @@ namespace gem
     {
         float4x4 out;
 
-        float c11 = +((((entries1d[6] * entries1d[11]) - (entries1d[7] * entries1d[10])) * entries1d[13]) + (((entries1d[7] * entries1d[9]) - (entries1d[5] * entries1d[11])) * entries1d[14]) + (((entries1d[5] * entries1d[10]) - (entries1d[6] * entries1d[9])) * entries1d[15]));
-        float c12 = -((((entries1d[6] * entries1d[11]) - (entries1d[7] * entries1d[10])) * entries1d[12]) + (((entries1d[7] * entries1d[8]) - (entries1d[4] * entries1d[11])) * entries1d[14]) + (((entries1d[4] * entries1d[10]) - (entries1d[6] * entries1d[8])) * entries1d[15]));
-        float c13 = +((((entries1d[5] * entries1d[11]) - (entries1d[7] * entries1d[9])) * entries1d[12]) + (((entries1d[7] * entries1d[8]) - (entries1d[4] * entries1d[11])) * entries1d[13]) + (((entries1d[4] * entries1d[9]) - (entries1d[5] * entries1d[8])) * entries1d[15]));
-        float c14 = -((((entries1d[5] * entries1d[10]) - (entries1d[6] * entries1d[9])) * entries1d[12]) + (((entries1d[6] * entries1d[8]) - (entries1d[4] * entries1d[10])) * entries1d[13]) + (((entries1d[4] * entries1d[9]) - (entries1d[5] * entries1d[8])) * entries1d[14]));
+        float c11 = +((((m12 * m23) - (m13 * m22)) * m31) + (((m13 * m21) - (m11 * m23)) * m32) + (((m11 * m22) - (m12 * m21)) * m33));
+        float c12 = -((((m12 * m23) - (m13 * m22)) * m30) + (((m13 * m20) - (m10 * m23)) * m32) + (((m10 * m22) - (m12 * m20)) * m33));
+        float c13 = +((((m11 * m23) - (m13 * m21)) * m30) + (((m13 * m20) - (m10 * m23)) * m31) + (((m10 * m21) - (m11 * m20)) * m33));
+        float c14 = -((((m11 * m22) - (m12 * m21)) * m30) + (((m12 * m20) - (m10 * m22)) * m31) + (((m10 * m21) - (m11 * m20)) * m32));
 
-        float det = (entries1d[0] * c11) + (entries1d[1] * c12) + (entries1d[2] * c13) + (entries1d[3] * c14);
+        float det = (m00 * c11) + (m01 * c12) + (m02 * c13) + (m03 * c14);
 
-        float c21 = -((((entries1d[2] * entries1d[11]) - (entries1d[3] * entries1d[10])) * entries1d[13]) + (((entries1d[3] * entries1d[9]) - (entries1d[1] * entries1d[11])) * entries1d[14]) + (((entries1d[1] * entries1d[10]) - (entries1d[2] * entries1d[9])) * entries1d[15]));
-        float c22 = +((((entries1d[2] * entries1d[11]) - (entries1d[3] * entries1d[10])) * entries1d[12]) + (((entries1d[3] * entries1d[8]) - (entries1d[0] * entries1d[11])) * entries1d[14]) + (((entries1d[0] * entries1d[10]) - (entries1d[2] * entries1d[8])) * entries1d[15]));
-        float c23 = -((((entries1d[1] * entries1d[11]) - (entries1d[3] * entries1d[9])) * entries1d[12]) + (((entries1d[3] * entries1d[8]) - (entries1d[0] * entries1d[11])) * entries1d[13]) + (((entries1d[0] * entries1d[9]) - (entries1d[1] * entries1d[8])) * entries1d[15]));
-        float c24 = +((((entries1d[1] * entries1d[10]) - (entries1d[2] * entries1d[9])) * entries1d[12]) + (((entries1d[2] * entries1d[8]) - (entries1d[0] * entries1d[10])) * entries1d[13]) + (((entries1d[0] * entries1d[9]) - (entries1d[1] * entries1d[8])) * entries1d[14]));
+        float c21 = -((((m02 * m23) - (m03 * m22)) * m31) + (((m03 * m21) - (m01 * m23)) * m32) + (((m01 * m22) - (m02 * m21)) * m33));
+        float c22 = +((((m02 * m23) - (m03 * m22)) * m30) + (((m03 * m20) - (m00 * m23)) * m32) + (((m00 * m22) - (m02 * m20)) * m33));
+        float c23 = -((((m01 * m23) - (m03 * m21)) * m30) + (((m03 * m20) - (m00 * m23)) * m31) + (((m00 * m21) - (m01 * m20)) * m33));
+        float c24 = +((((m01 * m22) - (m02 * m21)) * m30) + (((m02 * m20) - (m00 * m22)) * m31) + (((m00 * m21) - (m01 * m20)) * m32));
 
-        float c31 = +((((entries1d[2] * entries1d[7]) - (entries1d[3] * entries1d[6])) * entries1d[13]) + (((entries1d[3] * entries1d[5]) - (entries1d[1] * entries1d[7])) * entries1d[14]) + (((entries1d[1] * entries1d[6]) - (entries1d[2] * entries1d[5])) * entries1d[15]));
-        float c32 = -((((entries1d[2] * entries1d[7]) - (entries1d[3] * entries1d[6])) * entries1d[12]) + (((entries1d[3] * entries1d[4]) - (entries1d[0] * entries1d[7])) * entries1d[14]) + (((entries1d[0] * entries1d[6]) - (entries1d[2] * entries1d[4])) * entries1d[15]));
-        float c33 = +((((entries1d[1] * entries1d[7]) - (entries1d[3] * entries1d[5])) * entries1d[12]) + (((entries1d[3] * entries1d[4]) - (entries1d[0] * entries1d[7])) * entries1d[13]) + (((entries1d[0] * entries1d[5]) - (entries1d[1] * entries1d[4])) * entries1d[15]));
-        float c34 = -((((entries1d[1] * entries1d[6]) - (entries1d[2] * entries1d[5])) * entries1d[12]) + (((entries1d[2] * entries1d[4]) - (entries1d[0] * entries1d[6])) * entries1d[13]) + (((entries1d[0] * entries1d[5]) - (entries1d[1] * entries1d[4])) * entries1d[14]));
+        float c31 = +((((m02 * m13) - (m03 * m12)) * m31) + (((m03 * m11) - (m01 * m13)) * m32) + (((m01 * m12) - (m02 * m11)) * m33));
+        float c32 = -((((m02 * m13) - (m03 * m12)) * m30) + (((m03 * m10) - (m00 * m13)) * m32) + (((m00 * m12) - (m02 * m10)) * m33));
+        float c33 = +((((m01 * m13) - (m03 * m11)) * m30) + (((m03 * m10) - (m00 * m13)) * m31) + (((m00 * m11) - (m01 * m10)) * m33));
+        float c34 = -((((m01 * m12) - (m02 * m11)) * m30) + (((m02 * m10) - (m00 * m12)) * m31) + (((m00 * m11) - (m01 * m10)) * m32));
 
-        float c41 = -((((entries1d[2] * entries1d[7]) - (entries1d[3] * entries1d[6])) * entries1d[9]) + (((entries1d[3] * entries1d[5]) - (entries1d[1] * entries1d[7])) * entries1d[10]) + (((entries1d[1] * entries1d[6]) - (entries1d[2] * entries1d[5])) * entries1d[11]));
-        float c42 = +((((entries1d[2] * entries1d[7]) - (entries1d[3] * entries1d[6])) * entries1d[8]) + (((entries1d[3] * entries1d[4]) - (entries1d[0] * entries1d[7])) * entries1d[10]) + (((entries1d[0] * entries1d[6]) - (entries1d[2] * entries1d[4])) * entries1d[11]));
-        float c43 = -((((entries1d[1] * entries1d[7]) - (entries1d[3] * entries1d[5])) * entries1d[8]) + (((entries1d[3] * entries1d[4]) - (entries1d[0] * entries1d[7])) * entries1d[9]) + (((entries1d[0] * entries1d[5]) - (entries1d[1] * entries1d[4])) * entries1d[11]));
-        float c44 = +((((entries1d[1] * entries1d[6]) - (entries1d[2] * entries1d[5])) * entries1d[8]) + (((entries1d[2] * entries1d[4]) - (entries1d[0] * entries1d[6])) * entries1d[9]) + (((entries1d[0] * entries1d[5]) - (entries1d[1] * entries1d[4])) * entries1d[10]));
+        float c41 = -((((m02 * m13) - (m03 * m12)) * m21) + (((m03 * m11) - (m01 * m13)) * m22) + (((m01 * m12) - (m02 * m11)) * m23));
+        float c42 = +((((m02 * m13) - (m03 * m12)) * m20) + (((m03 * m10) - (m00 * m13)) * m22) + (((m00 * m12) - (m02 * m10)) * m23));
+        float c43 = -((((m01 * m13) - (m03 * m11)) * m20) + (((m03 * m10) - (m00 * m13)) * m21) + (((m00 * m11) - (m01 * m10)) * m23));
+        float c44 = +((((m01 * m12) - (m02 * m11)) * m20) + (((m02 * m10) - (m00 * m12)) * m21) + (((m00 * m11) - (m01 * m10)) * m22));
 
         float inv = 1.0f / det;
 
-        out.entries1d[0] = c11 * inv;
-        out.entries1d[1] = c21 * inv;
-        out.entries1d[2] = c31 * inv;
-        out.entries1d[3] = c41 * inv;
-        out.entries1d[4] = c12 * inv;
-        out.entries1d[5] = c22 * inv;
-        out.entries1d[6] = c32 * inv;
-        out.entries1d[7] = c42 * inv;
-        out.entries1d[8] = c13 * inv;
-        out.entries1d[9] = c23 * inv;
-        out.entries1d[10] = c33 * inv;
-        out.entries1d[11] = c43 * inv;
-        out.entries1d[12] = c14 * inv;
-        out.entries1d[13] = c24 * inv;
-        out.entries1d[14] = c34 * inv;
-        out.entries1d[15] = c44 * inv;
+        out.m00 = c11 * inv;
+        out.m01 = c21 * inv;
+        out.m02 = c31 * inv;
+        out.m03 = c41 * inv;
+        out.m10 = c12 * inv;
+        out.m11 = c22 * inv;
+        out.m12 = c32 * inv;
+        out.m13 = c42 * inv;
+        out.m20 = c13 * inv;
+        out.m21 = c23 * inv;
+        out.m22 = c33 * inv;
+        out.m23 = c43 * inv;
+        out.m30 = c14 * inv;
+        out.m31 = c24 * inv;
+        out.m32 = c34 * inv;
+        out.m33 = c44 * inv;
 
         return out;
     }
 
     GEM_INLINE float float4x4::determinant() const
     {
-        float c11 = +((((entries1d[6] * entries1d[11]) - (entries1d[7] * entries1d[10])) * entries1d[13]) + (((entries1d[7] * entries1d[9]) - (entries1d[5] * entries1d[11])) * entries1d[14]) + (((entries1d[5] * entries1d[10]) - (entries1d[6] * entries1d[9])) * entries1d[15]));
-        float c12 = -((((entries1d[6] * entries1d[11]) - (entries1d[7] * entries1d[10])) * entries1d[12]) + (((entries1d[7] * entries1d[8]) - (entries1d[4] * entries1d[11])) * entries1d[14]) + (((entries1d[4] * entries1d[10]) - (entries1d[6] * entries1d[8])) * entries1d[15]));
-        float c13 = +((((entries1d[5] * entries1d[11]) - (entries1d[7] * entries1d[9])) * entries1d[12]) + (((entries1d[7] * entries1d[8]) - (entries1d[4] * entries1d[11])) * entries1d[13]) + (((entries1d[4] * entries1d[9]) - (entries1d[5] * entries1d[8])) * entries1d[15]));
-        float c14 = -((((entries1d[5] * entries1d[10]) - (entries1d[6] * entries1d[9])) * entries1d[12]) + (((entries1d[6] * entries1d[8]) - (entries1d[4] * entries1d[10])) * entries1d[13]) + (((entries1d[4] * entries1d[9]) - (entries1d[5] * entries1d[8])) * entries1d[14]));
+        float c11 = +((((m12 * m23) - (m13 * m22)) * m31) + (((m13 * m21) - (m11 * m23)) * m32) + (((m11 * m22) - (m12 * m21)) * m33));
+        float c12 = -((((m12 * m23) - (m13 * m22)) * m30) + (((m13 * m20) - (m10 * m23)) * m32) + (((m10 * m22) - (m12 * m20)) * m33));
+        float c13 = +((((m11 * m23) - (m13 * m21)) * m30) + (((m13 * m20) - (m10 * m23)) * m31) + (((m10 * m21) - (m11 * m20)) * m33));
+        float c14 = -((((m11 * m22) - (m12 * m21)) * m30) + (((m12 * m20) - (m10 * m22)) * m31) + (((m10 * m21) - (m11 * m20)) * m32));
 
-        return (entries1d[0] * c11) + (entries1d[1] * c12) + (entries1d[2] * c13) + (entries1d[3] * c14);
+        return (m00 * c11) + (m01 * c12) + (m02 * c13) + (m03 * c14);
     }
 
     GEM_INLINE float3 float4x4::euler() const
     {
         float3 out;
-        float sp = -entries1d[9];
+        float sp = -m21;
         if (sp <= 1.0f)
         {
             out.x = -1.690998f;
@@ -1688,12 +1628,12 @@ namespace gem
         if (abs(sp) > 0.9999f)
         {
             out.z = 0.0f;
-            out.y = atan2(-entries1d[2], entries1d[0]);
+            out.y = atan2(-m02, m00);
         }
         else
         {
-            out.y = atan2(entries1d[8], entries1d[10]);
-            out.z = atan2(entries1d[1], entries1d[5]);
+            out.y = atan2(m20, m22);
+            out.z = atan2(m01, m11);
         }
         return out;
     }
@@ -1747,27 +1687,27 @@ namespace gem
 
     GEM_INLINE float4& GEM_VECTORCALL float4x4::operator[](const unsigned int index)
     {
-        return rows[index];
+        return reinterpret_cast<float4*>(this)[index];
     }
 
     GEM_INLINE float4 GEM_VECTORCALL float4x4::operator[](const unsigned int index) const
     {
-        return rows[index];
+        return reinterpret_cast<const float4*>(this)[index];
     }
 
     GEM_INLINE float GEM_VECTORCALL float4x4::operator()(const unsigned int row, const unsigned int column)
     {
-        return entries2d[row][column];
+        return reinterpret_cast<float4*>(this)[row][column];
     }
 
     GEM_INLINE float4x4 GEM_VECTORCALL operator+(const float4x4& lhs, const float4x4& rhs)
     {
         return
         {
-            lhs.entries1d[0] + rhs.entries1d[0], lhs.entries1d[1] + rhs.entries1d[1], lhs.entries1d[2] + rhs.entries1d[2], lhs.entries1d[3] + rhs.entries1d[3],
-            lhs.entries1d[4] + rhs.entries1d[4], lhs.entries1d[5] + rhs.entries1d[5], lhs.entries1d[6] + rhs.entries1d[6], lhs.entries1d[7] + rhs.entries1d[7],
-            lhs.entries1d[8] + rhs.entries1d[8], lhs.entries1d[9] + rhs.entries1d[9], lhs.entries1d[10] + rhs.entries1d[10], lhs.entries1d[11] + rhs.entries1d[11],
-            lhs.entries1d[12] + rhs.entries1d[12], lhs.entries1d[13] + rhs.entries1d[13], lhs.entries1d[14] + rhs.entries1d[14], lhs.entries1d[15] + rhs.entries1d[15]
+            lhs.m00 + rhs.m00, lhs.m01 + rhs.m01, lhs.m02 + rhs.m02, lhs.m03 + rhs.m03,
+            lhs.m10 + rhs.m10, lhs.m11 + rhs.m11, lhs.m12 + rhs.m12, lhs.m13 + rhs.m13,
+            lhs.m20 + rhs.m20, lhs.m21 + rhs.m21, lhs.m22 + rhs.m22, lhs.m23 + rhs.m23,
+            lhs.m30 + rhs.m30, lhs.m31 + rhs.m31, lhs.m32 + rhs.m32, lhs.m33 + rhs.m33
         };
     }
 
@@ -1775,10 +1715,10 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] - rhs.entries1d[0], lhs.entries1d[1] - rhs.entries1d[1], lhs.entries1d[2] - rhs.entries1d[2], lhs.entries1d[3] - rhs.entries1d[3],
-            lhs.entries1d[4] - rhs.entries1d[4], lhs.entries1d[5] - rhs.entries1d[5], lhs.entries1d[6] - rhs.entries1d[6], lhs.entries1d[7] - rhs.entries1d[7],
-            lhs.entries1d[8] - rhs.entries1d[8], lhs.entries1d[9] - rhs.entries1d[9], lhs.entries1d[10] - rhs.entries1d[10], lhs.entries1d[11] - rhs.entries1d[11],
-            lhs.entries1d[12] - rhs.entries1d[12], lhs.entries1d[13] - rhs.entries1d[13], lhs.entries1d[14] - rhs.entries1d[14], lhs.entries1d[15] - rhs.entries1d[15]
+            lhs.m00 - rhs.m00, lhs.m01 - rhs.m01, lhs.m02 - rhs.m02, lhs.m03 - rhs.m03,
+            lhs.m10 - rhs.m10, lhs.m11 - rhs.m11, lhs.m12 - rhs.m12, lhs.m13 - rhs.m13,
+            lhs.m20 - rhs.m20, lhs.m21 - rhs.m21, lhs.m22 - rhs.m22, lhs.m23 - rhs.m23,
+            lhs.m30 - rhs.m30, lhs.m31 - rhs.m31, lhs.m32 - rhs.m32, lhs.m33 - rhs.m33
         };
     }
 
@@ -1786,22 +1726,22 @@ namespace gem
     {
         return
         {
-            (lhs.entries1d[0] * rhs.entries1d[0]) + (lhs.entries1d[1] * rhs.entries1d[4]) + (lhs.entries1d[2] * rhs.entries1d[8]) + (lhs.entries1d[3] * rhs.entries1d[12]),
-            (lhs.entries1d[0] * rhs.entries1d[1]) + (lhs.entries1d[1] * rhs.entries1d[5]) + (lhs.entries1d[2] * rhs.entries1d[9]) + (lhs.entries1d[3] * rhs.entries1d[13]),
-            (lhs.entries1d[0] * rhs.entries1d[2]) + (lhs.entries1d[1] * rhs.entries1d[6]) + (lhs.entries1d[2] * rhs.entries1d[10]) + (lhs.entries1d[3] * rhs.entries1d[14]),
-            (lhs.entries1d[0] * rhs.entries1d[3]) + (lhs.entries1d[1] * rhs.entries1d[7]) + (lhs.entries1d[2] * rhs.entries1d[11]) + (lhs.entries1d[3] * rhs.entries1d[15]),
-            (lhs.entries1d[4] * rhs.entries1d[0]) + (lhs.entries1d[5] * rhs.entries1d[4]) + (lhs.entries1d[6] * rhs.entries1d[8]) + (lhs.entries1d[7] * rhs.entries1d[12]),
-            (lhs.entries1d[4] * rhs.entries1d[1]) + (lhs.entries1d[5] * rhs.entries1d[5]) + (lhs.entries1d[6] * rhs.entries1d[9]) + (lhs.entries1d[7] * rhs.entries1d[13]),
-            (lhs.entries1d[4] * rhs.entries1d[2]) + (lhs.entries1d[5] * rhs.entries1d[6]) + (lhs.entries1d[6] * rhs.entries1d[10]) + (lhs.entries1d[7] * rhs.entries1d[14]),
-            (lhs.entries1d[4] * rhs.entries1d[3]) + (lhs.entries1d[5] * rhs.entries1d[7]) + (lhs.entries1d[6] * rhs.entries1d[11]) + (lhs.entries1d[7] * rhs.entries1d[15]),
-            (lhs.entries1d[8] * rhs.entries1d[0]) + (lhs.entries1d[9] * rhs.entries1d[4]) + (lhs.entries1d[10] * rhs.entries1d[8]) + (lhs.entries1d[11] * rhs.entries1d[12]),
-            (lhs.entries1d[8] * rhs.entries1d[1]) + (lhs.entries1d[9] * rhs.entries1d[5]) + (lhs.entries1d[10] * rhs.entries1d[9]) + (lhs.entries1d[11] * rhs.entries1d[13]),
-            (lhs.entries1d[8] * rhs.entries1d[2]) + (lhs.entries1d[9] * rhs.entries1d[6]) + (lhs.entries1d[10] * rhs.entries1d[10]) + (lhs.entries1d[11] * rhs.entries1d[14]),
-            (lhs.entries1d[8] * rhs.entries1d[3]) + (lhs.entries1d[9] * rhs.entries1d[7]) + (lhs.entries1d[10] * rhs.entries1d[11]) + (lhs.entries1d[11] * rhs.entries1d[15]),
-            (lhs.entries1d[12] * rhs.entries1d[0]) + (lhs.entries1d[13] * rhs.entries1d[4]) + (lhs.entries1d[14] * rhs.entries1d[8]) + (lhs.entries1d[15] * rhs.entries1d[12]),
-            (lhs.entries1d[12] * rhs.entries1d[1]) + (lhs.entries1d[13] * rhs.entries1d[5]) + (lhs.entries1d[14] * rhs.entries1d[9]) + (lhs.entries1d[15] * rhs.entries1d[13]),
-            (lhs.entries1d[12] * rhs.entries1d[2]) + (lhs.entries1d[13] * rhs.entries1d[6]) + (lhs.entries1d[14] * rhs.entries1d[10]) + (lhs.entries1d[15] * rhs.entries1d[14]),
-            (lhs.entries1d[12] * rhs.entries1d[3]) + (lhs.entries1d[13] * rhs.entries1d[7]) + (lhs.entries1d[14] * rhs.entries1d[11]) + (lhs.entries1d[15] * rhs.entries1d[15])
+            (lhs.m00 * rhs.m00) + (lhs.m01 * rhs.m10) + (lhs.m02 * rhs.m20) + (lhs.m03 * rhs.m30),
+            (lhs.m00 * rhs.m01) + (lhs.m01 * rhs.m11) + (lhs.m02 * rhs.m21) + (lhs.m03 * rhs.m31),
+            (lhs.m00 * rhs.m02) + (lhs.m01 * rhs.m12) + (lhs.m02 * rhs.m22) + (lhs.m03 * rhs.m32),
+            (lhs.m00 * rhs.m03) + (lhs.m01 * rhs.m13) + (lhs.m02 * rhs.m23) + (lhs.m03 * rhs.m33),
+            (lhs.m10 * rhs.m00) + (lhs.m11 * rhs.m10) + (lhs.m12 * rhs.m20) + (lhs.m13 * rhs.m30),
+            (lhs.m10 * rhs.m01) + (lhs.m11 * rhs.m11) + (lhs.m12 * rhs.m21) + (lhs.m13 * rhs.m31),
+            (lhs.m10 * rhs.m02) + (lhs.m11 * rhs.m12) + (lhs.m12 * rhs.m22) + (lhs.m13 * rhs.m32),
+            (lhs.m10 * rhs.m03) + (lhs.m11 * rhs.m13) + (lhs.m12 * rhs.m23) + (lhs.m13 * rhs.m33),
+            (lhs.m20 * rhs.m00) + (lhs.m21 * rhs.m10) + (lhs.m22 * rhs.m20) + (lhs.m23 * rhs.m30),
+            (lhs.m20 * rhs.m01) + (lhs.m21 * rhs.m11) + (lhs.m22 * rhs.m21) + (lhs.m23 * rhs.m31),
+            (lhs.m20 * rhs.m02) + (lhs.m21 * rhs.m12) + (lhs.m22 * rhs.m22) + (lhs.m23 * rhs.m32),
+            (lhs.m20 * rhs.m03) + (lhs.m21 * rhs.m13) + (lhs.m22 * rhs.m23) + (lhs.m23 * rhs.m33),
+            (lhs.m30 * rhs.m00) + (lhs.m31 * rhs.m10) + (lhs.m32 * rhs.m20) + (lhs.m33 * rhs.m30),
+            (lhs.m30 * rhs.m01) + (lhs.m31 * rhs.m11) + (lhs.m32 * rhs.m21) + (lhs.m33 * rhs.m31),
+            (lhs.m30 * rhs.m02) + (lhs.m31 * rhs.m12) + (lhs.m32 * rhs.m22) + (lhs.m33 * rhs.m32),
+            (lhs.m30 * rhs.m03) + (lhs.m31 * rhs.m13) + (lhs.m32 * rhs.m23) + (lhs.m33 * rhs.m33)
         };
     }
 
@@ -1809,10 +1749,10 @@ namespace gem
     {
         return
         {
-            rhs.entries1d[ 0] * lhs, rhs.entries1d[ 1] * lhs, rhs.entries1d[ 2] * lhs, rhs.entries1d[ 3] * lhs,
-            rhs.entries1d[ 4] * lhs, rhs.entries1d[ 5] * lhs, rhs.entries1d[ 6] * lhs, rhs.entries1d[ 7] * lhs,
-            rhs.entries1d[ 8] * lhs, rhs.entries1d[ 9] * lhs, rhs.entries1d[10] * lhs, rhs.entries1d[11] * lhs,
-            rhs.entries1d[12] * lhs, rhs.entries1d[13] * lhs, rhs.entries1d[14] * lhs, rhs.entries1d[15] * lhs
+            rhs.m00 * lhs, rhs.m01 * lhs, rhs.m02 * lhs, rhs.m03 * lhs,
+            rhs.m10 * lhs, rhs.m11 * lhs, rhs.m12 * lhs, rhs.m13 * lhs,
+            rhs.m20 * lhs, rhs.m21 * lhs, rhs.m22 * lhs, rhs.m23 * lhs,
+            rhs.m30 * lhs, rhs.m31 * lhs, rhs.m32 * lhs, rhs.m33 * lhs
         };
     }
 
@@ -1820,10 +1760,10 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] * rhs, lhs.entries1d[1] * rhs, lhs.entries1d[2] * rhs, lhs.entries1d[3] * rhs,
-            lhs.entries1d[4] * rhs, lhs.entries1d[5] * rhs, lhs.entries1d[6] * rhs, lhs.entries1d[7] * rhs,
-            lhs.entries1d[8] * rhs, lhs.entries1d[9] * rhs, lhs.entries1d[10] * rhs, lhs.entries1d[11] * rhs,
-            lhs.entries1d[12] * rhs, lhs.entries1d[13] * rhs, lhs.entries1d[14] * rhs, lhs.entries1d[15] * rhs
+            lhs.m00 * rhs, lhs.m01 * rhs, lhs.m02 * rhs, lhs.m03 * rhs,
+            lhs.m10 * rhs, lhs.m11 * rhs, lhs.m12 * rhs, lhs.m13 * rhs,
+            lhs.m20 * rhs, lhs.m21 * rhs, lhs.m22 * rhs, lhs.m23 * rhs,
+            lhs.m30 * rhs, lhs.m31 * rhs, lhs.m32 * rhs, lhs.m33 * rhs
         };
     }
 
@@ -1831,10 +1771,10 @@ namespace gem
     {
         return
         {
-            (lhs.components[0] * rhs.entries1d[0]) + (lhs.components[1] * rhs.entries1d[4]) + (lhs.components[2] * rhs.entries1d[8]) + (lhs.components[3] * rhs.entries1d[12]),
-            (lhs.components[0] * rhs.entries1d[1]) + (lhs.components[1] * rhs.entries1d[5]) + (lhs.components[2] * rhs.entries1d[9]) + (lhs.components[3] * rhs.entries1d[13]),
-            (lhs.components[0] * rhs.entries1d[2]) + (lhs.components[1] * rhs.entries1d[6]) + (lhs.components[2] * rhs.entries1d[10]) + (lhs.components[3] * rhs.entries1d[14]),
-            (lhs.components[0] * rhs.entries1d[3]) + (lhs.components[1] * rhs.entries1d[7]) + (lhs.components[2] * rhs.entries1d[11]) + (lhs.components[3] * rhs.entries1d[15])
+            (lhs.x * rhs.m00) + (lhs.y * rhs.m10) + (lhs.z * rhs.m20) + (lhs.w * rhs.m30),
+            (lhs.x * rhs.m01) + (lhs.y * rhs.m11) + (lhs.z * rhs.m21) + (lhs.w * rhs.m31),
+            (lhs.x * rhs.m02) + (lhs.y * rhs.m12) + (lhs.z * rhs.m22) + (lhs.w * rhs.m32),
+            (lhs.x * rhs.m03) + (lhs.y * rhs.m13) + (lhs.z * rhs.m23) + (lhs.w * rhs.m33)
         };
     }
 
@@ -1844,23 +1784,8 @@ namespace gem
 
     struct double2x2
     {
-        union
-        {
-            struct
-            {
-                double m00, m01;
-                double m10, m11;
-            };
-
-            struct
-            {
-                double2 u, v;
-            };
-
-            double2 rows[2];
-            double entries1d[4];
-            double entries2d[2][2];
-        };
+        double m00, m01;
+        double m10, m11;
 
         double2x2(const double u1, const double u2, const double v1, const double v2);
 
@@ -1947,12 +1872,12 @@ namespace gem
     GEM_INLINE double2x2 double2x2::inverse() const
     {
         double2x2 out;
-        double det = (entries1d[0] * entries1d[3]) - (entries1d[1] * entries1d[2]);
-        double inv = 1.0f / det;
-        out.entries1d[0] = +entries1d[3] * inv;
-        out.entries1d[1] = -entries1d[1] * inv;
-        out.entries1d[2] = -entries1d[2] * inv;
-        out.entries1d[3] = +entries1d[0] * inv;
+        double det = (m00 * m11) - (m01 * m10);
+        double inv = 1.0 / det;
+        out.m00 = +m11 * inv;
+        out.m01 = -m01 * inv;
+        out.m10 = -m10 * inv;
+        out.m11 = +m00 * inv;
         return out;
     }
 
@@ -1960,7 +1885,7 @@ namespace gem
     {
         //     0 1      
         // det 2 3 =    (0 * 3) - (1 - 2)     
-        return (entries1d[0] * entries1d[3]) - (entries1d[1] * entries1d[2]);
+        return (m00 * m11) - (m01 * m10);
     }
 
     GEM_INLINE double2x2& GEM_VECTORCALL double2x2::operator+=(const double2x2& rhs)
@@ -2002,25 +1927,25 @@ namespace gem
 
     GEM_INLINE double2& GEM_VECTORCALL double2x2::operator[](const unsigned int index)
     {
-        return rows[index];
+        return reinterpret_cast<double2*>(this)[index];
     }
 
     GEM_INLINE double2 GEM_VECTORCALL double2x2::operator[](const unsigned int index) const
     {
-        return rows[index];
+        return reinterpret_cast<const double2*>(this)[index];
     }
 
     GEM_INLINE double GEM_VECTORCALL double2x2::operator()(const unsigned int row, const unsigned int column)
     {
-        return entries2d[row][column];
+        return reinterpret_cast<double2*>(this)[row][column];
     }
 
     GEM_INLINE double2x2 GEM_VECTORCALL operator+(const double2x2& lhs, const double2x2& rhs)
     {
         return
         {
-            lhs.entries1d[0] + rhs.entries1d[0], lhs.entries1d[1] + rhs.entries1d[1],
-            lhs.entries1d[2] + rhs.entries1d[2], lhs.entries1d[3] + rhs.entries1d[3]
+            lhs.m00 + rhs.m00, lhs.m01 + rhs.m01,
+            lhs.m10 + rhs.m10, lhs.m11 + rhs.m11
         };
     }
 
@@ -2028,8 +1953,8 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] - rhs.entries1d[0], lhs.entries1d[1] - rhs.entries1d[1],
-            lhs.entries1d[2] - rhs.entries1d[2], lhs.entries1d[3] - rhs.entries1d[3]
+            lhs.m00 - rhs.m00, lhs.m01 - rhs.m01,
+            lhs.m10 - rhs.m10, lhs.m11 - rhs.m11
         };
     }
 
@@ -2037,11 +1962,10 @@ namespace gem
     {
         return
         {
-            (lhs.entries1d[0] * rhs.entries1d[0]) + (lhs.entries1d[1] * rhs.entries1d[2]),
-            (lhs.entries1d[0] * rhs.entries1d[1]) + (lhs.entries1d[1] * rhs.entries1d[3]),
-            (lhs.entries1d[2] * rhs.entries1d[0]) + (lhs.entries1d[3] * rhs.entries1d[2]),
-            (lhs.entries1d[2] * rhs.entries1d[1]) + (lhs.entries1d[3] * rhs.entries1d[3])
-
+            (lhs.m00 * rhs.m00) + (lhs.m01 * rhs.m10),
+            (lhs.m00 * rhs.m01) + (lhs.m01 * rhs.m11),
+            (lhs.m10 * rhs.m00) + (lhs.m11 * rhs.m10),
+            (lhs.m10 * rhs.m01) + (lhs.m11 * rhs.m11)
         };
     }
 
@@ -2049,8 +1973,8 @@ namespace gem
     {
         return
         {
-            (lhs.components[0] * rhs.entries1d[0]) + (lhs.components[1] * rhs.entries1d[2]),
-            (lhs.components[0] * rhs.entries1d[1]) + (lhs.components[1] * rhs.entries1d[3])
+            (lhs.x * rhs.m00) + (lhs.y * rhs.m10),
+            (lhs.x * rhs.m01) + (lhs.y * rhs.m11)
         };
     }
 
@@ -2058,8 +1982,8 @@ namespace gem
     {
         return
         {
-            rhs.entries1d[0] * lhs, rhs.entries1d[1] * lhs,
-            rhs.entries1d[2] * lhs, rhs.entries1d[3] * lhs
+            rhs.m00 * lhs, rhs.m01 * lhs,
+            rhs.m10 * lhs, rhs.m11 * lhs
         };
     }
 
@@ -2067,8 +1991,8 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] * rhs, lhs.entries1d[1] * rhs,
-            lhs.entries1d[2] * rhs, lhs.entries1d[3] * rhs
+            lhs.m00 * rhs, lhs.m01 * rhs,
+            lhs.m10 * rhs, lhs.m11 * rhs
         };
     }
 
@@ -2078,24 +2002,9 @@ namespace gem
 
     struct double3x3
     {
-        union
-        {
-            struct
-            {
-                double m00, m01, m02;
-                double m10, m11, m12;
-                double m20, m21, m22;
-            };
-
-            struct
-            {
-                double3 u, v, w;
-            };
-
-            double3 rows[3];
-            double entries1d[9];
-            double entries2d[3][3];
-        };
+        double m00, m01, m02;
+        double m10, m11, m12;
+        double m20, m21, m22;
 
         static double3x3 identity();
 
@@ -2166,9 +2075,9 @@ namespace gem
     {
         return
         {
-            1.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 1.0f
+            1.0, 0.0f, 0.0f,
+            0.0f, 1.0, 0.0f,
+            0.0f, 0.0f, 1.0
         };
     }
 
@@ -2204,7 +2113,7 @@ namespace gem
         double c = cosf(radians);
         return
         {
-            1.0f, 0.0f, 0.0f,
+            1.0, 0.0f, 0.0f,
             0.0f, c, s,
             0.0f, -s, c
         };
@@ -2217,7 +2126,7 @@ namespace gem
         return
         {
             c, 0.0f, -s,
-            0.0f, 1.0f, 0.0f,
+            0.0f, 1.0, 0.0f,
             s, 0.0f, c
         };
     }
@@ -2230,7 +2139,7 @@ namespace gem
         {
             c, s, 0.0f,
             -s, c, 0.0f,
-            0.0f, 0.0f, 1.0f
+            0.0f, 0.0f, 1.0
         };
     }
 
@@ -2313,30 +2222,30 @@ namespace gem
         double3x3 out;
 
         double det =
-            (((entries1d[1] * entries1d[5]) - (entries1d[2] * entries1d[4])) * entries1d[6]) +
-            (((entries1d[2] * entries1d[3]) - (entries1d[0] * entries1d[5])) * entries1d[7]) +
-            (((entries1d[0] * entries1d[4]) - (entries1d[1] * entries1d[3])) * entries1d[8]);
+            (((m01 * m12) - (m02 * m11)) * m20) +
+            (((m02 * m10) - (m00 * m12)) * m21) +
+            (((m00 * m11) - (m01 * m10)) * m22);
 
-        double c11 = +((entries1d[4] * entries1d[8]) - (entries1d[5] * entries1d[7]));
-        double c12 = -((entries1d[3] * entries1d[8]) - (entries1d[5] * entries1d[6]));
-        double c13 = +((entries1d[3] * entries1d[7]) - (entries1d[4] * entries1d[6]));
-        double c21 = -((entries1d[1] * entries1d[8]) - (entries1d[2] * entries1d[7]));
-        double c22 = +((entries1d[0] * entries1d[8]) - (entries1d[2] * entries1d[6]));
-        double c23 = -((entries1d[0] * entries1d[7]) - (entries1d[1] * entries1d[6]));
-        double c31 = +((entries1d[1] * entries1d[5]) - (entries1d[2] * entries1d[4]));
-        double c32 = -((entries1d[0] * entries1d[5]) - (entries1d[2] * entries1d[3]));
-        double c33 = +((entries1d[0] * entries1d[4]) - (entries1d[1] * entries1d[3]));
+        double c11 = +((m11 * m22) - (m12 * m21));
+        double c12 = -((m10 * m22) - (m12 * m20));
+        double c13 = +((m10 * m21) - (m11 * m20));
+        double c21 = -((m01 * m22) - (m02 * m21));
+        double c22 = +((m00 * m22) - (m02 * m20));
+        double c23 = -((m00 * m21) - (m01 * m20));
+        double c31 = +((m01 * m12) - (m02 * m11));
+        double c32 = -((m00 * m12) - (m02 * m10));
+        double c33 = +((m00 * m11) - (m01 * m10));
 
-        double inv = 1.0f / det;
-        out.entries1d[0] = c11 * inv;
-        out.entries1d[1] = c21 * inv;
-        out.entries1d[2] = c31 * inv;
-        out.entries1d[3] = c12 * inv;
-        out.entries1d[4] = c22 * inv;
-        out.entries1d[5] = c32 * inv;
-        out.entries1d[6] = c13 * inv;
-        out.entries1d[7] = c23 * inv;
-        out.entries1d[8] = c33 * inv;
+        double inv = 1.0 / det;
+        out.m00 = c11 * inv;
+        out.m01 = c21 * inv;
+        out.m02 = c31 * inv;
+        out.m10 = c12 * inv;
+        out.m11 = c22 * inv;
+        out.m12 = c32 * inv;
+        out.m20 = c13 * inv;
+        out.m21 = c23 * inv;
+        out.m22 = c33 * inv;
         return out;
     }
 
@@ -2348,20 +2257,20 @@ namespace gem
         // (ax*by - ay*bx) * cz
 
         return
-            (((entries1d[1] * entries1d[5]) - (entries1d[2] * entries1d[4])) * entries1d[6]) +
-            (((entries1d[2] * entries1d[3]) - (entries1d[0] * entries1d[5])) * entries1d[7]) +
-            (((entries1d[0] * entries1d[4]) - (entries1d[1] * entries1d[3])) * entries1d[8]);
+            (((m01 * m12) - (m02 * m11)) * m20) +
+            (((m02 * m10) - (m00 * m12)) * m21) +
+            (((m00 * m11) - (m01 * m10)) * m22);
     }
 
     GEM_INLINE double3 double3x3::euler() const
     {
         double3 out;
-        double sp = -entries1d[7];
-        if (sp <= 1.0f)
+        double sp = -m21;
+        if (sp <= 1.0)
         {
             out.x = -1.570796f;
         }
-        else if (sp >= 1.0f)
+        else if (sp >= 1.0)
         {
             out.x = -1.570796f;
         }
@@ -2373,12 +2282,12 @@ namespace gem
         if (abs(sp) > 0.9999f)
         {
             out.z = 0.0f;
-            out.y = atan2(-entries1d[2], entries1d[0]);
+            out.y = atan2(-m02, m00);
         }
         else
         {
-            out.y = atan2(entries1d[6], entries1d[8]);
-            out.z = atan2(entries1d[1], entries1d[4]);
+            out.y = atan2(m20, m22);
+            out.z = atan2(m01, m11);
         }
         return out;
     }
@@ -2417,17 +2326,17 @@ namespace gem
 
     GEM_INLINE double3& GEM_VECTORCALL double3x3::operator[](const unsigned int index)
     {
-        return rows[index];
+        return reinterpret_cast<double3*>(this)[index];
     }
 
     GEM_INLINE double3 GEM_VECTORCALL double3x3::operator[](const unsigned int index) const
     {
-        return rows[index];
+        return reinterpret_cast<const double3*>(this)[index];
     }
 
     GEM_INLINE double GEM_VECTORCALL double3x3::operator()(const unsigned int row, const unsigned int column)
     {
-        return entries2d[row][column];
+        return reinterpret_cast<double3*>(this)[row][column];
     }
 
     GEM_INLINE double3x3 double3x3::operator-() const
@@ -2444,9 +2353,9 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] + rhs.entries1d[0], lhs.entries1d[1] + rhs.entries1d[1], lhs.entries1d[2] + rhs.entries1d[2],
-            lhs.entries1d[3] + rhs.entries1d[3], lhs.entries1d[4] + rhs.entries1d[4], lhs.entries1d[5] + rhs.entries1d[5],
-            lhs.entries1d[6] + rhs.entries1d[6], lhs.entries1d[7] + rhs.entries1d[7], lhs.entries1d[8] + rhs.entries1d[8],
+            lhs.m00 + rhs.m00, lhs.m01 + rhs.m01, lhs.m02 + rhs.m02,
+            lhs.m10 + rhs.m10, lhs.m11 + rhs.m11, lhs.m12 + rhs.m12,
+            lhs.m20 + rhs.m20, lhs.m21 + rhs.m21, lhs.m22 + rhs.m22,
         };
     }
 
@@ -2454,9 +2363,9 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] - rhs.entries1d[0], lhs.entries1d[1] - rhs.entries1d[1], lhs.entries1d[2] - rhs.entries1d[2],
-            lhs.entries1d[3] - rhs.entries1d[3], lhs.entries1d[4] - rhs.entries1d[4], lhs.entries1d[5] - rhs.entries1d[5],
-            lhs.entries1d[6] - rhs.entries1d[6], lhs.entries1d[7] - rhs.entries1d[7], lhs.entries1d[8] - rhs.entries1d[8],
+            lhs.m00 - rhs.m00, lhs.m01 - rhs.m01, lhs.m02 - rhs.m02,
+            lhs.m10 - rhs.m10, lhs.m11 - rhs.m11, lhs.m12 - rhs.m12,
+            lhs.m20 - rhs.m20, lhs.m21 - rhs.m21, lhs.m22 - rhs.m22,
         };
     }
 
@@ -2464,15 +2373,15 @@ namespace gem
     {
         return
         {
-            (lhs.entries1d[0] * rhs.entries1d[0]) + (lhs.entries1d[1] * rhs.entries1d[3]) + (lhs.entries1d[2] * rhs.entries1d[6]),
-            (lhs.entries1d[0] * rhs.entries1d[1]) + (lhs.entries1d[1] * rhs.entries1d[4]) + (lhs.entries1d[2] * rhs.entries1d[7]),
-            (lhs.entries1d[0] * rhs.entries1d[2]) + (lhs.entries1d[1] * rhs.entries1d[5]) + (lhs.entries1d[2] * rhs.entries1d[8]),
-            (lhs.entries1d[3] * rhs.entries1d[0]) + (lhs.entries1d[4] * rhs.entries1d[3]) + (lhs.entries1d[5] * rhs.entries1d[6]),
-            (lhs.entries1d[3] * rhs.entries1d[1]) + (lhs.entries1d[4] * rhs.entries1d[4]) + (lhs.entries1d[5] * rhs.entries1d[7]),
-            (lhs.entries1d[3] * rhs.entries1d[2]) + (lhs.entries1d[4] * rhs.entries1d[5]) + (lhs.entries1d[5] * rhs.entries1d[8]),
-            (lhs.entries1d[6] * rhs.entries1d[0]) + (lhs.entries1d[7] * rhs.entries1d[3]) + (lhs.entries1d[8] * rhs.entries1d[6]),
-            (lhs.entries1d[6] * rhs.entries1d[1]) + (lhs.entries1d[7] * rhs.entries1d[4]) + (lhs.entries1d[8] * rhs.entries1d[7]),
-            (lhs.entries1d[6] * rhs.entries1d[2]) + (lhs.entries1d[7] * rhs.entries1d[5]) + (lhs.entries1d[8] * rhs.entries1d[8])
+            (lhs.m00 * rhs.m00) + (lhs.m01 * rhs.m10) + (lhs.m02 * rhs.m20),
+            (lhs.m00 * rhs.m01) + (lhs.m01 * rhs.m11) + (lhs.m02 * rhs.m21),
+            (lhs.m00 * rhs.m02) + (lhs.m01 * rhs.m12) + (lhs.m02 * rhs.m22),
+            (lhs.m10 * rhs.m00) + (lhs.m11 * rhs.m10) + (lhs.m12 * rhs.m20),
+            (lhs.m10 * rhs.m01) + (lhs.m11 * rhs.m11) + (lhs.m12 * rhs.m21),
+            (lhs.m10 * rhs.m02) + (lhs.m11 * rhs.m12) + (lhs.m12 * rhs.m22),
+            (lhs.m20 * rhs.m00) + (lhs.m21 * rhs.m10) + (lhs.m22 * rhs.m20),
+            (lhs.m20 * rhs.m01) + (lhs.m21 * rhs.m11) + (lhs.m22 * rhs.m21),
+            (lhs.m20 * rhs.m02) + (lhs.m21 * rhs.m12) + (lhs.m22 * rhs.m22)
         };
     }
 
@@ -2481,9 +2390,9 @@ namespace gem
         return
         {
 
-            (lhs.components[0] * rhs.entries1d[0]) + (lhs.components[1] * rhs.entries1d[3]) + (lhs.components[2] * rhs.entries1d[6]),
-            (lhs.components[0] * rhs.entries1d[1]) + (lhs.components[1] * rhs.entries1d[4]) + (lhs.components[2] * rhs.entries1d[7]),
-            (lhs.components[0] * rhs.entries1d[2]) + (lhs.components[1] * rhs.entries1d[5]) + (lhs.components[2] * rhs.entries1d[8])
+            (lhs.x * rhs.m00) + (lhs.y * rhs.m10) + (lhs.z * rhs.m20),
+            (lhs.x * rhs.m01) + (lhs.y * rhs.m11) + (lhs.z * rhs.m21),
+            (lhs.x * rhs.m02) + (lhs.y * rhs.m12) + (lhs.z * rhs.m22)
         };
     }
 
@@ -2491,9 +2400,9 @@ namespace gem
     {
         return
         {
-            rhs.entries1d[0] * lhs, rhs.entries1d[1] * lhs, rhs.entries1d[2] * lhs,
-            rhs.entries1d[3] * lhs, rhs.entries1d[4] * lhs, rhs.entries1d[5] * lhs,
-            rhs.entries1d[6] * lhs, rhs.entries1d[7] * lhs, rhs.entries1d[8] * lhs
+            rhs.m00 * lhs, rhs.m01 * lhs, rhs.m02 * lhs,
+            rhs.m10 * lhs, rhs.m11 * lhs, rhs.m12 * lhs,
+            rhs.m20 * lhs, rhs.m21 * lhs, rhs.m22 * lhs
         };
     }
 
@@ -2501,9 +2410,9 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] * rhs, lhs.entries1d[1] * rhs, lhs.entries1d[2] * rhs,
-            lhs.entries1d[3] * rhs, lhs.entries1d[4] * rhs, lhs.entries1d[5] * rhs,
-            lhs.entries1d[6] * rhs, lhs.entries1d[7] * rhs, lhs.entries1d[8] * rhs
+            lhs.m00 * rhs, lhs.m01 * rhs, lhs.m02 * rhs,
+            lhs.m10 * rhs, lhs.m11 * rhs, lhs.m12 * rhs,
+            lhs.m20 * rhs, lhs.m21 * rhs, lhs.m22 * rhs
         };
     }
 
@@ -2513,25 +2422,10 @@ namespace gem
 
     struct double4x3
     {
-        union
-        {
-            struct
-            {
-                double m00, m01, m02;
-                double m10, m11, m12;
-                double m20, m21, m22;
-                double m30, m31, m32;
-            };
-
-            struct
-            {
-                double3 u, v, w, t;
-            };
-
-            double3 rows[4];
-            double entries1d[12];
-            double entries2d[4][3];
-        };
+        double m00, m01, m02;
+        double m10, m11, m12;
+        double m20, m21, m22;
+        double m30, m31, m32;
 
         static double4x3 identity();
 
@@ -2610,9 +2504,9 @@ namespace gem
     {
         return
         {
-            1.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 1.0f,
+            1.0, 0.0f, 0.0f,
+            0.0f, 1.0, 0.0f,
+            0.0f, 0.0f, 1.0,
             0.0f, 0.0f, 0.0f
         };
     }
@@ -2652,7 +2546,7 @@ namespace gem
         double c = cos(angle);
         return
         {
-            1.0f, 0.0f, 0.0f,
+            1.0, 0.0f, 0.0f,
             0.0f, c, s,
             0.0f, -s, c,
             0.0f, 0.0f, 0.0
@@ -2666,7 +2560,7 @@ namespace gem
         return
         {
             c, 0.0f, -s,
-            0.0f, 1.0f, 0.0f,
+            0.0f, 1.0, 0.0f,
             s, 0.0f, c,
             0.0f, 0.0f, 0.0
         };
@@ -2680,7 +2574,7 @@ namespace gem
         {
             c, s, 0.0f,
             -s, c, 0.0f,
-            0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 1.0,
             0.0f, 0.0f, 0.0
         };
     }
@@ -2720,9 +2614,9 @@ namespace gem
     {
         return
         {
-            1.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 1.0f,
+            1.0, 0.0f, 0.0f,
+            0.0f, 1.0, 0.0f,
+            0.0f, 0.0f, 1.0,
             t.x, t.y, t.z
         };
     }
@@ -2780,64 +2674,64 @@ namespace gem
     GEM_INLINE double4x3 double4x3::inverse() const
     {
         double4x3 out;
-        double c11 = +((entries1d[4] * entries1d[8]) - (entries1d[5] * entries1d[7]));
-        double c12 = -((entries1d[3] * entries1d[8]) - (entries1d[5] * entries1d[6]));
-        double c13 = +((entries1d[3] * entries1d[7]) - (entries1d[4] * entries1d[6]));
-        double c14 = -((((entries1d[4] * entries1d[8]) - (entries1d[5] * entries1d[7])) * entries1d[9]) + (((entries1d[5] * entries1d[6]) - (entries1d[3] * entries1d[8])) * entries1d[10]) + (((entries1d[3] * entries1d[7]) - (entries1d[4] * entries1d[6])) * entries1d[11]));
+        double c11 = +((m11 * m22) - (m12 * m21));
+        double c12 = -((m10 * m22) - (m12 * m20));
+        double c13 = +((m10 * m21) - (m11 * m20));
+        double c14 = -((((m11 * m22) - (m12 * m21)) * m30) + (((m12 * m20) - (m10 * m22)) * m31) + (((m10 * m21) - (m11 * m20)) * m32));
 
-        double det = (entries1d[0] * c11) + (entries1d[1] * c12) + (entries1d[2] * c13);
+        double det = (m00 * c11) + (m01 * c12) + (m02 * c13);
 
-        double c21 = -((entries1d[1] * entries1d[8]) - (entries1d[2] * entries1d[7]));
-        double c22 = +((entries1d[0] * entries1d[8]) - (entries1d[2] * entries1d[6]));
-        double c23 = -((entries1d[0] * entries1d[7]) - (entries1d[1] * entries1d[6]));
-        double c24 = +((((entries1d[1] * entries1d[8]) - (entries1d[2] * entries1d[7])) * entries1d[9]) + (((entries1d[2] * entries1d[6]) - (entries1d[0] * entries1d[8])) * entries1d[10]) + (((entries1d[0] * entries1d[7]) - (entries1d[1] * entries1d[6])) * entries1d[11]));
+        double c21 = -((m01 * m22) - (m02 * m21));
+        double c22 = +((m00 * m22) - (m02 * m20));
+        double c23 = -((m00 * m21) - (m01 * m20));
+        double c24 = +((((m01 * m22) - (m02 * m21)) * m30) + (((m02 * m20) - (m00 * m22)) * m31) + (((m00 * m21) - (m01 * m20)) * m32));
 
-        double c31 = +((entries1d[1] * entries1d[5]) - (entries1d[2] * entries1d[4]));
-        double c32 = -((entries1d[0] * entries1d[5]) - (entries1d[2] * entries1d[3]));
-        double c33 = +((entries1d[0] * entries1d[4]) - (entries1d[1] * entries1d[3]));
-        double c34 = -((((entries1d[1] * entries1d[5]) - (entries1d[2] * entries1d[4])) * entries1d[9]) + (((entries1d[2] * entries1d[3]) - (entries1d[0] * entries1d[5])) * entries1d[10]) + (((entries1d[0] * entries1d[4]) - (entries1d[1] * entries1d[3])) * entries1d[11]));
+        double c31 = +((m01 * m12) - (m02 * m11));
+        double c32 = -((m00 * m12) - (m02 * m10));
+        double c33 = +((m00 * m11) - (m01 * m10));
+        double c34 = -((((m01 * m12) - (m02 * m11)) * m30) + (((m02 * m10) - (m00 * m12)) * m31) + (((m00 * m11) - (m01 * m10)) * m32));
 
         // double c41 = double(0);
         // double c42 = double(0);
         // double c43 = double(0);
-        double c44 = +((((entries1d[1] * entries1d[5]) - (entries1d[2] * entries1d[4])) * entries1d[6]) + (((entries1d[2] * entries1d[3]) - (entries1d[0] * entries1d[5])) * entries1d[7]) + (((entries1d[0] * entries1d[4]) - (entries1d[1] * entries1d[3])) * entries1d[8]));
+        double c44 = +((((m01 * m12) - (m02 * m11)) * m20) + (((m02 * m10) - (m00 * m12)) * m21) + (((m00 * m11) - (m01 * m10)) * m22));
 
-        double inv = 1.0f / det;
+        double inv = 1.0 / det;
 
-        out.entries1d[0] = c11 * inv;
-        out.entries1d[1] = c21 * inv;
-        out.entries1d[2] = c31 * inv;
-        out.entries1d[3] = c12 * inv;
-        out.entries1d[4] = c22 * inv;
-        out.entries1d[5] = c32 * inv;
-        out.entries1d[6] = c13 * inv;
-        out.entries1d[7] = c23 * inv;
-        out.entries1d[8] = c33 * inv;
-        out.entries1d[9] = c14 * inv;
-        out.entries1d[10] = c24 * inv;
-        out.entries1d[11] = c34 * inv;
+        out.m00 = c11 * inv;
+        out.m01 = c21 * inv;
+        out.m02 = c31 * inv;
+        out.m10 = c12 * inv;
+        out.m11 = c22 * inv;
+        out.m12 = c32 * inv;
+        out.m20 = c13 * inv;
+        out.m21 = c23 * inv;
+        out.m22 = c33 * inv;
+        out.m30 = c14 * inv;
+        out.m31 = c24 * inv;
+        out.m32 = c34 * inv;
         return out;
     }
 
     GEM_INLINE double double4x3::determinant() const
     {
-        double c11 = +((entries1d[4] * entries1d[8]) - (entries1d[5] * entries1d[7]));
-        double c12 = -((entries1d[3] * entries1d[8]) - (entries1d[5] * entries1d[6]));
-        double c13 = +((entries1d[3] * entries1d[7]) - (entries1d[4] * entries1d[6]));
-        double c14 = -((((entries1d[4] * entries1d[8]) - (entries1d[5] * entries1d[7])) * entries1d[9]) + (((entries1d[5] * entries1d[6]) - (entries1d[3] * entries1d[8])) * entries1d[10]) + (((entries1d[3] * entries1d[7]) - (entries1d[4] * entries1d[6])) * entries1d[11]));
+        double c11 = +((m11 * m22) - (m12 * m21));
+        double c12 = -((m10 * m22) - (m12 * m20));
+        double c13 = +((m10 * m21) - (m11 * m20));
+        double c14 = -((((m11 * m22) - (m12 * m21)) * m30) + (((m12 * m20) - (m10 * m22)) * m31) + (((m10 * m21) - (m11 * m20)) * m32));
 
-        return (entries1d[0] * c11) + (entries1d[1] * c12) + (entries1d[2] * c13);
+        return (m00 * c11) + (m01 * c12) + (m02 * c13);
     }
 
     GEM_INLINE double3 double4x3::euler() const
     {
         double3 out;
-        double sp = -entries1d[7];
-        if (sp <= 1.0f)
+        double sp = -m21;
+        if (sp <= 1.0)
         {
             out.x = -1.570796f;
         }
-        else if (sp >= 1.0f)
+        else if (sp >= 1.0)
         {
             out.x = -1.570796f;
         }
@@ -2849,12 +2743,12 @@ namespace gem
         if (abs(sp) > 0.9999f)
         {
             out.z = 0.0f;
-            out.y = atan2(-entries1d[2], entries1d[0]);
+            out.y = atan2(-m02, m00);
         }
         else
         {
-            out.y = atan2(entries1d[6], entries1d[8]);
-            out.z = atan2(entries1d[1], entries1d[4]);
+            out.y = atan2(m20, m22);
+            out.z = atan2(m01, m11);
         }
         return out;
     }
@@ -2897,17 +2791,17 @@ namespace gem
 
     GEM_INLINE double3& GEM_VECTORCALL double4x3::operator[](const unsigned int index)
     {
-        return rows[index];
+        return reinterpret_cast<double3*>(this)[index];
     }
 
     GEM_INLINE double3 GEM_VECTORCALL double4x3::operator[](const unsigned int index) const
     {
-        return rows[index];
+        return reinterpret_cast<const double3*>(this)[index];
     }
 
     GEM_INLINE double GEM_VECTORCALL double4x3::operator()(const unsigned int row, const unsigned int column)
     {
-        return entries2d[row][column];
+        return reinterpret_cast<double3*>(this)[row][column];
     }
 
     GEM_INLINE double4x3 double4x3::operator-() const
@@ -2925,10 +2819,10 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] + rhs.entries1d[0], lhs.entries1d[1] + rhs.entries1d[1], lhs.entries1d[2] + rhs.entries1d[2],
-            lhs.entries1d[3] + rhs.entries1d[3], lhs.entries1d[4] + rhs.entries1d[4], lhs.entries1d[5] + rhs.entries1d[5],
-            lhs.entries1d[6] + rhs.entries1d[6], lhs.entries1d[7] + rhs.entries1d[7], lhs.entries1d[8] + rhs.entries1d[8],
-            lhs.entries1d[9] + rhs.entries1d[9], lhs.entries1d[10] + rhs.entries1d[10], lhs.entries1d[11] + rhs.entries1d[11]
+            lhs.m00 + rhs.m00, lhs.m01 + rhs.m01, lhs.m02 + rhs.m02,
+            lhs.m10 + rhs.m10, lhs.m11 + rhs.m11, lhs.m12 + rhs.m12,
+            lhs.m20 + rhs.m20, lhs.m21 + rhs.m21, lhs.m22 + rhs.m22,
+            lhs.m30 + rhs.m30, lhs.m31 + rhs.m31, lhs.m32 + rhs.m32
         };
     }
 
@@ -2936,10 +2830,10 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] - rhs.entries1d[0], lhs.entries1d[1] - rhs.entries1d[1], lhs.entries1d[2] - rhs.entries1d[2],
-            lhs.entries1d[3] - rhs.entries1d[3], lhs.entries1d[4] - rhs.entries1d[4], lhs.entries1d[5] - rhs.entries1d[5],
-            lhs.entries1d[6] - rhs.entries1d[6], lhs.entries1d[7] - rhs.entries1d[7], lhs.entries1d[8] - rhs.entries1d[8],
-            lhs.entries1d[9] - rhs.entries1d[9], lhs.entries1d[10] - rhs.entries1d[10], lhs.entries1d[11] - rhs.entries1d[11]
+            lhs.m00 - rhs.m00, lhs.m01 - rhs.m01, lhs.m02 - rhs.m02,
+            lhs.m10 - rhs.m10, lhs.m11 - rhs.m11, lhs.m12 - rhs.m12,
+            lhs.m20 - rhs.m20, lhs.m21 - rhs.m21, lhs.m22 - rhs.m22,
+            lhs.m30 - rhs.m30, lhs.m31 - rhs.m31, lhs.m32 - rhs.m32
         };
     }
 
@@ -2947,18 +2841,18 @@ namespace gem
     {
         return
         {
-            (lhs.entries1d[0] * rhs.entries1d[0]) + (lhs.entries1d[1] * rhs.entries1d[3]) + (lhs.entries1d[2] * rhs.entries1d[6]),
-            (lhs.entries1d[0] * rhs.entries1d[1]) + (lhs.entries1d[1] * rhs.entries1d[4]) + (lhs.entries1d[2] * rhs.entries1d[7]),
-            (lhs.entries1d[0] * rhs.entries1d[2]) + (lhs.entries1d[1] * rhs.entries1d[5]) + (lhs.entries1d[2] * rhs.entries1d[8]),
-            (lhs.entries1d[3] * rhs.entries1d[0]) + (lhs.entries1d[4] * rhs.entries1d[3]) + (lhs.entries1d[5] * rhs.entries1d[6]),
-            (lhs.entries1d[3] * rhs.entries1d[1]) + (lhs.entries1d[4] * rhs.entries1d[4]) + (lhs.entries1d[5] * rhs.entries1d[7]),
-            (lhs.entries1d[3] * rhs.entries1d[2]) + (lhs.entries1d[4] * rhs.entries1d[5]) + (lhs.entries1d[5] * rhs.entries1d[8]),
-            (lhs.entries1d[6] * rhs.entries1d[0]) + (lhs.entries1d[7] * rhs.entries1d[3]) + (lhs.entries1d[8] * rhs.entries1d[6]),
-            (lhs.entries1d[6] * rhs.entries1d[1]) + (lhs.entries1d[7] * rhs.entries1d[4]) + (lhs.entries1d[8] * rhs.entries1d[7]),
-            (lhs.entries1d[6] * rhs.entries1d[2]) + (lhs.entries1d[7] * rhs.entries1d[5]) + (lhs.entries1d[8] * rhs.entries1d[8]),
-            (lhs.entries1d[9] * rhs.entries1d[0]) + (lhs.entries1d[10] * rhs.entries1d[3]) + (lhs.entries1d[11] * rhs.entries1d[6]) + rhs.entries1d[9],
-            (lhs.entries1d[9] * rhs.entries1d[1]) + (lhs.entries1d[10] * rhs.entries1d[4]) + (lhs.entries1d[11] * rhs.entries1d[7]) + rhs.entries1d[10],
-            (lhs.entries1d[9] * rhs.entries1d[2]) + (lhs.entries1d[10] * rhs.entries1d[5]) + (lhs.entries1d[11] * rhs.entries1d[8]) + rhs.entries1d[11]
+            (lhs.m00 * rhs.m00) + (lhs.m01 * rhs.m10) + (lhs.m02 * rhs.m20),
+            (lhs.m00 * rhs.m01) + (lhs.m01 * rhs.m11) + (lhs.m02 * rhs.m21),
+            (lhs.m00 * rhs.m02) + (lhs.m01 * rhs.m12) + (lhs.m02 * rhs.m22),
+            (lhs.m10 * rhs.m00) + (lhs.m11 * rhs.m10) + (lhs.m12 * rhs.m20),
+            (lhs.m10 * rhs.m01) + (lhs.m11 * rhs.m11) + (lhs.m12 * rhs.m21),
+            (lhs.m10 * rhs.m02) + (lhs.m11 * rhs.m12) + (lhs.m12 * rhs.m22),
+            (lhs.m20 * rhs.m00) + (lhs.m21 * rhs.m10) + (lhs.m22 * rhs.m20),
+            (lhs.m20 * rhs.m01) + (lhs.m21 * rhs.m11) + (lhs.m22 * rhs.m21),
+            (lhs.m20 * rhs.m02) + (lhs.m21 * rhs.m12) + (lhs.m22 * rhs.m22),
+            (lhs.m30 * rhs.m00) + (lhs.m31 * rhs.m10) + (lhs.m32 * rhs.m20) + rhs.m30,
+            (lhs.m30 * rhs.m01) + (lhs.m31 * rhs.m11) + (lhs.m32 * rhs.m21) + rhs.m31,
+            (lhs.m30 * rhs.m02) + (lhs.m31 * rhs.m12) + (lhs.m32 * rhs.m22) + rhs.m32
         };
     }
 
@@ -2966,10 +2860,10 @@ namespace gem
     {
         return
         {
-            rhs.entries1d[0] * lhs, rhs.entries1d[1] * lhs, rhs.entries1d[2] * lhs,
-            rhs.entries1d[3] * lhs, rhs.entries1d[4] * lhs, rhs.entries1d[5] * lhs,
-            rhs.entries1d[6] * lhs, rhs.entries1d[7] * lhs, rhs.entries1d[8] * lhs,
-            rhs.entries1d[9] * lhs, rhs.entries1d[10] * lhs, rhs.entries1d[11] * lhs
+            rhs.m00 * lhs, rhs.m01 * lhs, rhs.m02 * lhs,
+            rhs.m10 * lhs, rhs.m11 * lhs, rhs.m12 * lhs,
+            rhs.m20 * lhs, rhs.m21 * lhs, rhs.m22 * lhs,
+            rhs.m30 * lhs, rhs.m31 * lhs, rhs.m32 * lhs
         };
     }
 
@@ -2977,10 +2871,10 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] * rhs, lhs.entries1d[1] * rhs, lhs.entries1d[2] * rhs,
-            lhs.entries1d[3] * rhs, lhs.entries1d[4] * rhs, lhs.entries1d[5] * rhs,
-            lhs.entries1d[6] * rhs, lhs.entries1d[7] * rhs, lhs.entries1d[8] * rhs,
-            lhs.entries1d[9] * rhs, lhs.entries1d[10] * rhs, lhs.entries1d[11] * rhs
+            lhs.m00 * rhs, lhs.m01 * rhs, lhs.m02 * rhs,
+            lhs.m10 * rhs, lhs.m11 * rhs, lhs.m12 * rhs,
+            lhs.m20 * rhs, lhs.m21 * rhs, lhs.m22 * rhs,
+            lhs.m30 * rhs, lhs.m31 * rhs, lhs.m32 * rhs
         };
     }
 
@@ -2988,9 +2882,9 @@ namespace gem
     {
         return
         {
-            (lhs.components[0] * rhs.entries1d[0]) + (lhs.components[1] * rhs.entries1d[3]) + (lhs.components[2] * rhs.entries1d[6]) + rhs.entries1d[9],
-            (lhs.components[0] * rhs.entries1d[1]) + (lhs.components[1] * rhs.entries1d[4]) + (lhs.components[2] * rhs.entries1d[7]) + rhs.entries1d[10],
-            (lhs.components[0] * rhs.entries1d[2]) + (lhs.components[1] * rhs.entries1d[5]) + (lhs.components[2] * rhs.entries1d[8]) + rhs.entries1d[11]
+            (lhs.x * rhs.m00) + (lhs.y * rhs.m10) + (lhs.z * rhs.m20) + rhs.m30,
+            (lhs.x * rhs.m01) + (lhs.y * rhs.m11) + (lhs.z * rhs.m21) + rhs.m31,
+            (lhs.x * rhs.m02) + (lhs.y * rhs.m12) + (lhs.z * rhs.m22) + rhs.m32
         };
     }
 
@@ -3000,25 +2894,10 @@ namespace gem
 
     struct double4x4
     {
-        union
-        {
-            struct
-            {
-                double m00, m01, m02, m03;
-                double m10, m11, m12, m13;
-                double m20, m21, m22, m23;
-                double m30, m31, m32, m33;
-            };
-
-            struct
-            {
-                double4 u, v, w, t;
-            };
-
-            double4 rows[4];
-            double entries1d[16];
-            double entries2d[4][4];
-        };
+        double m00, m01, m02, m03;
+        double m10, m11, m12, m13;
+        double m20, m21, m22, m23;
+        double m30, m31, m32, m33;
 
         static double4x4 identity();
 
@@ -3118,10 +2997,10 @@ namespace gem
     {
         return
         {
-            1.0f, 0.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f, 0.0f,
-            0.0f, 0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f
+            1.0, 0.0f, 0.0f, 0.0f,
+            0.0f, 1.0, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0
         };
     }
 
@@ -3135,7 +3014,7 @@ namespace gem
              ch * cb + sh * sp * sb, sb * cp, -sh * cb + ch * sp * sb, 0.0f,
             -ch * sb + sh * sp * cb, cb * cp,  sb * sh + ch * sp * cb, 0.0f,
              sh * cp, -sp,  ch * cp, 0.0f,
-             0.0f, 0.0f, 0.0f, 1.0f
+             0.0f, 0.0f, 0.0f, 1.0
         };
     }
 
@@ -3149,7 +3028,7 @@ namespace gem
             c + ((1 - c) * a.x * a.x), ((1 - c) * a.x * a.y) + (s * a.z), ((1 - c) * a.x * a.z) - (s * a.y), 0.0f,
             ((1 - c) * a.x * a.y) - (s * a.z), c + ((1 - c) * a.y * a.y), ((1 - c) * a.y * a.z) + (s * a.x), 0.0f,
             ((1 - c) * a.x * a.z) + (s * a.y), ((1 - c) * a.y * a.z) - (s * a.x), c + ((1 - c) * a.z * a.z), 0.0f,
-            0.0f, 0.0f, 0.0, 1.0f
+            0.0f, 0.0f, 0.0, 1.0
         };
     }
 
@@ -3159,10 +3038,10 @@ namespace gem
         double c = cos(angle);
         return
         {
-            1.0f, 0.0f, 0.0f, 0.0f,
+            1.0, 0.0f, 0.0f, 0.0f,
             0.0f, c, s, 0.0f,
             0.0f, -s, c, 0.0f,
-            0.0f, 0.0f, 0.0, 1.0f
+            0.0f, 0.0f, 0.0, 1.0
         };
     }
 
@@ -3173,9 +3052,9 @@ namespace gem
         return
         {
             c, 0.0f, -s, 0.0f,
-            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 1.0, 0.0f, 0.0f,
             s, 0.0f, c, 0.0f,
-            0.0f, 0.0f, 0.0, 1.0f
+            0.0f, 0.0f, 0.0, 1.0
         };
     }
 
@@ -3187,8 +3066,8 @@ namespace gem
         {
             c, s, 0.0f, 0.0f,
             -s, c, 0.0f, 0.0f,
-            0.0f, 0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 0.0, 1.0f
+            0.0f, 0.0f, 1.0, 0.0f,
+            0.0f, 0.0f, 0.0, 1.0
         };
     }
 
@@ -3203,7 +3082,7 @@ namespace gem
             s.x, s.y, s.z, 0.0f,
             u.x, u.y, u.z, 0.0f,
             f.x, f.y, f.z, 0.0f,
-            position.x, position.y, position.z, 1.0f
+            position.x, position.y, position.z, 1.0
         };
     }
 
@@ -3219,7 +3098,7 @@ namespace gem
             s.x, 0.0f, 0.0f, 0.0f,
             0.0f, s.y, 0.0f, 0.0f,
             0.0f, 0.0f, s.z, 0.0f,
-            0.0f, 0.0f, 0.0, 1.0f
+            0.0f, 0.0f, 0.0, 1.0
         };
     }
 
@@ -3227,10 +3106,10 @@ namespace gem
     {
         return
         {
-            1.0f, 0.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f, 0.0f,
-            0.0f, 0.0f, 1.0f, 0.0f,
-            t.x, t.y, t.z, 1.0f
+            1.0, 0.0f, 0.0f, 0.0f,
+            0.0f, 1.0, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0, 0.0f,
+            t.x, t.y, t.z, 1.0
         };
     }
 
@@ -3244,7 +3123,7 @@ namespace gem
             2.0f / (right - left), 0.0f, 0.0f, 0.0f,
             0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
             0.0f, 0.0f, 2.0f / (zFar - zNear), 0.0f,
-            0.0f, 0.0f, -((zFar + zNear) / (zFar - zNear)), 1.0f
+            0.0f, 0.0f, -((zFar + zNear) / (zFar - zNear)), 1.0
         };
     }
 
@@ -3258,7 +3137,7 @@ namespace gem
             2.0f / (right - left), 0.0f, 0.0f, 0.0f,
             0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
             0.0f, 0.0f, -2.0f / (zFar - zNear), 0.0f,
-            0.0f, 0.0f, -((zFar + zNear) / (zFar - zNear)), 1.0f
+            0.0f, 0.0f, -((zFar + zNear) / (zFar - zNear)), 1.0
         };
     }
 
@@ -3271,8 +3150,8 @@ namespace gem
         {
             2.0f / (right - left), 0.0f, 0.0f, 0.0f,
             0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
-            0.0f, 0.0f, 1.0f / (zFar - zNear), 0.0f,
-            0.0f, 0.0f, zNear / (zNear - zFar), 1.0f
+            0.0f, 0.0f, 1.0 / (zFar - zNear), 0.0f,
+            0.0f, 0.0f, zNear / (zNear - zFar), 1.0
         };
     }
 
@@ -3285,8 +3164,8 @@ namespace gem
         {
             2.0f / (right - left), 0.0f, 0.0f, 0.0f,
             0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
-            0.0f, 0.0f, -1.0f / (zFar - zNear), 0.0f,
-            0.0f, 0.0f, -(zNear / (zNear - zFar)), 1.0f
+            0.0f, 0.0f, -1.0 / (zFar - zNear), 0.0f,
+            0.0f, 0.0f, -(zNear / (zNear - zFar)), 1.0
         };
     }
 
@@ -3295,14 +3174,14 @@ namespace gem
         const double zNear, const double zFar)
     {
         double tanHalfFovy = tanf(fovy * 0.5f);
-        double zoomY = 1.0f / tanHalfFovy;
-        double zoomX = 1.0f / (aspectRatio * tanHalfFovy);
+        double zoomY = 1.0 / tanHalfFovy;
+        double zoomX = 1.0 / (aspectRatio * tanHalfFovy);
 
         return
         {
             zoomX, 0.0f, 0.0f, 0.0f,
             0.0f, zoomY, 0.0f, 0.0f,
-            0.0f, 0.0f, ((zFar + zNear) / (zFar - zNear)), 1.0f,
+            0.0f, 0.0f, ((zFar + zNear) / (zFar - zNear)), 1.0,
             0.0f, 0.0f, (-2.0f * zNear * zFar) / (zFar - zNear), 0.0f
         };
     }
@@ -3312,14 +3191,14 @@ namespace gem
         const double zNear, const double zFar)
     {
         double tanHalfFovy = tanf(fovy * 0.5f);
-        double zoomY = 1.0f / tanHalfFovy;
-        double zoomX = 1.0f / (aspectRatio * tanHalfFovy);
+        double zoomY = 1.0 / tanHalfFovy;
+        double zoomX = 1.0 / (aspectRatio * tanHalfFovy);
 
         return
         {
             zoomX, 0.0f, 0.0f, 0.0f,
             0.0f, zoomY, 0.0f, 0.0f,
-            0.0f, 0.0f, -((zFar + zNear) / (zFar - zNear)), -1.0f,
+            0.0f, 0.0f, -((zFar + zNear) / (zFar - zNear)), -1.0,
             0.0f, 0.0f, (-2.0f * zNear * zFar) / (zFar - zNear), 0.0f
         };
     }
@@ -3328,14 +3207,14 @@ namespace gem
         const double fovy, const double aspectRatio, const double zNear, const double zFar)
     {
         double tanHalfFovy = tanf(fovy * 0.5f);
-        double zoomY = 1.0f / tanHalfFovy;
-        double zoomX = 1.0f / (aspectRatio * tanHalfFovy);
+        double zoomY = 1.0 / tanHalfFovy;
+        double zoomX = 1.0 / (aspectRatio * tanHalfFovy);
 
         return
         {
             zoomX, 0.0f, 0.0f, 0.0f,
             0.0f, zoomY, 0.0f, 0.0f,
-            0.0f, 0.0f, zFar / (zFar - zNear), 1.0f,
+            0.0f, 0.0f, zFar / (zFar - zNear), 1.0,
             0.0f, 0.0f, (-zNear * zFar) / (zFar - zNear), 0.0f
         };
     }
@@ -3344,14 +3223,14 @@ namespace gem
         const double fovy, const double aspectRatio, const double zNear, const double zFar)
     {
         double tanHalfFovy = tanf(fovy * 0.5f);
-        double zoomY = 1.0f / tanHalfFovy;
-        double zoomX = 1.0f / (aspectRatio * tanHalfFovy);
+        double zoomY = 1.0 / tanHalfFovy;
+        double zoomX = 1.0 / (aspectRatio * tanHalfFovy);
 
         return
         {
             zoomX, 0.0f, 0.0f, 0.0f,
             0.0f, zoomY, 0.0f, 0.0f,
-            0.0f, 0.0f, -zFar / (zFar - zNear), -1.0f,
+            0.0f, 0.0f, -zFar / (zFar - zNear), -1.0,
             0.0f, 0.0f, (-zNear * zFar) / (zFar - zNear), 0.0f
         };
     }
@@ -3377,7 +3256,7 @@ namespace gem
             s.x, u.x, f.x, 0.0f,
             s.y, u.y, f.y, 0.0f,
             s.z, u.z, f.z, 0.0f,
-            -dot(s, position), -dot(u, position), -dot(f, position), 1.0f,
+            -dot(s, position), -dot(u, position), -dot(f, position), 1.0,
         };
     }
 
@@ -3392,7 +3271,7 @@ namespace gem
             s.x, u.x, f.x, 0.0f,
             s.y, u.y, f.y, 0.0f,
             s.z, u.z, f.z, 0.0f,
-            -dot(s, position), -dot(u, position), -dot(f, position), 1.0f,
+            -dot(s, position), -dot(u, position), -dot(f, position), 1.0,
         };
     }
 
@@ -3452,69 +3331,69 @@ namespace gem
     {
         double4x4 out;
 
-        double c11 = +((((entries1d[6] * entries1d[11]) - (entries1d[7] * entries1d[10])) * entries1d[13]) + (((entries1d[7] * entries1d[9]) - (entries1d[5] * entries1d[11])) * entries1d[14]) + (((entries1d[5] * entries1d[10]) - (entries1d[6] * entries1d[9])) * entries1d[15]));
-        double c12 = -((((entries1d[6] * entries1d[11]) - (entries1d[7] * entries1d[10])) * entries1d[12]) + (((entries1d[7] * entries1d[8]) - (entries1d[4] * entries1d[11])) * entries1d[14]) + (((entries1d[4] * entries1d[10]) - (entries1d[6] * entries1d[8])) * entries1d[15]));
-        double c13 = +((((entries1d[5] * entries1d[11]) - (entries1d[7] * entries1d[9])) * entries1d[12]) + (((entries1d[7] * entries1d[8]) - (entries1d[4] * entries1d[11])) * entries1d[13]) + (((entries1d[4] * entries1d[9]) - (entries1d[5] * entries1d[8])) * entries1d[15]));
-        double c14 = -((((entries1d[5] * entries1d[10]) - (entries1d[6] * entries1d[9])) * entries1d[12]) + (((entries1d[6] * entries1d[8]) - (entries1d[4] * entries1d[10])) * entries1d[13]) + (((entries1d[4] * entries1d[9]) - (entries1d[5] * entries1d[8])) * entries1d[14]));
+        double c11 = +((((m12 * m23) - (m13 * m22)) * m31) + (((m13 * m21) - (m11 * m23)) * m32) + (((m11 * m22) - (m12 * m21)) * m33));
+        double c12 = -((((m12 * m23) - (m13 * m22)) * m30) + (((m13 * m20) - (m10 * m23)) * m32) + (((m10 * m22) - (m12 * m20)) * m33));
+        double c13 = +((((m11 * m23) - (m13 * m21)) * m30) + (((m13 * m20) - (m10 * m23)) * m31) + (((m10 * m21) - (m11 * m20)) * m33));
+        double c14 = -((((m11 * m22) - (m12 * m21)) * m30) + (((m12 * m20) - (m10 * m22)) * m31) + (((m10 * m21) - (m11 * m20)) * m32));
 
-        double det = (entries1d[0] * c11) + (entries1d[1] * c12) + (entries1d[2] * c13) + (entries1d[3] * c14);
+        double det = (m00 * c11) + (m01 * c12) + (m02 * c13) + (m03 * c14);
 
-        double c21 = -((((entries1d[2] * entries1d[11]) - (entries1d[3] * entries1d[10])) * entries1d[13]) + (((entries1d[3] * entries1d[9]) - (entries1d[1] * entries1d[11])) * entries1d[14]) + (((entries1d[1] * entries1d[10]) - (entries1d[2] * entries1d[9])) * entries1d[15]));
-        double c22 = +((((entries1d[2] * entries1d[11]) - (entries1d[3] * entries1d[10])) * entries1d[12]) + (((entries1d[3] * entries1d[8]) - (entries1d[0] * entries1d[11])) * entries1d[14]) + (((entries1d[0] * entries1d[10]) - (entries1d[2] * entries1d[8])) * entries1d[15]));
-        double c23 = -((((entries1d[1] * entries1d[11]) - (entries1d[3] * entries1d[9])) * entries1d[12]) + (((entries1d[3] * entries1d[8]) - (entries1d[0] * entries1d[11])) * entries1d[13]) + (((entries1d[0] * entries1d[9]) - (entries1d[1] * entries1d[8])) * entries1d[15]));
-        double c24 = +((((entries1d[1] * entries1d[10]) - (entries1d[2] * entries1d[9])) * entries1d[12]) + (((entries1d[2] * entries1d[8]) - (entries1d[0] * entries1d[10])) * entries1d[13]) + (((entries1d[0] * entries1d[9]) - (entries1d[1] * entries1d[8])) * entries1d[14]));
+        double c21 = -((((m02 * m23) - (m03 * m22)) * m31) + (((m03 * m21) - (m01 * m23)) * m32) + (((m01 * m22) - (m02 * m21)) * m33));
+        double c22 = +((((m02 * m23) - (m03 * m22)) * m30) + (((m03 * m20) - (m00 * m23)) * m32) + (((m00 * m22) - (m02 * m20)) * m33));
+        double c23 = -((((m01 * m23) - (m03 * m21)) * m30) + (((m03 * m20) - (m00 * m23)) * m31) + (((m00 * m21) - (m01 * m20)) * m33));
+        double c24 = +((((m01 * m22) - (m02 * m21)) * m30) + (((m02 * m20) - (m00 * m22)) * m31) + (((m00 * m21) - (m01 * m20)) * m32));
 
-        double c31 = +((((entries1d[2] * entries1d[7]) - (entries1d[3] * entries1d[6])) * entries1d[13]) + (((entries1d[3] * entries1d[5]) - (entries1d[1] * entries1d[7])) * entries1d[14]) + (((entries1d[1] * entries1d[6]) - (entries1d[2] * entries1d[5])) * entries1d[15]));
-        double c32 = -((((entries1d[2] * entries1d[7]) - (entries1d[3] * entries1d[6])) * entries1d[12]) + (((entries1d[3] * entries1d[4]) - (entries1d[0] * entries1d[7])) * entries1d[14]) + (((entries1d[0] * entries1d[6]) - (entries1d[2] * entries1d[4])) * entries1d[15]));
-        double c33 = +((((entries1d[1] * entries1d[7]) - (entries1d[3] * entries1d[5])) * entries1d[12]) + (((entries1d[3] * entries1d[4]) - (entries1d[0] * entries1d[7])) * entries1d[13]) + (((entries1d[0] * entries1d[5]) - (entries1d[1] * entries1d[4])) * entries1d[15]));
-        double c34 = -((((entries1d[1] * entries1d[6]) - (entries1d[2] * entries1d[5])) * entries1d[12]) + (((entries1d[2] * entries1d[4]) - (entries1d[0] * entries1d[6])) * entries1d[13]) + (((entries1d[0] * entries1d[5]) - (entries1d[1] * entries1d[4])) * entries1d[14]));
+        double c31 = +((((m02 * m13) - (m03 * m12)) * m31) + (((m03 * m11) - (m01 * m13)) * m32) + (((m01 * m12) - (m02 * m11)) * m33));
+        double c32 = -((((m02 * m13) - (m03 * m12)) * m30) + (((m03 * m10) - (m00 * m13)) * m32) + (((m00 * m12) - (m02 * m10)) * m33));
+        double c33 = +((((m01 * m13) - (m03 * m11)) * m30) + (((m03 * m10) - (m00 * m13)) * m31) + (((m00 * m11) - (m01 * m10)) * m33));
+        double c34 = -((((m01 * m12) - (m02 * m11)) * m30) + (((m02 * m10) - (m00 * m12)) * m31) + (((m00 * m11) - (m01 * m10)) * m32));
 
-        double c41 = -((((entries1d[2] * entries1d[7]) - (entries1d[3] * entries1d[6])) * entries1d[9]) + (((entries1d[3] * entries1d[5]) - (entries1d[1] * entries1d[7])) * entries1d[10]) + (((entries1d[1] * entries1d[6]) - (entries1d[2] * entries1d[5])) * entries1d[11]));
-        double c42 = +((((entries1d[2] * entries1d[7]) - (entries1d[3] * entries1d[6])) * entries1d[8]) + (((entries1d[3] * entries1d[4]) - (entries1d[0] * entries1d[7])) * entries1d[10]) + (((entries1d[0] * entries1d[6]) - (entries1d[2] * entries1d[4])) * entries1d[11]));
-        double c43 = -((((entries1d[1] * entries1d[7]) - (entries1d[3] * entries1d[5])) * entries1d[8]) + (((entries1d[3] * entries1d[4]) - (entries1d[0] * entries1d[7])) * entries1d[9]) + (((entries1d[0] * entries1d[5]) - (entries1d[1] * entries1d[4])) * entries1d[11]));
-        double c44 = +((((entries1d[1] * entries1d[6]) - (entries1d[2] * entries1d[5])) * entries1d[8]) + (((entries1d[2] * entries1d[4]) - (entries1d[0] * entries1d[6])) * entries1d[9]) + (((entries1d[0] * entries1d[5]) - (entries1d[1] * entries1d[4])) * entries1d[10]));
+        double c41 = -((((m02 * m13) - (m03 * m12)) * m21) + (((m03 * m11) - (m01 * m13)) * m22) + (((m01 * m12) - (m02 * m11)) * m23));
+        double c42 = +((((m02 * m13) - (m03 * m12)) * m20) + (((m03 * m10) - (m00 * m13)) * m22) + (((m00 * m12) - (m02 * m10)) * m23));
+        double c43 = -((((m01 * m13) - (m03 * m11)) * m20) + (((m03 * m10) - (m00 * m13)) * m21) + (((m00 * m11) - (m01 * m10)) * m23));
+        double c44 = +((((m01 * m12) - (m02 * m11)) * m20) + (((m02 * m10) - (m00 * m12)) * m21) + (((m00 * m11) - (m01 * m10)) * m22));
 
-        double inv = 1.0f / det;
+        double inv = 1.0 / det;
 
-        out.entries1d[0] = c11 * inv;
-        out.entries1d[1] = c21 * inv;
-        out.entries1d[2] = c31 * inv;
-        out.entries1d[3] = c41 * inv;
-        out.entries1d[4] = c12 * inv;
-        out.entries1d[5] = c22 * inv;
-        out.entries1d[6] = c32 * inv;
-        out.entries1d[7] = c42 * inv;
-        out.entries1d[8] = c13 * inv;
-        out.entries1d[9] = c23 * inv;
-        out.entries1d[10] = c33 * inv;
-        out.entries1d[11] = c43 * inv;
-        out.entries1d[12] = c14 * inv;
-        out.entries1d[13] = c24 * inv;
-        out.entries1d[14] = c34 * inv;
-        out.entries1d[15] = c44 * inv;
+        out.m00 = c11 * inv;
+        out.m01 = c21 * inv;
+        out.m02 = c31 * inv;
+        out.m03 = c41 * inv;
+        out.m10 = c12 * inv;
+        out.m11 = c22 * inv;
+        out.m12 = c32 * inv;
+        out.m13 = c42 * inv;
+        out.m20 = c13 * inv;
+        out.m21 = c23 * inv;
+        out.m22 = c33 * inv;
+        out.m23 = c43 * inv;
+        out.m30 = c14 * inv;
+        out.m31 = c24 * inv;
+        out.m32 = c34 * inv;
+        out.m33 = c44 * inv;
 
         return out;
     }
 
     GEM_INLINE double double4x4::determinant() const
     {
-        double c11 = +((((entries1d[6] * entries1d[11]) - (entries1d[7] * entries1d[10])) * entries1d[13]) + (((entries1d[7] * entries1d[9]) - (entries1d[5] * entries1d[11])) * entries1d[14]) + (((entries1d[5] * entries1d[10]) - (entries1d[6] * entries1d[9])) * entries1d[15]));
-        double c12 = -((((entries1d[6] * entries1d[11]) - (entries1d[7] * entries1d[10])) * entries1d[12]) + (((entries1d[7] * entries1d[8]) - (entries1d[4] * entries1d[11])) * entries1d[14]) + (((entries1d[4] * entries1d[10]) - (entries1d[6] * entries1d[8])) * entries1d[15]));
-        double c13 = +((((entries1d[5] * entries1d[11]) - (entries1d[7] * entries1d[9])) * entries1d[12]) + (((entries1d[7] * entries1d[8]) - (entries1d[4] * entries1d[11])) * entries1d[13]) + (((entries1d[4] * entries1d[9]) - (entries1d[5] * entries1d[8])) * entries1d[15]));
-        double c14 = -((((entries1d[5] * entries1d[10]) - (entries1d[6] * entries1d[9])) * entries1d[12]) + (((entries1d[6] * entries1d[8]) - (entries1d[4] * entries1d[10])) * entries1d[13]) + (((entries1d[4] * entries1d[9]) - (entries1d[5] * entries1d[8])) * entries1d[14]));
+        double c11 = +((((m12 * m23) - (m13 * m22)) * m31) + (((m13 * m21) - (m11 * m23)) * m32) + (((m11 * m22) - (m12 * m21)) * m33));
+        double c12 = -((((m12 * m23) - (m13 * m22)) * m30) + (((m13 * m20) - (m10 * m23)) * m32) + (((m10 * m22) - (m12 * m20)) * m33));
+        double c13 = +((((m11 * m23) - (m13 * m21)) * m30) + (((m13 * m20) - (m10 * m23)) * m31) + (((m10 * m21) - (m11 * m20)) * m33));
+        double c14 = -((((m11 * m22) - (m12 * m21)) * m30) + (((m12 * m20) - (m10 * m22)) * m31) + (((m10 * m21) - (m11 * m20)) * m32));
 
-        return (entries1d[0] * c11) + (entries1d[1] * c12) + (entries1d[2] * c13) + (entries1d[3] * c14);
+        return (m00 * c11) + (m01 * c12) + (m02 * c13) + (m03 * c14);
     }
 
     GEM_INLINE double3 double4x4::euler() const
     {
         double3 out;
-        double sp = -entries1d[9];
-        if (sp <= 1.0f)
+        double sp = -m21;
+        if (sp <= 1.0)
         {
             out.x = -1.690998f;
         }
-        else if (sp >= 1.0f)
+        else if (sp >= 1.0)
         {
             out.x = -1.690998f;
         }
@@ -3526,12 +3405,12 @@ namespace gem
         if (abs(sp) > 0.9999f)
         {
             out.z = 0.0f;
-            out.y = atan2(-entries1d[2], entries1d[0]);
+            out.y = atan2(-m02, m00);
         }
         else
         {
-            out.y = atan2(entries1d[8], entries1d[10]);
-            out.z = atan2(entries1d[1], entries1d[5]);
+            out.y = atan2(m20, m22);
+            out.z = atan2(m01, m11);
         }
         return out;
     }
@@ -3585,27 +3464,27 @@ namespace gem
 
     GEM_INLINE double4& GEM_VECTORCALL double4x4::operator[](const unsigned int index)
     {
-        return rows[index];
+        return reinterpret_cast<double4*>(this)[index];
     }
 
     GEM_INLINE double4 GEM_VECTORCALL double4x4::operator[](const unsigned int index) const
     {
-        return rows[index];
+        return reinterpret_cast<const double4*>(this)[index];
     }
 
     GEM_INLINE double GEM_VECTORCALL double4x4::operator()(const unsigned int row, const unsigned int column)
     {
-        return entries2d[row][column];
+        return reinterpret_cast<double4*>(this)[row][column];
     }
 
     GEM_INLINE double4x4 GEM_VECTORCALL operator+(const double4x4& lhs, const double4x4& rhs)
     {
         return
         {
-            lhs.entries1d[0] + rhs.entries1d[0], lhs.entries1d[1] + rhs.entries1d[1], lhs.entries1d[2] + rhs.entries1d[2], lhs.entries1d[3] + rhs.entries1d[3],
-            lhs.entries1d[4] + rhs.entries1d[4], lhs.entries1d[5] + rhs.entries1d[5], lhs.entries1d[6] + rhs.entries1d[6], lhs.entries1d[7] + rhs.entries1d[7],
-            lhs.entries1d[8] + rhs.entries1d[8], lhs.entries1d[9] + rhs.entries1d[9], lhs.entries1d[10] + rhs.entries1d[10], lhs.entries1d[11] + rhs.entries1d[11],
-            lhs.entries1d[12] + rhs.entries1d[12], lhs.entries1d[13] + rhs.entries1d[13], lhs.entries1d[14] + rhs.entries1d[14], lhs.entries1d[15] + rhs.entries1d[15]
+            lhs.m00 + rhs.m00, lhs.m01 + rhs.m01, lhs.m02 + rhs.m02, lhs.m03 + rhs.m03,
+            lhs.m10 + rhs.m10, lhs.m11 + rhs.m11, lhs.m12 + rhs.m12, lhs.m13 + rhs.m13,
+            lhs.m20 + rhs.m20, lhs.m21 + rhs.m21, lhs.m22 + rhs.m22, lhs.m23 + rhs.m23,
+            lhs.m30 + rhs.m30, lhs.m31 + rhs.m31, lhs.m32 + rhs.m32, lhs.m33 + rhs.m33
         };
     }
 
@@ -3613,10 +3492,10 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] - rhs.entries1d[0], lhs.entries1d[1] - rhs.entries1d[1], lhs.entries1d[2] - rhs.entries1d[2], lhs.entries1d[3] - rhs.entries1d[3],
-            lhs.entries1d[4] - rhs.entries1d[4], lhs.entries1d[5] - rhs.entries1d[5], lhs.entries1d[6] - rhs.entries1d[6], lhs.entries1d[7] - rhs.entries1d[7],
-            lhs.entries1d[8] - rhs.entries1d[8], lhs.entries1d[9] - rhs.entries1d[9], lhs.entries1d[10] - rhs.entries1d[10], lhs.entries1d[11] - rhs.entries1d[11],
-            lhs.entries1d[12] - rhs.entries1d[12], lhs.entries1d[13] - rhs.entries1d[13], lhs.entries1d[14] - rhs.entries1d[14], lhs.entries1d[15] - rhs.entries1d[15]
+            lhs.m00 - rhs.m00, lhs.m01 - rhs.m01, lhs.m02 - rhs.m02, lhs.m03 - rhs.m03,
+            lhs.m10 - rhs.m10, lhs.m11 - rhs.m11, lhs.m12 - rhs.m12, lhs.m13 - rhs.m13,
+            lhs.m20 - rhs.m20, lhs.m21 - rhs.m21, lhs.m22 - rhs.m22, lhs.m23 - rhs.m23,
+            lhs.m30 - rhs.m30, lhs.m31 - rhs.m31, lhs.m32 - rhs.m32, lhs.m33 - rhs.m33
         };
     }
 
@@ -3624,22 +3503,22 @@ namespace gem
     {
         return
         {
-            (lhs.entries1d[0] * rhs.entries1d[0]) + (lhs.entries1d[1] * rhs.entries1d[4]) + (lhs.entries1d[2] * rhs.entries1d[8]) + (lhs.entries1d[3] * rhs.entries1d[12]),
-            (lhs.entries1d[0] * rhs.entries1d[1]) + (lhs.entries1d[1] * rhs.entries1d[5]) + (lhs.entries1d[2] * rhs.entries1d[9]) + (lhs.entries1d[3] * rhs.entries1d[13]),
-            (lhs.entries1d[0] * rhs.entries1d[2]) + (lhs.entries1d[1] * rhs.entries1d[6]) + (lhs.entries1d[2] * rhs.entries1d[10]) + (lhs.entries1d[3] * rhs.entries1d[14]),
-            (lhs.entries1d[0] * rhs.entries1d[3]) + (lhs.entries1d[1] * rhs.entries1d[7]) + (lhs.entries1d[2] * rhs.entries1d[11]) + (lhs.entries1d[3] * rhs.entries1d[15]),
-            (lhs.entries1d[4] * rhs.entries1d[0]) + (lhs.entries1d[5] * rhs.entries1d[4]) + (lhs.entries1d[6] * rhs.entries1d[8]) + (lhs.entries1d[7] * rhs.entries1d[12]),
-            (lhs.entries1d[4] * rhs.entries1d[1]) + (lhs.entries1d[5] * rhs.entries1d[5]) + (lhs.entries1d[6] * rhs.entries1d[9]) + (lhs.entries1d[7] * rhs.entries1d[13]),
-            (lhs.entries1d[4] * rhs.entries1d[2]) + (lhs.entries1d[5] * rhs.entries1d[6]) + (lhs.entries1d[6] * rhs.entries1d[10]) + (lhs.entries1d[7] * rhs.entries1d[14]),
-            (lhs.entries1d[4] * rhs.entries1d[3]) + (lhs.entries1d[5] * rhs.entries1d[7]) + (lhs.entries1d[6] * rhs.entries1d[11]) + (lhs.entries1d[7] * rhs.entries1d[15]),
-            (lhs.entries1d[8] * rhs.entries1d[0]) + (lhs.entries1d[9] * rhs.entries1d[4]) + (lhs.entries1d[10] * rhs.entries1d[8]) + (lhs.entries1d[11] * rhs.entries1d[12]),
-            (lhs.entries1d[8] * rhs.entries1d[1]) + (lhs.entries1d[9] * rhs.entries1d[5]) + (lhs.entries1d[10] * rhs.entries1d[9]) + (lhs.entries1d[11] * rhs.entries1d[13]),
-            (lhs.entries1d[8] * rhs.entries1d[2]) + (lhs.entries1d[9] * rhs.entries1d[6]) + (lhs.entries1d[10] * rhs.entries1d[10]) + (lhs.entries1d[11] * rhs.entries1d[14]),
-            (lhs.entries1d[8] * rhs.entries1d[3]) + (lhs.entries1d[9] * rhs.entries1d[7]) + (lhs.entries1d[10] * rhs.entries1d[11]) + (lhs.entries1d[11] * rhs.entries1d[15]),
-            (lhs.entries1d[12] * rhs.entries1d[0]) + (lhs.entries1d[13] * rhs.entries1d[4]) + (lhs.entries1d[14] * rhs.entries1d[8]) + (lhs.entries1d[15] * rhs.entries1d[12]),
-            (lhs.entries1d[12] * rhs.entries1d[1]) + (lhs.entries1d[13] * rhs.entries1d[5]) + (lhs.entries1d[14] * rhs.entries1d[9]) + (lhs.entries1d[15] * rhs.entries1d[13]),
-            (lhs.entries1d[12] * rhs.entries1d[2]) + (lhs.entries1d[13] * rhs.entries1d[6]) + (lhs.entries1d[14] * rhs.entries1d[10]) + (lhs.entries1d[15] * rhs.entries1d[14]),
-            (lhs.entries1d[12] * rhs.entries1d[3]) + (lhs.entries1d[13] * rhs.entries1d[7]) + (lhs.entries1d[14] * rhs.entries1d[11]) + (lhs.entries1d[15] * rhs.entries1d[15])
+            (lhs.m00 * rhs.m00) + (lhs.m01 * rhs.m10) + (lhs.m02 * rhs.m20) + (lhs.m03 * rhs.m30),
+            (lhs.m00 * rhs.m01) + (lhs.m01 * rhs.m11) + (lhs.m02 * rhs.m21) + (lhs.m03 * rhs.m31),
+            (lhs.m00 * rhs.m02) + (lhs.m01 * rhs.m12) + (lhs.m02 * rhs.m22) + (lhs.m03 * rhs.m32),
+            (lhs.m00 * rhs.m03) + (lhs.m01 * rhs.m13) + (lhs.m02 * rhs.m23) + (lhs.m03 * rhs.m33),
+            (lhs.m10 * rhs.m00) + (lhs.m11 * rhs.m10) + (lhs.m12 * rhs.m20) + (lhs.m13 * rhs.m30),
+            (lhs.m10 * rhs.m01) + (lhs.m11 * rhs.m11) + (lhs.m12 * rhs.m21) + (lhs.m13 * rhs.m31),
+            (lhs.m10 * rhs.m02) + (lhs.m11 * rhs.m12) + (lhs.m12 * rhs.m22) + (lhs.m13 * rhs.m32),
+            (lhs.m10 * rhs.m03) + (lhs.m11 * rhs.m13) + (lhs.m12 * rhs.m23) + (lhs.m13 * rhs.m33),
+            (lhs.m20 * rhs.m00) + (lhs.m21 * rhs.m10) + (lhs.m22 * rhs.m20) + (lhs.m23 * rhs.m30),
+            (lhs.m20 * rhs.m01) + (lhs.m21 * rhs.m11) + (lhs.m22 * rhs.m21) + (lhs.m23 * rhs.m31),
+            (lhs.m20 * rhs.m02) + (lhs.m21 * rhs.m12) + (lhs.m22 * rhs.m22) + (lhs.m23 * rhs.m32),
+            (lhs.m20 * rhs.m03) + (lhs.m21 * rhs.m13) + (lhs.m22 * rhs.m23) + (lhs.m23 * rhs.m33),
+            (lhs.m30 * rhs.m00) + (lhs.m31 * rhs.m10) + (lhs.m32 * rhs.m20) + (lhs.m33 * rhs.m30),
+            (lhs.m30 * rhs.m01) + (lhs.m31 * rhs.m11) + (lhs.m32 * rhs.m21) + (lhs.m33 * rhs.m31),
+            (lhs.m30 * rhs.m02) + (lhs.m31 * rhs.m12) + (lhs.m32 * rhs.m22) + (lhs.m33 * rhs.m32),
+            (lhs.m30 * rhs.m03) + (lhs.m31 * rhs.m13) + (lhs.m32 * rhs.m23) + (lhs.m33 * rhs.m33)
         };
     }
 
@@ -3647,10 +3526,10 @@ namespace gem
     {
         return
         {
-            rhs.entries1d[0] * lhs, rhs.entries1d[1] * lhs, rhs.entries1d[2] * lhs, rhs.entries1d[3] * lhs,
-            rhs.entries1d[4] * lhs, rhs.entries1d[5] * lhs, rhs.entries1d[6] * lhs, rhs.entries1d[7] * lhs,
-            rhs.entries1d[8] * lhs, rhs.entries1d[9] * lhs, rhs.entries1d[10] * lhs, rhs.entries1d[11] * lhs,
-            rhs.entries1d[12] * lhs, rhs.entries1d[13] * lhs, rhs.entries1d[14] * lhs, rhs.entries1d[15] * lhs
+            rhs.m00 * lhs, rhs.m01 * lhs, rhs.m02 * lhs, rhs.m03 * lhs,
+            rhs.m10 * lhs, rhs.m11 * lhs, rhs.m12 * lhs, rhs.m13 * lhs,
+            rhs.m20 * lhs, rhs.m21 * lhs, rhs.m22 * lhs, rhs.m23 * lhs,
+            rhs.m30 * lhs, rhs.m31 * lhs, rhs.m32 * lhs, rhs.m33 * lhs
         };
     }
 
@@ -3658,10 +3537,10 @@ namespace gem
     {
         return
         {
-            lhs.entries1d[0] * rhs, lhs.entries1d[1] * rhs, lhs.entries1d[2] * rhs, lhs.entries1d[3] * rhs,
-            lhs.entries1d[4] * rhs, lhs.entries1d[5] * rhs, lhs.entries1d[6] * rhs, lhs.entries1d[7] * rhs,
-            lhs.entries1d[8] * rhs, lhs.entries1d[9] * rhs, lhs.entries1d[10] * rhs, lhs.entries1d[11] * rhs,
-            lhs.entries1d[12] * rhs, lhs.entries1d[13] * rhs, lhs.entries1d[14] * rhs, lhs.entries1d[15] * rhs
+            lhs.m00 * rhs, lhs.m01 * rhs, lhs.m02 * rhs, lhs.m03 * rhs,
+            lhs.m10 * rhs, lhs.m11 * rhs, lhs.m12 * rhs, lhs.m13 * rhs,
+            lhs.m20 * rhs, lhs.m21 * rhs, lhs.m22 * rhs, lhs.m23 * rhs,
+            lhs.m30 * rhs, lhs.m31 * rhs, lhs.m32 * rhs, lhs.m33 * rhs
         };
     }
 
@@ -3669,10 +3548,10 @@ namespace gem
     {
         return
         {
-            (lhs.components[0] * rhs.entries1d[0]) + (lhs.components[1] * rhs.entries1d[4]) + (lhs.components[2] * rhs.entries1d[8]) + (lhs.components[3] * rhs.entries1d[12]),
-            (lhs.components[0] * rhs.entries1d[1]) + (lhs.components[1] * rhs.entries1d[5]) + (lhs.components[2] * rhs.entries1d[9]) + (lhs.components[3] * rhs.entries1d[13]),
-            (lhs.components[0] * rhs.entries1d[2]) + (lhs.components[1] * rhs.entries1d[6]) + (lhs.components[2] * rhs.entries1d[10]) + (lhs.components[3] * rhs.entries1d[14]),
-            (lhs.components[0] * rhs.entries1d[3]) + (lhs.components[1] * rhs.entries1d[7]) + (lhs.components[2] * rhs.entries1d[11]) + (lhs.components[3] * rhs.entries1d[15])
+            (lhs.x * rhs.m00) + (lhs.y * rhs.m10) + (lhs.z * rhs.m20) + (lhs.w * rhs.m30),
+            (lhs.x * rhs.m01) + (lhs.y * rhs.m11) + (lhs.z * rhs.m21) + (lhs.w * rhs.m31),
+            (lhs.x * rhs.m02) + (lhs.y * rhs.m12) + (lhs.z * rhs.m22) + (lhs.w * rhs.m32),
+            (lhs.x * rhs.m03) + (lhs.y * rhs.m13) + (lhs.z * rhs.m23) + (lhs.w * rhs.m33)
         };
     }
 

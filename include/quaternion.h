@@ -149,9 +149,9 @@ namespace gem
     GEM_INLINE quatf GEM_VECTORCALL quatf::rotate_matrix(const float3x3& m)
     {
         quatf o;
-        const float m11 = m.entries1d[0], m12 = m.entries1d[1], m13 = m.entries1d[2];
-        const float m21 = m.entries1d[3], m22 = m.entries1d[4], m23 = m.entries1d[5];
-        const float m31 = m.entries1d[6], m32 = m.entries1d[7], m33 = m.entries1d[8];
+        const float m11 = m.m00, m12 = m.m01, m13 = m.m02;
+        const float m21 = m.m10, m22 = m.m11, m23 = m.m12;
+        const float m31 = m.m20, m32 = m.m21, m33 = m.m22;
 
         // Determine which of w, x, y or z has the largest absolute value
         float fourWSquaredMinus1 = +m11 + m22 + m33;
@@ -793,9 +793,9 @@ namespace gem
     GEM_INLINE quatd GEM_VECTORCALL quatd::rotate_matrix(const double3x3& m)
     {
         quatd o;
-        const double m11 = m.entries1d[0], m12 = m.entries1d[1], m13 = m.entries1d[2];
-        const double m21 = m.entries1d[3], m22 = m.entries1d[4], m23 = m.entries1d[5];
-        const double m31 = m.entries1d[6], m32 = m.entries1d[7], m33 = m.entries1d[8];
+        const double m11 = m.m00, m12 = m.m01, m13 = m.m02;
+        const double m21 = m.m10, m22 = m.m11, m23 = m.m12;
+        const double m31 = m.m20, m32 = m.m21, m33 = m.m22;
 
         // Determine which of w, x, y or z has the largest absolute value
         double fourWSquaredMinus1 = +m11 + m22 + m33;
@@ -821,8 +821,8 @@ namespace gem
             biggestIndex = 3;
         }
 
-        double biggestVal = sqrt(fourBiggestSquardeMinus1 + 1) * .5f;
-        double mult = 0.25f / biggestVal;
+        double biggestVal = sqrt(fourBiggestSquardeMinus1 + 1) * .5;
+        double mult = 0.25 / biggestVal;
 
         switch (biggestIndex)
         {
@@ -859,10 +859,10 @@ namespace gem
             break;
         }
         default:
-            o.x = 0.0f;
-            o.y = 0.0f;
-            o.z = 0.0f;
-            o.w = 1.0f;
+            o.x = 0.0;
+            o.y = 0.0;
+            o.z = 0.0;
+            o.w = 1.0;
             break;
         }
         return o;
@@ -907,7 +907,7 @@ namespace gem
 
     GEM_INLINE quatd& quatd::normalize()
     {
-        double il = 1.0f / sqrt((x * x) + (y * y) + (z * z) + (w * w));
+        double il = 1.0 / sqrt((x * x) + (y * y) + (z * z) + (w * w));
         x *= il;
         y *= il;
         z *= il;
@@ -920,7 +920,7 @@ namespace gem
         double l = sqrt((x * x) + (y * y) + (z * z) + (w * w));
         if (l > tolerance)
         {
-            double il = 1.0f / l;
+            double il = 1.0 / l;
             x *= il;
             y *= il;
             z *= il;
@@ -940,7 +940,7 @@ namespace gem
 
     GEM_INLINE quatd& quatd::inverse()
     {
-        double il = 1.0f / sqrt((x * x) + (y * y) + (z * z) + (w * w));
+        double il = 1.0 / sqrt((x * x) + (y * y) + (z * z) + (w * w));
         x = -x * il;
         y = -y * il;
         z = -z * il;
@@ -961,15 +961,15 @@ namespace gem
         double yz = y * z;
         return
         {
-            1.0f - (2.0f * y2) - (2.0f * z2),
-            (2.0f * xy) + (2.0f * wz),
-            (2.0f * xz) - (2.0f * wy),
-            (2.0f * xy) - (2.0f * wz),
-            1.0f - (2.0f * x2) - (2.0f * z2),
-            (2.0f * yz) + (2.0f * wx),
-            (2.0f * xz) + (2.0f * wy),
-            (2.0f * yz) - (2.0f * wx),
-            1.0f - (2.0f * x2) - (2.0f * y2)
+            1.0 - (2.0 * y2) - (2.0 * z2),
+            (2.0 * xy) + (2.0 * wz),
+            (2.0 * xz) - (2.0 * wy),
+            (2.0 * xy) - (2.0 * wz),
+            1.0 - (2.0 * x2) - (2.0 * z2),
+            (2.0 * yz) + (2.0 * wx),
+            (2.0 * xz) + (2.0 * wy),
+            (2.0 * yz) - (2.0 * wx),
+            1.0 - (2.0 * x2) - (2.0 * y2)
         };
     }
 
@@ -987,18 +987,18 @@ namespace gem
 
         return
         {
-            1.0f - (2.0f * y2) - (2.0f * z2),
-            (2.0f * xy) + (2.0f * wz),
-            (2.0f * xz) - (2.0f * wy),
-            (2.0f * xy) - (2.0f * wz),
-            1.0f - (2.0f * x2) - (2.0f * z2),
-            (2.0f * yz) + (2.0f * wx),
-            (2.0f * xz) + (2.0f * wy),
-            (2.0f * yz) - (2.0f * wx),
-            1.0f - (2.0f * x2) - (2.0f * y2),
-            0.0f,
-            0.0f,
-            0.0f
+            1.0 - (2.0 * y2) - (2.0 * z2),
+            (2.0 * xy) + (2.0 * wz),
+            (2.0 * xz) - (2.0 * wy),
+            (2.0 * xy) - (2.0 * wz),
+            1.0 - (2.0 * x2) - (2.0 * z2),
+            (2.0 * yz) + (2.0 * wx),
+            (2.0 * xz) + (2.0 * wy),
+            (2.0 * yz) - (2.0 * wx),
+            1.0 - (2.0 * x2) - (2.0 * y2),
+            0.0,
+            0.0,
+            0.0
         };
     }
 
@@ -1016,34 +1016,34 @@ namespace gem
 
         return
         {
-            1.0f - (2.0f * y2) - (2.0f * z2),
-            (2.0f * xy) + (2.0f * wz),
-            (2.0f * xz) - (2.0f * wy),
-            0.0f,
-            (2.0f * xy) - (2.0f * wz),
-            1.0f - (2.0f * x2) - (2.0f * z2),
-            (2.0f * yz) + (2.0f * wx),
-            0.0f,
-            (2.0f * xz) + (2.0f * wy),
-            (2.0f * yz) - (2.0f * wx),
-            1.0f - (2.0f * x2) - (2.0f * y2),
-            0.0f,
-            0.0f,
-            0.0f,
-            0.0f,
-            1.0f
+            1.0 - (2.0 * y2) - (2.0 * z2),
+            (2.0 * xy) + (2.0 * wz),
+            (2.0 * xz) - (2.0 * wy),
+            0.0,
+            (2.0 * xy) - (2.0 * wz),
+            1.0 - (2.0 * x2) - (2.0 * z2),
+            (2.0 * yz) + (2.0 * wx),
+            0.0,
+            (2.0 * xz) + (2.0 * wy),
+            (2.0 * yz) - (2.0 * wx),
+            1.0 - (2.0 * x2) - (2.0 * y2),
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
         };
     }
 
     GEM_INLINE double3 quatd::euler() const
     {
         double3 o;
-        auto sp = -2.0f * ((y * z) - (w * x));
-        if (fabs(sp) > 0.9999f)
+        auto sp = -2.0 * ((y * z) - (w * x));
+        if (fabs(sp) > 0.9999)
         {
             o.x = 1.570796f * sp;
             o.y = atan2((-x * z) + (w * y), 0.5f - (y * y) - (z * z));
-            o.z = 0.0f;
+            o.z = 0.0;
         }
         else
         {
@@ -1119,7 +1119,7 @@ namespace gem
 
     GEM_INLINE quatd& GEM_VECTORCALL quatd::operator/=(const double rhs)
     {
-        double inv = 1.0f / rhs;
+        double inv = 1.0 / rhs;
         x *= inv;
         y *= inv;
         z *= inv;
@@ -1154,7 +1154,7 @@ namespace gem
 
     GEM_INLINE quatd GEM_VECTORCALL normalize(const quatd& rhs)
     {
-        double il = 1.0f / sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
+        double il = 1.0 / sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
         return
         {
             rhs.x * il,
@@ -1167,7 +1167,7 @@ namespace gem
     GEM_INLINE quatd GEM_VECTORCALL safe_normalize(const quatd& rhs, const double tolerance /*= 0.001f*/)
     {
         double l = sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
-        double il = (l > tolerance) ? (1.0f / l) : 1.0f;
+        double il = (l > tolerance) ? (1.0 / l) : 1.0;
         return
         {
             rhs.x * il,
@@ -1184,14 +1184,14 @@ namespace gem
 
     GEM_INLINE quatd GEM_VECTORCALL inverse(const quatd& rhs)
     {
-        double il = 1.0f / sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
+        double il = 1.0 / sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
         return { -rhs.x * il, -rhs.y * il, -rhs.z * il, rhs.w * il };
     }
 
     GEM_INLINE quatd GEM_VECTORCALL slerp(quatd q0, quatd q1, const double t)
     {
         double cosAngle = (q0.x * q1.x) + (q0.y * q1.y) + (q0.z * q1.z) + (q0.w * q1.w);
-        if (cosAngle < 0.0f) {
+        if (cosAngle < 0.0) {
             q1 = -q1;
             cosAngle = -cosAngle;
         }
@@ -1199,15 +1199,15 @@ namespace gem
         double k0, k1;
 
         // Check for divide by zero
-        if (cosAngle > 0.9999f) {
-            k0 = 1.0f - t;
+        if (cosAngle > 0.9999) {
+            k0 = 1.0 - t;
             k1 = t;
         }
         else {
             double angle = acos(cosAngle);
-            double oneOverSinAngle = 1.0f / sin(angle);
+            double oneOverSinAngle = 1.0 / sin(angle);
 
-            k0 = ((sin(1.0f - t) * angle) * oneOverSinAngle);
+            k0 = ((sin(1.0 - t) * angle) * oneOverSinAngle);
             k1 = (sin(t * angle) * oneOverSinAngle);
         }
 
@@ -1263,7 +1263,7 @@ namespace gem
 
     GEM_INLINE quatd GEM_VECTORCALL operator/(const quatd& lhs, const double rhs)
     {
-        double inv = 1.0f / rhs;
+        double inv = 1.0 / rhs;
         return
         {
             lhs.x * inv,

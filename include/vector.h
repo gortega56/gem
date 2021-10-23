@@ -8,15 +8,7 @@ namespace gem
 
     struct float2
     {
-        union
-        {
-            struct
-            {
-                float x, y;
-            };
-
-            float components[2];
-        };
+        float x, y;
 
         float2(const float ix, const float iy);
 
@@ -193,12 +185,12 @@ namespace gem
 
     GEM_INLINE float& GEM_VECTORCALL float2::operator[](const unsigned int index)
     {
-        return components[index];
+        return reinterpret_cast<float*>(this)[index];
     }
 
     GEM_INLINE float GEM_VECTORCALL float2::operator[](const unsigned int index) const
     {
-        return components[index];
+        return reinterpret_cast<const float*>(this)[index];
     }
 
     GEM_INLINE float2 float2::operator-() const
@@ -356,15 +348,7 @@ namespace gem
 
     struct float3
     {
-        union
-        {
-            struct
-            {
-                float x, y, z;
-            };
-
-            float components[3];
-        };
+        float x, y, z;
 
         float3(const float ix, const float iy, const float iz);
 
@@ -575,7 +559,7 @@ namespace gem
 
     GEM_INLINE float& float3::operator[](const unsigned int index)
     {
-        return components[index];
+        return reinterpret_cast<float*>(this)[index];
     }
 
     GEM_INLINE float GEM_VECTORCALL dot(const float lx, const float ly, const float lz, const float rx, const float ry, const float rz)
@@ -754,15 +738,7 @@ namespace gem
 
     struct float4
     {
-        union
-        {
-            struct
-            {
-                float x, y, z, w;
-            };
-
-            float components[4];
-        };
+        float x, y, z, w;
 
         float4(const float ix, const float iy, const float iz, const float iw);
 
@@ -985,12 +961,12 @@ namespace gem
 
     GEM_INLINE float& GEM_VECTORCALL float4::operator[](const unsigned int index)
     {
-        return components[index];
+        return reinterpret_cast<float*>(this)[index];
     }
 
     GEM_INLINE float GEM_VECTORCALL float4::operator[](const unsigned int index) const
     {
-        return components[index];
+        return reinterpret_cast<const float*>(this)[index];
     }
 
     GEM_INLINE float4 float4::operator-() const
@@ -1172,15 +1148,7 @@ namespace gem
 
     struct double2
     {
-        union
-        {
-            struct
-            {
-                double x, y;
-            };
-
-            double components[2];
-        };
+        double x, y;
 
         double2(const double ix, const double iy);
 
@@ -1357,12 +1325,12 @@ namespace gem
 
     GEM_INLINE double& GEM_VECTORCALL double2::operator[](const unsigned int index)
     {
-        return components[index];
+        return reinterpret_cast<double*>(this)[index];
     }
 
     GEM_INLINE double GEM_VECTORCALL double2::operator[](const unsigned int index) const
     {
-        return components[index];
+        return reinterpret_cast<const double*>(this)[index];
     }
 
     GEM_INLINE double2 double2::operator-() const
@@ -1520,15 +1488,7 @@ namespace gem
 
     struct double3
     {
-        union
-        {
-            struct
-            {
-                double x, y, z;
-            };
-
-            double components[3];
-        };
+        double x, y, z;
 
         double3(const double ix, const double iy, const double iz);
 
@@ -1739,7 +1699,7 @@ namespace gem
 
     GEM_INLINE double& double3::operator[](const unsigned int index)
     {
-        return components[index];
+        return reinterpret_cast<double*>(this)[index];
     }
 
     GEM_INLINE double GEM_VECTORCALL dot(const double lx, const double ly, const double lz, const double rx, const double ry, const double rz)
@@ -1918,15 +1878,7 @@ namespace gem
 
     struct double4
     {
-        union
-        {
-            struct
-            {
-                double x, y, z, w;
-            };
-
-            double components[4];
-        };
+        double x, y, z, w;
 
         double4(const double ix, const double iy, const double iz, const double iw);
 
@@ -2149,12 +2101,12 @@ namespace gem
 
     GEM_INLINE double& GEM_VECTORCALL double4::operator[](const unsigned int index)
     {
-        return components[index];
+        return reinterpret_cast<double*>(this)[index];
     }
 
     GEM_INLINE double GEM_VECTORCALL double4::operator[](const unsigned int index) const
     {
-        return components[index];
+        return reinterpret_cast<const double*>(this)[index];
     }
 
     GEM_INLINE double4 double4::operator-() const
@@ -2336,15 +2288,7 @@ namespace gem
 
     struct int2
     {
-        union
-        {
-            struct
-            {
-                int x, y;
-            };
-
-            int components[2];
-        };
+        int x, y;
 
         int2(const int ix, const int iy);
 
@@ -2473,12 +2417,12 @@ namespace gem
 
     GEM_INLINE int& GEM_VECTORCALL int2::operator[](const unsigned int index)
     {
-        return components[index];
+        return reinterpret_cast<int*>(this)[index];
     }
 
     GEM_INLINE int GEM_VECTORCALL int2::operator[](const unsigned int index) const
     {
-        return components[index];
+        return reinterpret_cast<const int*>(this)[index];
     }
 
     GEM_INLINE int2 int2::operator-() const
@@ -2597,15 +2541,7 @@ namespace gem
 
     struct int3
     {
-        union
-        {
-            struct
-            {
-                int x, y, z;
-            };
-
-            int components[3];
-        };
+        int x, y, z;
 
         int3(const int ix, const int iy, const int iz);
 
@@ -2764,7 +2700,7 @@ namespace gem
 
     GEM_INLINE int& int3::operator[](const unsigned int index)
     {
-        return components[index];
+        return reinterpret_cast<int*>(this)[index];
     }
 
     GEM_INLINE int GEM_VECTORCALL dot(const int3& lhs, const int3& rhs)
@@ -2893,15 +2829,7 @@ namespace gem
 
     struct int4
     {
-        union
-        {
-            struct
-            {
-                int x, y, z, w;
-            };
-
-            int components[4];
-        };
+        int x, y, z, w;
 
         int4(const int ix, const int iy, const int iz, const int iw);
 
@@ -3078,12 +3006,12 @@ namespace gem
 
     GEM_INLINE int& GEM_VECTORCALL int4::operator[](const unsigned int index)
     {
-        return components[index];
+        return reinterpret_cast<int*>(this)[index];
     }
 
     GEM_INLINE int GEM_VECTORCALL int4::operator[](const unsigned int index) const
     {
-        return components[index];
+        return reinterpret_cast<const int*>(this)[index];
     }
 
     GEM_INLINE int4 int4::operator-() const
