@@ -27,6 +27,9 @@ target_include_directories(${PROJECT_NAME} SYSTEM INTERFACE
 
 add_custom_target(game_engine_math SOURCES ${SOURCE_FILES})
 
-enable_testing()
+set(GEM_UNIT_TEST_ENABLE OFF CACHE bool "Builds unit tests using google test framework.")
+if (${GEM_UNIT_TEST_ENABLE})
+    enable_testing()
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/unit_tests)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/unit_tests)
+endif()
