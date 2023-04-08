@@ -36,13 +36,13 @@ namespace gem
 
         float2& GEM_VECTORCALL operator=(const float2& rhs);
 
-        float2& GEM_VECTORCALL operator*=(const float rhs);
+        float2& operator*=(const float rhs);
 
-        float2& GEM_VECTORCALL operator/=(const float rhs);
+        float2& operator/=(const float rhs);
 
-        float& GEM_VECTORCALL operator[](const unsigned int index);
+        float& operator[](const unsigned int index);
 
-        float GEM_VECTORCALL operator[](const unsigned int index) const;
+        float operator[](const unsigned int index) const;
 
         float2 operator-() const;
     };
@@ -168,14 +168,14 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE float2& GEM_VECTORCALL float2::operator*=(const float rhs)
+    GEM_INLINE float2& float2::operator*=(const float rhs)
     {
         x *= rhs;
         y *= rhs;
         return *this;
     }
 
-    GEM_INLINE float2& GEM_VECTORCALL float2::operator/=(const float rhs)
+    GEM_INLINE float2& float2::operator/=(const float rhs)
     {
         float inv = 1.0f / rhs;
         x *= inv;
@@ -183,12 +183,12 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE float& GEM_VECTORCALL float2::operator[](const unsigned int index)
+    GEM_INLINE float& float2::operator[](const unsigned int index)
     {
         return reinterpret_cast<float*>(this)[index];
     }
 
-    GEM_INLINE float GEM_VECTORCALL float2::operator[](const unsigned int index) const
+    GEM_INLINE float float2::operator[](const unsigned int index) const
     {
         return reinterpret_cast<const float*>(this)[index];
     }
@@ -212,29 +212,29 @@ namespace gem
         return (lhs.x * rhs.x) + (lhs.y * rhs.y);
     }
 
-    GEM_INLINE float GEM_VECTORCALL  length_squared(const float x, const float y)
+    GEM_INLINE float GEM_VECTORCALL length_squared(const float x, const float y)
     {
-        return sqrt((x * x) + (y * y));
+        return sqrtf((x * x) + (y * y));
     }
 
-    GEM_INLINE float GEM_VECTORCALL  length_squared(const float2& val)
+    GEM_INLINE float GEM_VECTORCALL length_squared(const float2& val)
     {
         return (val.x * val.x) + (val.y * val.y);
     }
 
     GEM_INLINE float GEM_VECTORCALL length(const float x, const float y)
     {
-        return sqrt((x * x) + (y * y));
+        return sqrtf((x * x) + (y * y));
     }
 
     GEM_INLINE float GEM_VECTORCALL length(const float2& rhs)
     {
-        return sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y));
+        return sqrtf((rhs.x * rhs.x) + (rhs.y * rhs.y));
     }
 
     GEM_INLINE float2 GEM_VECTORCALL normalize(const float2& rhs)
     {
-        float il = 1.0f / sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y));
+        float il = 1.0f / sqrtf((rhs.x * rhs.x) + (rhs.y * rhs.y));
         return
         {
             rhs.x * il,
@@ -244,7 +244,7 @@ namespace gem
 
     GEM_INLINE float2 GEM_VECTORCALL safe_normalize(const float2& rhs, const float tolerance /*= 0.001f*/)
     {
-        float l = sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y));
+        float l = sqrtf((rhs.x * rhs.x) + (rhs.y * rhs.y));
         float il = (l > tolerance) ? (1.0f / l) : 1.0f;
         return
         {
@@ -378,13 +378,15 @@ namespace gem
 
         float3& GEM_VECTORCALL operator=(const float3& rhs);
 
-        float3& GEM_VECTORCALL operator*=(const float rhs);
+        float3& operator*=(const float rhs);
 
-        float3& GEM_VECTORCALL operator/=(const float rhs);
+        float3& operator/=(const float rhs);
 
-        float3 GEM_VECTORCALL operator-() const;
+        float3 operator-() const;
 
         float& operator[](const unsigned int index);
+
+        float operator[](const unsigned int index) const;
     };
 
     float GEM_VECTORCALL dot(const float lx, const float ly, const float lz, const float rx, const float ry, const float rz);
@@ -395,7 +397,7 @@ namespace gem
 
     float GEM_VECTORCALL length_squared(const float3& val);
 
-    float GEM_VECTORCALL length(const float3 x, const float y, const float z);
+    float GEM_VECTORCALL length(const float x, const float y, const float z);
 
     float GEM_VECTORCALL length(const float3& rhs);
 
@@ -530,7 +532,7 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE float3& GEM_VECTORCALL float3::operator*=(const float rhs)
+    GEM_INLINE float3& float3::operator*=(const float rhs)
     {
         x *= rhs;
         y *= rhs;
@@ -538,7 +540,7 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE float3& GEM_VECTORCALL float3::operator/=(const float rhs)
+    GEM_INLINE float3& float3::operator/=(const float rhs)
     {
         float inv = 1.0f / rhs;
         x *= inv;
@@ -560,6 +562,11 @@ namespace gem
     GEM_INLINE float& float3::operator[](const unsigned int index)
     {
         return reinterpret_cast<float*>(this)[index];
+    }
+
+    GEM_INLINE float float3::operator[](const unsigned int index) const
+    {
+        return reinterpret_cast<const float*>(this)[index];
     }
 
     GEM_INLINE float GEM_VECTORCALL dot(const float lx, const float ly, const float lz, const float rx, const float ry, const float rz)
@@ -594,7 +601,7 @@ namespace gem
 
     GEM_INLINE float3 GEM_VECTORCALL normalize(const float3& rhs)
     {
-        float il = 1.0f / sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z));
+        float il = 1.0f / sqrtf((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z));
         return
         {
             rhs.x * il,
@@ -770,13 +777,13 @@ namespace gem
 
         float4& GEM_VECTORCALL operator=(const float4& rhs);
 
-        float4& GEM_VECTORCALL operator*=(const float rhs);
+        float4& operator*=(const float rhs);
 
-        float4& GEM_VECTORCALL operator/=(const float rhs);
+        float4& operator/=(const float rhs);
 
-        float& GEM_VECTORCALL operator[](const unsigned int index);
+        float& operator[](const unsigned int index);
 
-        float GEM_VECTORCALL operator[](const unsigned int index) const;
+        float operator[](const unsigned int index) const;
 
         float4 operator-() const;
     };
@@ -940,7 +947,7 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE float4& GEM_VECTORCALL float4::operator*=(const float rhs)
+    GEM_INLINE float4& float4::operator*=(const float rhs)
     {
         x *= rhs;
         y *= rhs;
@@ -949,7 +956,7 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE float4& GEM_VECTORCALL float4::operator/=(const float rhs)
+    GEM_INLINE float4& float4::operator/=(const float rhs)
     {
         float inv = 1.0f / rhs;
         x *= inv;
@@ -959,12 +966,12 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE float& GEM_VECTORCALL float4::operator[](const unsigned int index)
+    GEM_INLINE float& float4::operator[](const unsigned int index)
     {
         return reinterpret_cast<float*>(this)[index];
     }
 
-    GEM_INLINE float GEM_VECTORCALL float4::operator[](const unsigned int index) const
+    GEM_INLINE float float4::operator[](const unsigned int index) const
     {
         return reinterpret_cast<const float*>(this)[index];
     }
@@ -980,7 +987,7 @@ namespace gem
         };
     }
 
-    float GEM_VECTORCALL dot(const float lx, const float ly, const float lz, const float lw, const float rx, const float ry, const float rz, const float rw)
+    GEM_INLINE float GEM_VECTORCALL dot(const float lx, const float ly, const float lz, const float lw, const float rx, const float ry, const float rz, const float rw)
     {
         return (lx * rx) + (ly * ry) + (lz * rz) + (lw * rw);
     }
@@ -990,7 +997,7 @@ namespace gem
         return (lhs.x * rhs.x) + (lhs.y * rhs.y) + (lhs.z * rhs.z) + (lhs.w * rhs.w);
     }
 
-    float GEM_VECTORCALL length_squared(const float x, const float y, const float z, const float w)
+    GEM_INLINE float GEM_VECTORCALL length_squared(const float x, const float y, const float z, const float w)
     {
         return (x * x) + (y * y) + (z * z) + (w * w);
     }
@@ -1000,7 +1007,7 @@ namespace gem
         return (val.x * val.x) + (val.y * val.y) + (val.z * val.z) + (val.w * val.w);
     }
 
-    float GEM_VECTORCALL length(const float x, const float y, const float z, const float w)
+    GEM_INLINE float GEM_VECTORCALL length(const float x, const float y, const float z, const float w)
     {
         return sqrtf((x * x) + (y * y) + (z * z) + (w * w));
     }
@@ -1180,9 +1187,9 @@ namespace gem
 
         double2& GEM_VECTORCALL operator/=(const double rhs);
 
-        double& GEM_VECTORCALL operator[](const unsigned int index);
+        double& operator[](const unsigned int index);
 
-        double GEM_VECTORCALL operator[](const unsigned int index) const;
+        double operator[](const unsigned int index) const;
 
         double2 operator-() const;
     };
@@ -1256,12 +1263,12 @@ namespace gem
 
     GEM_INLINE double double2::length() const
     {
-        return sqrtf((x * x) + (y * y));
+        return sqrt((x * x) + (y * y));
     }
 
     GEM_INLINE double2& double2::normalize()
     {
-        double il = 1.0f / sqrtf((x * x) + (y * y));
+        double il = 1.0f / sqrt((x * x) + (y * y));
         x *= il;
         y *= il;
         return *this;
@@ -1269,7 +1276,7 @@ namespace gem
 
     GEM_INLINE double2& double2::safe_normalize(const double tolerance /*= 0.001f*/)
     {
-        double l = sqrtf((x * x) + (y * y));
+        double l = sqrt((x * x) + (y * y));
         if (l > tolerance)
         {
             double il = 1.0f / l;
@@ -1323,12 +1330,12 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE double& GEM_VECTORCALL double2::operator[](const unsigned int index)
+    GEM_INLINE double& double2::operator[](const unsigned int index)
     {
         return reinterpret_cast<double*>(this)[index];
     }
 
-    GEM_INLINE double GEM_VECTORCALL double2::operator[](const unsigned int index) const
+    GEM_INLINE double double2::operator[](const unsigned int index) const
     {
         return reinterpret_cast<const double*>(this)[index];
     }
@@ -1518,13 +1525,15 @@ namespace gem
 
         double3& GEM_VECTORCALL operator=(const double3& rhs);
 
-        double3& GEM_VECTORCALL operator*=(const double rhs);
+        double3& operator*=(const double rhs);
 
-        double3& GEM_VECTORCALL operator/=(const double rhs);
-
-        double3 GEM_VECTORCALL operator-() const;
+        double3& operator/=(const double rhs);
 
         double& operator[](const unsigned int index);
+
+        double operator[](const unsigned int index) const;
+
+        double3 operator-() const;
     };
 
     double GEM_VECTORCALL dot(const double lx, const double ly, const double lz, const double rx, const double ry, const double rz);
@@ -1535,7 +1544,7 @@ namespace gem
 
     double GEM_VECTORCALL length_squared(const double3& val);
 
-    double GEM_VECTORCALL length(const double3 x, const double y, const double z);
+    double GEM_VECTORCALL length(const double x, const double y, const double z);
 
     double GEM_VECTORCALL length(const double3& rhs);
 
@@ -1612,12 +1621,12 @@ namespace gem
 
     GEM_INLINE double double3::length() const
     {
-        return sqrtf((x * x) + (y * y) + (z * z));
+        return sqrt((x * x) + (y * y) + (z * z));
     }
 
     GEM_INLINE double3& double3::normalize()
     {
-        double il = 1.0f / sqrtf((x * x) + (y * y) + (z * z));
+        double il = 1.0f / sqrt((x * x) + (y * y) + (z * z));
         x *= il;
         y *= il;
         z *= il;
@@ -1626,7 +1635,7 @@ namespace gem
 
     GEM_INLINE double3& double3::safe_normalize(const double tolerance /*= 0.001f*/)
     {
-        double l = sqrtf((x * x) + (y * y) + (z * z));
+        double l = sqrt((x * x) + (y * y) + (z * z));
         if (l > tolerance)
         {
             double il = 1.0f / l;
@@ -1670,7 +1679,7 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE double3& GEM_VECTORCALL double3::operator*=(const double rhs)
+    GEM_INLINE double3& double3::operator*=(const double rhs)
     {
         x *= rhs;
         y *= rhs;
@@ -1678,7 +1687,7 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE double3& GEM_VECTORCALL double3::operator/=(const double rhs)
+    GEM_INLINE double3& double3::operator/=(const double rhs)
     {
         double inv = 1.0f / rhs;
         x *= inv;
@@ -1700,6 +1709,11 @@ namespace gem
     GEM_INLINE double& double3::operator[](const unsigned int index)
     {
         return reinterpret_cast<double*>(this)[index];
+    }
+
+    GEM_INLINE double double3::operator[](const unsigned int index) const
+    {
+        return reinterpret_cast<const double*>(this)[index];
     }
 
     GEM_INLINE double GEM_VECTORCALL dot(const double lx, const double ly, const double lz, const double rx, const double ry, const double rz)
@@ -1910,13 +1924,13 @@ namespace gem
 
         double4& GEM_VECTORCALL operator=(const double4& rhs);
 
-        double4& GEM_VECTORCALL operator*=(const double rhs);
+        double4& operator*=(const double rhs);
 
-        double4& GEM_VECTORCALL operator/=(const double rhs);
+        double4& operator/=(const double rhs);
 
-        double& GEM_VECTORCALL operator[](const unsigned int index);
+        double& operator[](const unsigned int index);
 
-        double GEM_VECTORCALL operator[](const unsigned int index) const;
+        double operator[](const unsigned int index) const;
 
         double4 operator-() const;
     };
@@ -2016,12 +2030,12 @@ namespace gem
 
     GEM_INLINE double double4::length() const
     {
-        return sqrtf((x * x) + (y * y) + (z * z) + (w * w));
+        return sqrt((x * x) + (y * y) + (z * z) + (w * w));
     }
 
     GEM_INLINE double4& double4::normalize()
     {
-        double il = 1.0f / sqrtf((x * x) + (y * y) + (z * z) + (w * w));
+        double il = 1.0f / sqrt((x * x) + (y * y) + (z * z) + (w * w));
         x *= il;
         y *= il;
         z *= il;
@@ -2031,7 +2045,7 @@ namespace gem
 
     GEM_INLINE double4& double4::safe_normalize(const double tolerance /*= 0.001f*/)
     {
-        double l = sqrtf((x * x) + (y * y) + (z * z) + (w * w));
+        double l = sqrt((x * x) + (y * y) + (z * z) + (w * w));
         if (l > tolerance)
         {
             double il = 1.0f / l;
@@ -2080,7 +2094,7 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE double4& GEM_VECTORCALL double4::operator*=(const double rhs)
+    GEM_INLINE double4& double4::operator*=(const double rhs)
     {
         x *= rhs;
         y *= rhs;
@@ -2089,7 +2103,7 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE double4& GEM_VECTORCALL double4::operator/=(const double rhs)
+    GEM_INLINE double4& double4::operator/=(const double rhs)
     {
         double inv = 1.0f / rhs;
         x *= inv;
@@ -2099,12 +2113,12 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE double& GEM_VECTORCALL double4::operator[](const unsigned int index)
+    GEM_INLINE double& double4::operator[](const unsigned int index)
     {
         return reinterpret_cast<double*>(this)[index];
     }
 
-    GEM_INLINE double GEM_VECTORCALL double4::operator[](const unsigned int index) const
+    GEM_INLINE double double4::operator[](const unsigned int index) const
     {
         return reinterpret_cast<const double*>(this)[index];
     }
@@ -2120,7 +2134,7 @@ namespace gem
         };
     }
 
-    double GEM_VECTORCALL dot(const double lx, const double ly, const double lz, const double lw, const double rx, const double ry, const double rz, const double rw)
+    GEM_INLINE double GEM_VECTORCALL dot(const double lx, const double ly, const double lz, const double lw, const double rx, const double ry, const double rz, const double rw)
     {
         return (lx * rx) + (ly * ry) + (lz * rz) + (lw * rw);
     }
@@ -2130,7 +2144,7 @@ namespace gem
         return (lhs.x * rhs.x) + (lhs.y * rhs.y) + (lhs.z * rhs.z) + (lhs.w * rhs.w);
     }
 
-    double GEM_VECTORCALL length_squared(const double x, const double y, const double z, const double w)
+    GEM_INLINE double GEM_VECTORCALL length_squared(const double x, const double y, const double z, const double w)
     {
         return (x * x) + (y * y) + (z * z) + (w * w);
     }
@@ -2140,7 +2154,7 @@ namespace gem
         return (val.x * val.x) + (val.y * val.y) + (val.z * val.z) + (val.w * val.w);
     }
 
-    double GEM_VECTORCALL length(const double x, const double y, const double z, const double w)
+    GEM_INLINE double GEM_VECTORCALL length(const double x, const double y, const double z, const double w)
     {
         return sqrt((x * x) + (y * y) + (z * z) + (w * w));
     }
@@ -2310,13 +2324,13 @@ namespace gem
 
         int2& GEM_VECTORCALL operator=(const int2& rhs);
 
-        int2& GEM_VECTORCALL operator*=(const int rhs);
+        int2& operator*=(const int rhs);
 
-        int2& GEM_VECTORCALL operator/=(const int rhs);
+        int2& operator/=(const int rhs);
 
-        int& GEM_VECTORCALL operator[](const unsigned int index);
+        int& operator[](const unsigned int index);
 
-        int GEM_VECTORCALL operator[](const unsigned int index) const;
+        int operator[](const unsigned int index) const;
 
         int2 operator-() const;
     };
@@ -2324,8 +2338,6 @@ namespace gem
     int GEM_VECTORCALL dot(const int2& lhs, const int2& rhs);
 
     int GEM_VECTORCALL length(const int2& rhs);
-
-    int2 GEM_VECTORCALL lerp(const int2& lhs, const int2& rhs, const int t);
 
     int2 GEM_VECTORCALL operator+(const int2& lhs, const int2& rhs);
 
@@ -2400,14 +2412,14 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE int2& GEM_VECTORCALL int2::operator*=(const int rhs)
+    GEM_INLINE int2& int2::operator*=(const int rhs)
     {
         x *= rhs;
         y *= rhs;
         return *this;
     }
 
-    GEM_INLINE int2& GEM_VECTORCALL int2::operator/=(const int rhs)
+    GEM_INLINE int2& int2::operator/=(const int rhs)
     {
         int inv = 1.0f / rhs;
         x *= inv;
@@ -2415,12 +2427,12 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE int& GEM_VECTORCALL int2::operator[](const unsigned int index)
+    GEM_INLINE int& int2::operator[](const unsigned int index)
     {
         return reinterpret_cast<int*>(this)[index];
     }
 
-    GEM_INLINE int GEM_VECTORCALL int2::operator[](const unsigned int index) const
+    GEM_INLINE int int2::operator[](const unsigned int index) const
     {
         return reinterpret_cast<const int*>(this)[index];
     }
@@ -2439,35 +2451,9 @@ namespace gem
         return (lhs.x * rhs.x) + (lhs.y * rhs.y);
     }
 
-    GEM_INLINE int GEM_VECTORCALL  length_squared(const int2& val)
-    {
-        return (val.x * val.x) + (val.y * val.y);
-    }
-
     GEM_INLINE int GEM_VECTORCALL length(const int2& rhs)
     {
-        return sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y));
-    }
-
-    GEM_INLINE int2 GEM_VECTORCALL normalize(const int2& rhs)
-    {
-        int il = 1.0f / sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y));
-        return
-        {
-            rhs.x * il,
-            rhs.y * il
-        };
-    }
-
-    GEM_INLINE int2 GEM_VECTORCALL safe_normalize(const int2& rhs, const int tolerance /*= 0.001f*/)
-    {
-        int l = sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y));
-        int il = (l > tolerance) ? (1.0f / l) : 1.0f;
-        return
-        {
-            rhs.x * il,
-            rhs.y * il
-        };
+        return abs(rhs.x) + abs(rhs.y);
     }
 
     GEM_INLINE int2 GEM_VECTORCALL lerp(const int2& lhs, const int2& rhs, const int t)
@@ -2565,20 +2551,20 @@ namespace gem
 
         int3& GEM_VECTORCALL operator=(const int3& rhs);
 
-        int3& GEM_VECTORCALL operator*=(const int rhs);
+        int3& operator*=(const int rhs);
 
-        int3& GEM_VECTORCALL operator/=(const int rhs);
-
-        int3 GEM_VECTORCALL operator-() const;
+        int3& operator/=(const int rhs);
 
         int& operator[](const unsigned int index);
+
+        int operator[](const unsigned int index) const;
+
+        int3 operator-() const;
     };
 
     int GEM_VECTORCALL dot(const int3& lhs, const int3& rhs);
 
     int GEM_VECTORCALL length(const int3& rhs);
-
-    int3 GEM_VECTORCALL lerp(const int3& lhs, const int3& rhs, const int t);
 
     int3 GEM_VECTORCALL cross(const int3& lhs, const int3& rhs);
 
@@ -2671,7 +2657,7 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE int3& GEM_VECTORCALL int3::operator*=(const int rhs)
+    GEM_INLINE int3& int3::operator*=(const int rhs)
     {
         x *= rhs;
         y *= rhs;
@@ -2679,7 +2665,7 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE int3& GEM_VECTORCALL int3::operator/=(const int rhs)
+    GEM_INLINE int3& int3::operator/=(const int rhs)
     {
         int inv = 1.0f / rhs;
         x *= inv;
@@ -2703,53 +2689,19 @@ namespace gem
         return reinterpret_cast<int*>(this)[index];
     }
 
+    GEM_INLINE int int3::operator[](const unsigned int index) const
+    {
+        return reinterpret_cast<const int*>(this)[index];
+    }
+
     GEM_INLINE int GEM_VECTORCALL dot(const int3& lhs, const int3& rhs)
     {
         return (lhs.x * rhs.x) + (lhs.y * rhs.y) + (lhs.z * rhs.z);
     }
 
-    GEM_INLINE int GEM_VECTORCALL length_squared(const int3& val)
-    {
-        return (val.x * val.x) + (val.y * val.y) + (val.z * val.z);
-    }
-
     GEM_INLINE int GEM_VECTORCALL length(const int3& rhs)
     {
-        return sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z));
-    }
-
-    GEM_INLINE int3 GEM_VECTORCALL normalize(const int3& rhs)
-    {
-        int il = 1.0f / sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z));
-        return
-        {
-            rhs.x * il,
-            rhs.y * il,
-            rhs.z * il
-        };
-    }
-
-    GEM_INLINE int3 GEM_VECTORCALL safe_normalize(const int3& rhs, const int tolerance /*= 0.001f*/)
-    {
-        int l = sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z));
-        int il = (l > tolerance) ? (1.0f / l) : 1.0f;
-        return
-        {
-            rhs.x * il,
-            rhs.y * il,
-            rhs.z * il
-        };
-    }
-
-    GEM_INLINE int3 GEM_VECTORCALL lerp(const int3& lhs, const int3& rhs, const int t)
-    {
-        int oneMinusT = 1.0f - t;
-        return
-        {
-            (oneMinusT * lhs.x) + (rhs.x * t),
-            (oneMinusT * lhs.y) + (rhs.y * t),
-            (oneMinusT * lhs.z) + (rhs.z * t)
-        };
+        return abs(rhs.x) + abs(rhs.y) + abs(rhs.z);
     }
 
     GEM_INLINE int3 GEM_VECTORCALL cross(const int3& lhs, const int3& rhs)
@@ -2855,28 +2807,20 @@ namespace gem
 
         int4& GEM_VECTORCALL operator=(const int4& rhs);
 
-        int4& GEM_VECTORCALL operator*=(const int rhs);
+        int4& operator*=(const int rhs);
 
-        int4& GEM_VECTORCALL operator/=(const int rhs);
+        int4& operator/=(const int rhs);
 
-        int& GEM_VECTORCALL operator[](const unsigned int index);
+        int& operator[](const unsigned int index);
 
-        int GEM_VECTORCALL operator[](const unsigned int index) const;
+        int operator[](const unsigned int index) const;
 
         int4 operator-() const;
     };
 
     int GEM_VECTORCALL dot(const int4& lhs, const int4& rhs);
 
-    int GEM_VECTORCALL length_squared(const int4& val);
-
     int GEM_VECTORCALL length(const int4& rhs);
-
-    int4 GEM_VECTORCALL normalize(const int4& rhs);
-
-    int4 GEM_VECTORCALL  safe_normalize(const int4& rhs, const int tolerance = 0.001f);
-
-    int4 GEM_VECTORCALL lerp(const int4& lhs, const int4& rhs, const int t);
 
     int4 GEM_VECTORCALL operator+(const int4& lhs, const int4& rhs);
 
@@ -2985,7 +2929,7 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE int4& GEM_VECTORCALL int4::operator*=(const int rhs)
+    GEM_INLINE int4& int4::operator*=(const int rhs)
     {
         x *= rhs;
         y *= rhs;
@@ -2994,7 +2938,7 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE int4& GEM_VECTORCALL int4::operator/=(const int rhs)
+    GEM_INLINE int4& int4::operator/=(const int rhs)
     {
         int inv = 1.0f / rhs;
         x *= inv;
@@ -3004,12 +2948,12 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE int& GEM_VECTORCALL int4::operator[](const unsigned int index)
+    GEM_INLINE int& int4::operator[](const unsigned int index)
     {
         return reinterpret_cast<int*>(this)[index];
     }
 
-    GEM_INLINE int GEM_VECTORCALL int4::operator[](const unsigned int index) const
+    GEM_INLINE int int4::operator[](const unsigned int index) const
     {
         return reinterpret_cast<const int*>(this)[index];
     }
@@ -3030,51 +2974,9 @@ namespace gem
         return (lhs.x * rhs.x) + (lhs.y * rhs.y) + (lhs.z * rhs.z) + (lhs.w * rhs.w);
     }
 
-    GEM_INLINE int GEM_VECTORCALL length_squared(const int4& val)
-    {
-        return (val.x * val.x) + (val.y * val.y) + (val.z * val.z) + (val.w * val.w);
-    }
-
     GEM_INLINE int GEM_VECTORCALL length(const int4& rhs)
     {
-        return sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
-    }
-
-    GEM_INLINE int4 GEM_VECTORCALL normalize(const int4& rhs)
-    {
-        int il = 1.0f / sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
-        return
-        {
-            rhs.x * il,
-            rhs.y * il,
-            rhs.z * il,
-            rhs.w * il
-        };
-    }
-
-    GEM_INLINE int4 GEM_VECTORCALL safe_normalize(const int4& rhs, const int tolerance /*= 0.001f*/)
-    {
-        int l = sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
-        int il = (l > tolerance) ? (1.0f / l) : 1.0f;
-        return
-        {
-            rhs.x * il,
-            rhs.y * il,
-            rhs.z * il,
-            rhs.w * il
-        };
-    }
-
-    GEM_INLINE int4 GEM_VECTORCALL lerp(const int4& lhs, const int4& rhs, const int t)
-    {
-        int oneMinusT = 1.0f - t;
-        return
-        {
-            (oneMinusT * lhs.x) + (rhs.x * t),
-            (oneMinusT * lhs.y) + (rhs.y * t),
-            (oneMinusT * lhs.z) + (rhs.z * t),
-            (oneMinusT * lhs.w) + (rhs.w * t)
-        };
+        return abs(rhs.x) + abs(rhs.y) + abs(rhs.z) + abs(rhs.w);
     }
 
     GEM_INLINE int4 GEM_VECTORCALL operator+(const int4& lhs, const int4& rhs)
