@@ -92,6 +92,10 @@ namespace gem
         bool GEM_VECTORCALL intersects_ray(const ray3f& ray, float3* p_point, float tolerance = 0.00f);
     };
 
+    range3f GEM_VECTORCALL transform_range(const range3f& range, const transform3f& transform);
+
+    range3f GEM_VECTORCALL transform_range(const range3f& range, const transform1f& transform);
+
     GEM_INLINE float3 range3f::center() const
     {
         return (max + min) * 0.5f;
@@ -143,9 +147,14 @@ namespace gem
         min = { FLT_MAX, FLT_MAX, FLT_MAX };
         max = { FLT_MIN, FLT_MIN, FLT_MIN };
         
-        int i = 8;
-        while (i > 0)
-            expand(transform.transform_point(points[--i]));
+        expand(transform.transform_point(points[0]));
+        expand(transform.transform_point(points[1]));
+        expand(transform.transform_point(points[2]));
+        expand(transform.transform_point(points[3]));
+        expand(transform.transform_point(points[4]));
+        expand(transform.transform_point(points[5]));
+        expand(transform.transform_point(points[6]));
+        expand(transform.transform_point(points[7]));
 
         return *this;
     }
@@ -167,9 +176,14 @@ namespace gem
         min = { FLT_MAX, FLT_MAX, FLT_MAX };
         max = { FLT_MIN, FLT_MIN, FLT_MIN };
 
-        int i = 8;
-        while (i > 0)
-            expand(transform.transform_point(points[--i]));
+        expand(transform.transform_point(points[0]));
+        expand(transform.transform_point(points[1]));
+        expand(transform.transform_point(points[2]));
+        expand(transform.transform_point(points[3]));
+        expand(transform.transform_point(points[4]));
+        expand(transform.transform_point(points[5]));
+        expand(transform.transform_point(points[6]));
+        expand(transform.transform_point(points[7]));
 
         return *this;
     }
@@ -240,6 +254,38 @@ namespace gem
         return true;
     }
 
+    GEM_INLINE range3f GEM_VECTORCALL transform_range(const range3f& range, const transform3f& transform)
+    {
+        range3f o;
+        o.min = { FLT_MAX, FLT_MAX, FLT_MAX };
+        o.max = { FLT_MIN, FLT_MIN, FLT_MIN };
+        o.expand(transform.transform_point({ range.min.x, range.min.y, range.min.z }));
+        o.expand(transform.transform_point({ range.max.x, range.min.y, range.min.z }));
+        o.expand(transform.transform_point({ range.min.x, range.max.y, range.min.z }));
+        o.expand(transform.transform_point({ range.max.x, range.max.y, range.min.z }));
+        o.expand(transform.transform_point({ range.min.x, range.min.y, range.max.z }));
+        o.expand(transform.transform_point({ range.max.x, range.min.y, range.max.z }));
+        o.expand(transform.transform_point({ range.min.x, range.max.y, range.max.z }));
+        o.expand(transform.transform_point({ range.max.x, range.max.y, range.max.z }));
+        return o;
+    }
+
+    GEM_INLINE range3f GEM_VECTORCALL transform_range(const range3f& range, const transform1f& transform)
+    {
+        range3f o;
+        o.min = { FLT_MAX, FLT_MAX, FLT_MAX };
+        o.max = { FLT_MIN, FLT_MIN, FLT_MIN };
+        o.expand(transform.transform_point({ range.min.x, range.min.y, range.min.z }));
+        o.expand(transform.transform_point({ range.max.x, range.min.y, range.min.z }));
+        o.expand(transform.transform_point({ range.min.x, range.max.y, range.min.z }));
+        o.expand(transform.transform_point({ range.max.x, range.max.y, range.min.z }));
+        o.expand(transform.transform_point({ range.min.x, range.min.y, range.max.z }));
+        o.expand(transform.transform_point({ range.max.x, range.min.y, range.max.z }));
+        o.expand(transform.transform_point({ range.min.x, range.max.y, range.max.z }));
+        o.expand(transform.transform_point({ range.max.x, range.max.y, range.max.z }));
+        return o;
+    }
+
     struct range2d
     {
         double2 min, max;
@@ -304,8 +350,6 @@ namespace gem
 
     struct range3d
     {
-        typedef double3 double3;
-
         double3 min, max;
 
         double3 center() const;

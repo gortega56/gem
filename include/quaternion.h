@@ -7,21 +7,7 @@ namespace gem
 
     struct quatf
     {
-        union
-        {
-            struct
-            {
-                float x, y, z, w;
-            };
-
-            struct
-            {
-                float3 v;
-                float s;
-            };
-
-            float components[4];
-        };
+        float x, y, z, w;
 
         static quatf identity();
 
@@ -414,7 +400,7 @@ namespace gem
         // Given q is a unit vector:
         // qvq* = (b + c)(v + 0)(-b + c)
         //      = v + 2c(bxv) + 2(bxbxv)
-
+        float3 v = { x, y, z };
         float3 bxv = cross(v, p);
         float3 bxbxv = cross(v, bxv);
         return 

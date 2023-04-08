@@ -57,12 +57,16 @@ namespace gem
 
         float GEM_VECTORCALL distance_to_point(const float3& point) const;
 
+        line3f& GEM_VECTORCALL transform(const transform3f& transform);
+
+        line3f& GEM_VECTORCALL transform(const transform3f& transform);
+
         bool GEM_VECTORCALL intersects_line(const line3f& line, float3* p_point, const float tolerance = 0.001f) const;
-
-        line3f& GEM_VECTORCALL transform(const transform3f& transform);
-
-        line3f& GEM_VECTORCALL transform(const transform3f& transform);
     };
+
+    line3f GEM_VECTORCALL transform_line(const line3f& line, const transform3f& transform);
+
+    line3f GEM_VECTORCALL transform_line(const line3f& line, const transform3f& transform);
 
     GEM_INLINE float3 GEM_VECTORCALL line3f::point_closest_to_line(const line3f& line, const float tolerance /*= 0.001f*/) const
     {
@@ -101,6 +105,22 @@ namespace gem
         return length(cross(v, point) + m) / length(v);
     }
 
+    GEM_INLINE line3f& GEM_VECTORCALL line3f::transform(const transform3f& transform)
+    {
+        float4x3 h = transform.matrix4x3().inverse().transpose();
+        v = transform.transform_vector(v);
+        m = m * h;
+        return *this;
+    }
+
+    GEM_INLINE line3f& GEM_VECTORCALL line3f::transform(const transform3f& transform)
+    {
+        float4x3 h = transform.matrix4x3().inverse().transpose();
+        v = transform.transform_vector(v);
+        m = m * h;
+        return *this;
+    }
+
     GEM_INLINE bool GEM_VECTORCALL line3f::intersects_line(const line3f& line, float3* p_point, const float tolerance /*= 0.001f*/) const
     {
         float3 v0 = v;
@@ -126,20 +146,16 @@ namespace gem
         return true;
     }
 
-    GEM_INLINE line3f& GEM_VECTORCALL line3f::transform(const transform3f& transform)
+    GEM_INLINE line3f GEM_VECTORCALL transform_line(const line3f& line, const transform3f& transform)
     {
         float4x3 h = transform.matrix4x3().inverse().transpose();
-        v = transform.transform_vector(v);
-        m = m * h;
-        return *this;
+        return { transform.transform_vector(line.v), line.m * h };
     }
 
-    GEM_INLINE line3f& GEM_VECTORCALL line3f::transform(const transform3f& transform)
+    GEM_INLINE line3f GEM_VECTORCALL transform_line(const line3f& line, const transform3f& transform)
     {
         float4x3 h = transform.matrix4x3().inverse().transpose();
-        v = transform.transform_vector(v);
-        m = m * h;
-        return *this;
+        return { transform.transform_vector(line.v), line.m * h };
     }
 
     struct line_segment2f
@@ -205,12 +221,16 @@ namespace gem
         
         float GEM_VECTORCALL distance_to_point(const float3& point) const;
 
+        line_segment3f& GEM_VECTORCALL transform(const transform3f& transform);
+
+        line_segment3f& GEM_VECTORCALL transform(const transform3f& transform);
+
         bool GEM_VECTORCALL intersects_line(const line_segment3f& line, float3* p_point, const float tolerance = 0.001f) const;
-
-        line_segment3f& GEM_VECTORCALL transform(const transform3f& transform);
-
-        line_segment3f& GEM_VECTORCALL transform(const transform3f& transform);
     };
+
+    GEM_INLINE line_segment3f GEM_VECTORCALL transform_line_segment(const line_segment3f& line, const transform3f& transform);
+
+    GEM_INLINE line_segment3f GEM_VECTORCALL transform_line_segment(const line_segment3f& line, const transform3f& transform);
 
     GEM_INLINE float3 GEM_VECTORCALL line_segment3f::point_closest_to_line(const line_segment3f& line, const float tolerance /*= 0.001f*/) const
     {
@@ -310,4 +330,14 @@ namespace gem
         b = transform.transform_point(b);
         return *this;
     }
+
+    GEM_INLINE line_segment3f GEM_VECTORCALL transform_line_segment(const line_segment3f& line, const transform3f& transform)
+    {
+        return { transform.transform_point(line.a), transform.transform_point(line.b) };
+    }
+    GEM_INLINE line_segment3f GEM_VECTORCALL transform_line_segment(const line_segment3f& line, const transform3f& transform)
+    {
+        return { transform.transform_point(line.a), transform.transform_point(line.b) };
+    }
+
 }

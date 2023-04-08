@@ -25,6 +25,10 @@ namespace gem
         bool GEM_VECTORCALL intersects_ray(const ray3f& ray, float3* p_point, const float tolerance = 0.001f);
     };
 
+    plane4f GEM_VECTORCALL transform_plane(const plane4f& plane, const transform3f& transform);
+
+    plane4f GEM_VECTORCALL transform_plane(const plane4f& plane, const transform1f& transform);
+
     GEM_INLINE float plane4f::distance_from_origin() const
     {
         return fabsf(w) / length(x, y, z);
@@ -111,5 +115,21 @@ namespace gem
             *p_point = ray.p - ray.v * (dot(n, ray.p) / ndotv);
 
         return true;
+    }
+
+    GEM_INLINE plane4f GEM_VECTORCALL transform_plane(const plane4f& plane, const transform3f& transform)
+    {
+        float4x4 m = transform.matrix4x4().inverse().transpose();
+        float4 q = { plane.x, plane.y, plane.z, plane.w };
+        float4 r = q * m;
+        return { r.x, r.y, r.z, r.w };
+    }
+
+    GEM_INLINE plane4f GEM_VECTORCALL transform_plane(const plane4f& plane, const transform1f& transform)
+    {
+        float4x4 m = transform.matrix4x4().inverse().transpose();
+        float4 q = { plane.x, plane.y, plane.z, plane.w };
+        float4 r = q * m;
+        return { r.x, r.y, r.z, r.w };
     }
 }
