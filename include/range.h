@@ -1,5 +1,7 @@
 #pragma once
-#include "vector.h"
+#include "transform.h"
+#include "ray.h"
+#include <float.h>
 
 namespace gem
 {
@@ -13,13 +15,13 @@ namespace gem
 
         float2 area() const;
 
+        range2f& GEM_VECTORCALL expand(const float2& point);
+        
+        range2f& GEM_VECTORCALL expand(const range2f& range);
+
         bool degenerate() const;
 
         bool GEM_VECTORCALL contains_point(const float2& point) const;
-
-        range2f& GEM_VECTORCALL expand(const float2& point);
-
-        range2f& GEM_VECTORCALL expand(const range2f& range);
     };
 
     GEM_INLINE float2 range2f::center() const
@@ -67,8 +69,6 @@ namespace gem
 
     struct range3f
     {
-        typedef float3 float3;
-
         float3 min, max;
 
         float3 center() const;
@@ -77,13 +77,19 @@ namespace gem
     
         float3 volume() const;
 
+        range3f& GEM_VECTORCALL expand(const float3& point);
+
+        range3f& GEM_VECTORCALL expand(const range3f& range);
+
+        range3f& GEM_VECTORCALL transform(const transform3f& transform);
+
+        range3f& GEM_VECTORCALL transform(const transform1f& transform);
+
         bool degenerate() const;
 
         bool GEM_VECTORCALL contains_point(const float3& point) const;
 
-        range3f& GEM_VECTORCALL expand(const float3& point);
-
-        range3f& GEM_VECTORCALL expand(const range3f& range);
+        bool GEM_VECTORCALL intersects_ray(const ray3f& ray, float3* p_point, float tolerance = 0.00f);
     };
 
     GEM_INLINE float3 range3f::center() const
@@ -102,20 +108,6 @@ namespace gem
 
     }
 
-    GEM_INLINE bool range3f::degenerate() const
-    {
-        return min.x > max.x 
-            || min.y > max.y
-            || min.z > min.z;
-    }
-
-    GEM_INLINE bool GEM_VECTORCALL range3f::contains_point(const float3& point) const
-    {
-        return min.x <= point.x && point.x <= max.x
-            && min.y <= point.y && point.y <= max.y
-            && min.z <= point.z && point.z <= max.z;
-    }
-
     GEM_INLINE range3f& GEM_VECTORCALL range3f::expand(const float3& point)
     {
         if (point.x < min.x) min.x = point.x;
@@ -132,6 +124,120 @@ namespace gem
         expand(range.min);
         expand(range.max);
         return *this;
+    }
+
+    GEM_INLINE range3f& GEM_VECTORCALL range3f::transform(const transform3f& transform)
+    {
+        float3 points[8] =
+        {
+            { min.x, min.y, min.z },
+            { max.x, min.y, min.z },
+            { min.x, max.y, min.z },
+            { max.x, max.y, min.z },
+            { min.x, min.y, max.z },
+            { max.x, min.y, max.z },
+            { min.x, max.y, max.z },
+            { max.x, max.y, max.z },
+        };
+
+        min = { FLT_MAX, FLT_MAX, FLT_MAX };
+        max = { FLT_MIN, FLT_MIN, FLT_MIN };
+        
+        int i = 8;
+        while (i > 0)
+            expand(transform.transform_point(points[--i]));
+
+        return *this;
+    }
+
+    GEM_INLINE range3f& GEM_VECTORCALL range3f::transform(const transform1f& transform)
+    {
+        float3 points[8] =
+        {
+            { min.x, min.y, min.z },
+            { max.x, min.y, min.z },
+            { min.x, max.y, min.z },
+            { max.x, max.y, min.z },
+            { min.x, min.y, max.z },
+            { max.x, min.y, max.z },
+            { min.x, max.y, max.z },
+            { max.x, max.y, max.z },
+        };
+
+        min = { FLT_MAX, FLT_MAX, FLT_MAX };
+        max = { FLT_MIN, FLT_MIN, FLT_MIN };
+
+        int i = 8;
+        while (i > 0)
+            expand(transform.transform_point(points[--i]));
+
+        return *this;
+    }
+
+    GEM_INLINE bool range3f::degenerate() const
+    {
+        return min.x > max.x 
+            || min.y > max.y
+            || min.z > min.z;
+    }
+
+    GEM_INLINE bool GEM_VECTORCALL range3f::contains_point(const float3& point) const
+    {
+        return min.x <= point.x && point.x <= max.x
+            && min.y <= point.y && point.y <= max.y
+            && min.z <= point.z && point.z <= max.z;
+    }
+
+    GEM_INLINE bool GEM_VECTORCALL range3f::intersects_ray(const ray3f& ray, float3* p_point, float tolerance /*= 0.00f*/)
+    {
+        https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
+        float3 iv =
+        {
+            1.0f / ray.v.x,
+            1.0f / ray.v.y,
+            1.0f / ray.v.z
+        };
+
+        int sign[3] =
+        {
+            iv.x < 0.0f,
+            iv.y < 0.0f,
+            iv.z < 0.0f
+        };
+
+        float3 bounds[2] =
+        {
+            min,
+            max
+        };
+
+        float tmin, tmax, tymin, tymax, tzmin, tzmax;
+        tmin = (bounds[sign[0]].x - ray.p.x) * iv.x;
+        tmax = (bounds[1 - sign[0]].x - ray.p.x) * iv.x;
+        tymin = (bounds[sign[1]].y - ray.p.y) * iv.y;
+        tymax = (bounds[1 - sign[1]].y - ray.p.y) * iv.y;
+
+        if ((tmin > tymax) || (tymin > tmax))
+            return false;
+        if (tymin > tmin)
+            tmin = tymin;
+        if (tymax < tmax)
+            tmax = tymax;
+
+        tzmin = (bounds[sign[2]].z - ray.p.z) * iv.z;
+        tzmax = (bounds[1 - sign[2]].z - ray.p.z) * iv.z;
+
+        if ((tmin > tzmax) || (tzmin > tmax))
+            return false;
+        if (tzmin > tmin)
+            tmin = tzmin;
+        if (tzmax < tmax)
+            tmax = tzmax;
+
+        if (p_point)
+            *p_point = ray.p + tmin * ray.v;
+
+        return true;
     }
 
     struct range2d

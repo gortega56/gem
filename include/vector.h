@@ -572,9 +572,9 @@ namespace gem
         return (lhs.x * rhs.x) + (lhs.y * rhs.y) + (lhs.z * rhs.z);
     }
 
-    GEM_INLINE float GEM_VECTORCALL  length_squared(const float x, const float y, const float z)
+    GEM_INLINE float GEM_VECTORCALL length_squared(const float x, const float y, const float z)
     {
-        return sqrt((x * x) + (y * y) + (z * z));
+        return (x * x) + (y * y) + (z * z);
     }
 
     GEM_INLINE float GEM_VECTORCALL length_squared(const float3& val)
@@ -584,12 +584,12 @@ namespace gem
 
     GEM_INLINE float GEM_VECTORCALL length(const float x, const float y, const float z)
     {
-        return sqrt((x * x) + (y * y) + (z * z));
+        return sqrtf((x * x) + (y * y) + (z * z));
     }
 
     GEM_INLINE float GEM_VECTORCALL length(const float3& rhs)
     {
-        return sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z));
+        return sqrtf((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z));
     }
 
     GEM_INLINE float3 GEM_VECTORCALL normalize(const float3& rhs)
@@ -605,7 +605,7 @@ namespace gem
 
     GEM_INLINE float3 GEM_VECTORCALL safe_normalize(const float3& rhs, const float tolerance /*= 0.001f*/)
     {
-        float l = sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z));
+        float l = sqrtf((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z));
         float il = (l > tolerance) ? (1.0f / l) : 1.0f;
         return
         {
@@ -652,13 +652,13 @@ namespace gem
         };
     }
 
-    float3 GEM_VECTORCALL rotate_axis_angle(const float3& v, const float3& a, const float angle)
+    float3 GEM_VECTORCALL rotate_axis_angle(const float3& v, const float3& a, const float theta)
     {
         // v' = (v project a) + (v reject a) * cos(theta) + (a x v) * sin(theta)
-        float c0 = cosf(angle);
-        float c1 = (1.0f - c0) * dot(v, a);
-        float c2 = sinf(angle);
-        return (v * c0) + (a * c1) + cross(a, v) * c2;
+        float cos_theta = cosf(theta);
+        float c1 = (1.0f - cos_theta) * dot(v, a);
+        float sin_theta = sinf(theta);
+        return (v * cos_theta) + (a * c1) + cross(a, v) * sin_theta;
     }
 
     GEM_INLINE float3 GEM_VECTORCALL cross(const float3& lhs, const float3& rhs)
@@ -1002,17 +1002,17 @@ namespace gem
 
     float GEM_VECTORCALL length(const float x, const float y, const float z, const float w)
     {
-        return sqrt((x * x) + (y * y) + (z * z) + (w * w));
+        return sqrtf((x * x) + (y * y) + (z * z) + (w * w));
     }
 
     GEM_INLINE float GEM_VECTORCALL length(const float4& rhs)
     {
-        return sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
+        return sqrtf((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
     }
 
     GEM_INLINE float4 GEM_VECTORCALL normalize(const float4& rhs)
     {
-        float il = 1.0f / sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
+        float il = 1.0f / sqrtf((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
         return
         {
             rhs.x * il,
@@ -1024,7 +1024,7 @@ namespace gem
 
     GEM_INLINE float4 GEM_VECTORCALL safe_normalize(const float4& rhs, const float tolerance /*= 0.001f*/)
     {
-        float l = sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
+        float l = sqrtf((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
         float il = (l > tolerance) ? (1.0f / l) : 1.0f;
         return
         {

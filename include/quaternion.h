@@ -1,5 +1,4 @@
 #pragma once
-#include "common/defines.h"
 #include "matrix.h"
 
 namespace gem
@@ -507,12 +506,12 @@ namespace gem
 
     GEM_INLINE float GEM_VECTORCALL length(const quatf& rhs)
     {
-        return sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
+        return sqrtf((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
     }
 
     GEM_INLINE quatf GEM_VECTORCALL normalize(const quatf& rhs)
     {
-        float il = 1.0f / sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
+        float il = 1.0f / sqrtf((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
         return
         {
             rhs.x * il,

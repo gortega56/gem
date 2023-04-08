@@ -1,6 +1,4 @@
 #pragma once
-#include "plane.h"
-#include "range.h"
 #include "transform.h"
 
 namespace gem
@@ -10,12 +8,30 @@ namespace gem
         float3 p;
         float3 v;
     
-        bool intersects_ray(const ray3f& ray, float3* p_point, const float tolerance = 0.001f) const;
+        ray3f& GEM_VECTORCALL transform(const transform3f& transform);
 
-        bool intersects_plane(const plane4f& plane, float3* p_point, const float tolerance = 0.001f) const;
+        ray3f& GEM_VECTORCALL transform(const transform1f& transform);
 
-        bool intersects_range(const range3f& range, float3* p_point, const float tolerance = 0.001f) const;
+        bool GEM_VECTORCALL intersects_ray(const ray3f& ray, float3* p_point, const float tolerance = 0.001f) const;
     };
+
+    ray3f GEM_VECTORCALL transform_ray(const transform3f& transform, const ray3f& ray);
+
+    ray3f GEM_VECTORCALL transform_ray(const transform1f& transform, const ray3f& ray);
+    
+    GEM_INLINE ray3f& GEM_VECTORCALL ray3f::transform(const transform3f& transform)
+    {
+        p = transform.transform_point(p);
+        v = transform.transform_vector(v);
+        return *this;
+    }
+
+    GEM_INLINE ray3f& GEM_VECTORCALL ray3f::transform(const transform1f& transform)
+    {
+        p = transform.transform_point(p);
+        v = transform.transform_vector(v);
+        return *this;
+    }
 
     bool ray3f::intersects_ray(const ray3f& ray, float3* p_point, const float tolerance /*= 0.001f*/) const
     {
@@ -42,67 +58,13 @@ namespace gem
         return true;
     }
 
-    bool ray3f::intersects_plane(const plane4f& plane, float3* p_point, const float tolerance /*= 0.001f*/) const
+    GEM_INLINE ray3f GEM_VECTORCALL transform_ray(const transform3f& transform, const ray3f& ray)
     {
-        float ndotv = dot(plane.n, v);
-        if (ndotv < tolerance)
-            return false;
-
-        if (p_point)
-            *p_point = p - v * (dot(plane.n, p) / ndotv);
-
-        return true;
+        return { transform.transform_point(ray.p), transform.transform_vector(ray.v) };
     }
 
-    bool ray3f::intersects_range(const range3f& range, float3* p_point, const float tolerance /*= 0.001f*/) const
+    GEM_INLINE ray3f GEM_VECTORCALL transform_ray(const transform1f& transform, const ray3f& ray)
     {
-        https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
-        float3 iv =
-        {
-            1.0f / v.x,
-            1.0f / v.y,
-            1.0f / v.z
-        };
-
-        int sign[3] =
-        {
-            iv.x < 0.0f,
-            iv.y < 0.0f,
-            iv.z < 0.0f
-        };
-
-        float3 bounds[2] =
-        {
-            range.min,
-            range.max
-        };
-
-        float tmin, tmax, tymin, tymax, tzmin, tzmax;
-        tmin = (bounds[sign[0]].x - p.x) * iv.x;
-        tmax = (bounds[1 - sign[0]].x - p.x) * iv.x;
-        tymin = (bounds[sign[1]].y - p.y) * iv.y;
-        tymax = (bounds[1 - sign[1]].y - p.y) * iv.y;
-
-        if ((tmin > tymax) || (tymin > tmax))
-            return false;
-        if (tymin > tmin)
-            tmin = tymin;
-        if (tymax < tmax)
-            tmax = tymax;
-
-        tzmin = (bounds[sign[2]].z - p.z) * iv.z;
-        tzmax = (bounds[1 - sign[2]].z - p.z) * iv.z;
-
-        if ((tmin > tzmax) || (tzmin > tmax))
-            return false;
-        if (tzmin > tmin)
-            tmin = tzmin;
-        if (tzmax < tmax)
-            tmax = tzmax;
-
-        if (p_point)
-            *p_point = p + tmin * v;
-
-        return true;
+        return { transform.transform_point(ray.p), transform.transform_vector(ray.v) };
     }
 }
