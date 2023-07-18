@@ -44,32 +44,29 @@ namespace gem
 
     GEM_INLINE transform3f transform3f::identity()
     {
-        return
-        {
+        return transform3f::set(
             quatf::identity(), 
             float3(0, 0, 0), 
             float3(1, 1, 1) 
-        };
+        );
     }
 
     GEM_INLINE transform3f GEM_VECTORCALL transform3f::set(const quatf& q, const float3& t, const float3& s)
     {
-        return
-        {
+        return transform3f::set(
             q,
             t,
             s
-        };
+        );
     }
 
     GEM_INLINE transform3f GEM_VECTORCALL transform3f::set(const transform3f& o)
     {
-        return
-        {
+        return transform3f::set(
             o.q,
             o.t,
             o.s
-        };
+        );
     }
 
     GEM_INLINE transform3f transform3f::inverse() const
@@ -77,7 +74,7 @@ namespace gem
         quatf invq = gem::inverse(q);
         float3 invs = { 1.f / s.x, 1.f / s.y, 1.f / s.z };
         float3 invt = -(invq.transform_point(t) * invs);
-        return { invq, invt, invs };
+        return transform3f::set(invq, invt, invs);
     }
 
     GEM_INLINE transform3f& GEM_VECTORCALL transform3f::concatenate(const transform3f& b)
@@ -123,12 +120,11 @@ namespace gem
 
     GEM_INLINE transform3f GEM_VECTORCALL concatenate(const transform3f& a, const transform3f& b)
     {
-        return
-        {
+        return transform3f::set(
             a.q * b.q,
             b.t + (b.q.transform_point(a.t * b.s)),
             a.s * b.s
-        };
+        );
     }
 
 #pragma endregion
@@ -173,32 +169,29 @@ namespace gem
 
     GEM_INLINE transform1f transform1f::identity()
     {
-        return
-        {
+        return transform1f::set(
             quatf::identity(),
             float3(0, 0, 0),
             1
-        };
+        );
     }
 
     GEM_INLINE transform1f GEM_VECTORCALL transform1f::set(const quatf& q, const float3& t, const float s)
     {
-        return
-        {
+        return transform1f::set(
             q,
             t,
             s
-        };
+        );
     }
 
     GEM_INLINE transform1f GEM_VECTORCALL transform1f::set(const transform1f& o)
     {
-        return
-        {
+        return transform1f::set(
             o.q,
             o.t,
             o.s
-        };
+        );
     }
 
     GEM_INLINE transform1f transform1f::inverse() const
@@ -206,7 +199,7 @@ namespace gem
         quatf invq = gem::inverse(q);
         float invs = { 1.f / s };
         float3 invt = -(invq.transform_point(t) * invs);
-        return { invq, invt, invs };
+        return  transform1f::set(invq, invt, invs );
     }
 
     GEM_INLINE transform1f& GEM_VECTORCALL transform1f::concatenate(const transform1f& b)
@@ -252,12 +245,11 @@ namespace gem
 
     GEM_INLINE transform1f GEM_VECTORCALL concatenate(const transform1f& a, const transform1f& b)
     {
-        return
-        {
+        return transform1f::set(
             a.q * b.q,
             b.t + (b.q.transform_point(a.t * b.s)),
             a.s * b.s
-        };
+        );
     }
 
 #pragma endregion
