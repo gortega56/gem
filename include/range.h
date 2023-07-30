@@ -71,6 +71,8 @@ namespace gem
     {
         float3 min, max;
 
+        static range3f unit();
+
         float3 center() const;
 
         float3 extent() const;
@@ -95,6 +97,11 @@ namespace gem
     range3f GEM_VECTORCALL transform_range(const range3f& range, const transform3f& transform);
 
     range3f GEM_VECTORCALL transform_range(const range3f& range, const transform1f& transform);
+
+    GEM_INLINE range3f range3f::unit()
+    {
+        return { .min = float3(-0.5f, -0.5f, -0.5f), .max = float3(+0.5f, +0.5f, +0.5f) };
+    }
 
     GEM_INLINE float3 range3f::center() const
     {

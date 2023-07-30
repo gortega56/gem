@@ -23,7 +23,9 @@ namespace gem
 
         static transform3f GEM_VECTORCALL set(const transform3f& o);
 
-        transform3f() = default;
+        transform3f();
+
+        transform3f(const quatf& q, const float3& t, const float3& s);
 
         transform3f inverse() const;
 
@@ -53,20 +55,36 @@ namespace gem
 
     GEM_INLINE transform3f GEM_VECTORCALL transform3f::set(const quatf& q, const float3& t, const float3& s)
     {
-        return transform3f::set(
+        return {
             q,
             t,
             s
-        );
+        };
     }
 
     GEM_INLINE transform3f GEM_VECTORCALL transform3f::set(const transform3f& o)
     {
-        return transform3f::set(
+        return {
             o.q,
             o.t,
             o.s
-        );
+        };
+    }
+
+    GEM_INLINE transform3f::transform3f()
+        : q(quatf::identity())
+        , t({0.f, 0.f, 0.f})
+        , s({1.f, 1.f, 1.f})
+    {
+
+    }
+
+    GEM_INLINE transform3f::transform3f(const quatf& q, const float3& t, const float3& s)
+        : q(q)
+        , t(t)
+        , s(s)
+    {
+
     }
 
     GEM_INLINE transform3f transform3f::inverse() const
