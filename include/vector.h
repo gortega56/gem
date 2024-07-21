@@ -659,7 +659,7 @@ namespace gem
         };
     }
 
-    float3 GEM_VECTORCALL rotate_axis_angle(const float3& v, const float3& a, const float theta)
+    GEM_INLINE float3 GEM_VECTORCALL rotate_axis_angle(const float3& v, const float3& a, const float theta)
     {
         // v' = (v project a) + (v reject a) * cos(theta) + (a x v) * sin(theta)
         float cos_theta = cosf(theta);
@@ -1806,7 +1806,7 @@ namespace gem
         };
     }
 
-    double3 GEM_VECTORCALL rotate_axis_angle(const double3& v, const double3& a, const double angle)
+    GEM_INLINE double3 GEM_VECTORCALL rotate_axis_angle(const double3& v, const double3& a, const double angle)
     {
         // v' = (v project a) + (v reject a) * cos(theta) + (a x v) * sin(theta)
         double c0 = cos(angle);

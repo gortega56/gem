@@ -10,6 +10,8 @@ namespace gem
 
         float distance_from_origin() const;
 
+        float distance_to_point(const float3& point) const;
+
         float3 normal() const;
 
         plane4f& normalize();
@@ -32,6 +34,11 @@ namespace gem
     GEM_INLINE float plane4f::distance_from_origin() const
     {
         return fabsf(w) / length(x, y, z);
+    }
+
+    GEM_INLINE float plane4f::distance_to_point(const float3& point) const
+    {
+        return (x * point.x + y * point.y + z * point.z) - w;
     }
 
     GEM_INLINE float3 plane4f::normal() const
@@ -108,7 +115,7 @@ namespace gem
     {
         float3 n = normal();
         float ndotv = dot(n, ray.v);
-        if (ndotv < tolerance)
+        if (abs(ndotv) < tolerance)
             return false;
 
         if (p_point)

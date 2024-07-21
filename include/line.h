@@ -59,14 +59,14 @@ namespace gem
 
         line3f& GEM_VECTORCALL transform(const transform3f& transform);
 
-        line3f& GEM_VECTORCALL transform(const transform3f& transform);
+        line3f& GEM_VECTORCALL transform(const transform1f& transform);
 
         bool GEM_VECTORCALL intersects_line(const line3f& line, float3* p_point, const float tolerance = 0.001f) const;
     };
 
     line3f GEM_VECTORCALL transform_line(const line3f& line, const transform3f& transform);
 
-    line3f GEM_VECTORCALL transform_line(const line3f& line, const transform3f& transform);
+    line3f GEM_VECTORCALL transform_line(const line3f& line, const transform1f& transform);
 
     GEM_INLINE float3 GEM_VECTORCALL line3f::point_closest_to_line(const line3f& line, const float tolerance /*= 0.001f*/) const
     {
@@ -113,7 +113,7 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE line3f& GEM_VECTORCALL line3f::transform(const transform3f& transform)
+    GEM_INLINE line3f& GEM_VECTORCALL line3f::transform(const transform1f& transform)
     {
         float4x3 h = transform.matrix4x3().inverse().transpose();
         v = transform.transform_vector(v);
@@ -152,7 +152,7 @@ namespace gem
         return { transform.transform_vector(line.v), line.m * h };
     }
 
-    GEM_INLINE line3f GEM_VECTORCALL transform_line(const line3f& line, const transform3f& transform)
+    GEM_INLINE line3f GEM_VECTORCALL transform_line(const line3f& line, const transform1f& transform)
     {
         float4x3 h = transform.matrix4x3().inverse().transpose();
         return { transform.transform_vector(line.v), line.m * h };
@@ -223,14 +223,14 @@ namespace gem
 
         line_segment3f& GEM_VECTORCALL transform(const transform3f& transform);
 
-        line_segment3f& GEM_VECTORCALL transform(const transform3f& transform);
+        line_segment3f& GEM_VECTORCALL transform(const transform1f& transform);
 
         bool GEM_VECTORCALL intersects_line(const line_segment3f& line, float3* p_point, const float tolerance = 0.001f) const;
     };
 
     GEM_INLINE line_segment3f GEM_VECTORCALL transform_line_segment(const line_segment3f& line, const transform3f& transform);
 
-    GEM_INLINE line_segment3f GEM_VECTORCALL transform_line_segment(const line_segment3f& line, const transform3f& transform);
+    GEM_INLINE line_segment3f GEM_VECTORCALL transform_line_segment(const line_segment3f& line, const transform1f& transform);
 
     GEM_INLINE float3 GEM_VECTORCALL line_segment3f::point_closest_to_line(const line_segment3f& line, const float tolerance /*= 0.001f*/) const
     {
@@ -324,7 +324,7 @@ namespace gem
         return *this;
     }
 
-    GEM_INLINE line_segment3f& GEM_VECTORCALL line_segment3f::transform(const transform3f& transform)
+    GEM_INLINE line_segment3f& GEM_VECTORCALL line_segment3f::transform(const transform1f& transform)
     {
         a = transform.transform_point(a);
         b = transform.transform_point(b);
@@ -335,7 +335,7 @@ namespace gem
     {
         return { transform.transform_point(line.a), transform.transform_point(line.b) };
     }
-    GEM_INLINE line_segment3f GEM_VECTORCALL transform_line_segment(const line_segment3f& line, const transform3f& transform)
+    GEM_INLINE line_segment3f GEM_VECTORCALL transform_line_segment(const line_segment3f& line, const transform1f& transform)
     {
         return { transform.transform_point(line.a), transform.transform_point(line.b) };
     }
