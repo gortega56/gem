@@ -75,6 +75,8 @@ namespace gem
 
         static range3f unit();
 
+        static range3f unit();
+
         float3 center() const;
 
         float3 extent() const;
