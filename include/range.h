@@ -7,13 +7,14 @@ namespace gem
 {
     struct range2f
     {
-        float2 min, max;
+        float2 min = { +FLT_MAX, +FLT_MAX };
+        float2 max = { -FLT_MAX, -FLT_MAX };
 
         float2 center() const;
 
         float2 extent() const;
 
-        float2 area() const;
+        float area() const;
 
         range2f& GEM_VECTORCALL expand(const float2& point);
         
@@ -34,7 +35,7 @@ namespace gem
         return (max - min) * 0.5f;
     }
 
-    GEM_INLINE float2 range2f::area() const
+    GEM_INLINE float range2f::area() const
     {
         return (max.x - min.x) * (max.y - min.y);
     }
@@ -69,7 +70,8 @@ namespace gem
 
     struct range3f
     {
-        float3 min, max;
+        float3 min = { +FLT_MAX, +FLT_MAX, +FLT_MAX };
+        float3 max = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
 
         static range3f unit();
 
@@ -77,7 +79,7 @@ namespace gem
 
         float3 extent() const;
     
-        float3 volume() const;
+        float volume() const;
 
         range3f& GEM_VECTORCALL expand(const float3& point);
 
@@ -113,7 +115,7 @@ namespace gem
         return (max - min) * 0.5f;
     }
 
-    GEM_INLINE float3 range3f::volume() const
+    GEM_INLINE float range3f::volume() const
     {
         return (max.x - min.x) * (max.y - min.y) * (max.z * min.z);
 
@@ -295,13 +297,14 @@ namespace gem
 
     struct range2d
     {
-        double2 min, max;
+        double2 min = { +DBL_MAX, +DBL_MAX };
+        double2 max = { -DBL_MAX, -DBL_MAX };
 
         double2 center() const;
 
         double2 extent() const;
 
-        double2 area() const;
+        double area() const;
 
         bool degenerate() const;
 
@@ -322,7 +325,7 @@ namespace gem
         return (max - min) * 0.5f;
     }
 
-    GEM_INLINE double2 range2d::area() const
+    GEM_INLINE double range2d::area() const
     {
         return (max.x - min.x) * (max.y - min.y);
     }
@@ -357,13 +360,14 @@ namespace gem
 
     struct range3d
     {
-        double3 min, max;
+        double3 min = { +DBL_MAX, +DBL_MAX, +DBL_MAX };
+        double3 max = { -DBL_MAX, -DBL_MAX, -DBL_MAX };
 
         double3 center() const;
 
         double3 extent() const;
 
-        double3 volume() const;
+        double volume() const;
 
         bool degenerate() const;
 
@@ -384,7 +388,7 @@ namespace gem
         return (max - min) * 0.5f;
     }
 
-    GEM_INLINE double3 range3d::volume() const
+    GEM_INLINE double range3d::volume() const
     {
         return (max.x - min.x) * (max.y - min.y) * (max.z * min.z);
     }
@@ -423,13 +427,14 @@ namespace gem
 
     struct range2i
     {
-        int2 min, max;
+        int2 min = { INT_MAX, INT_MAX };
+        int2 max = { INT_MIN, INT_MIN };
 
         int2 center() const;
 
         int2 extent() const;
 
-        int2 area() const;
+        int area() const;
 
         bool degenerate() const;
 
@@ -450,7 +455,7 @@ namespace gem
         return (max - min) / 2;
     }
 
-    GEM_INLINE int2 range2i::area() const
+    GEM_INLINE int range2i::area() const
     {
         return (max.x - min.x) * (max.y - min.y);
     }
@@ -485,15 +490,14 @@ namespace gem
 
     struct range3i
     {
-        typedef int3 int3;
-
-        int3 min, max;
+        int3 min = { INT_MAX, INT_MAX, INT_MAX };
+        int3 max = { INT_MIN, INT_MIN, INT_MIN };
 
         int3 center() const;
 
         int3 extent() const;
 
-        int3 volume() const;
+        int volume() const;
 
         bool degenerate() const;
 
@@ -514,7 +518,7 @@ namespace gem
         return (max - min) / 2;
     }
 
-    GEM_INLINE int3 range3i::volume() const
+    GEM_INLINE int range3i::volume() const
     {
         return (max.x - min.x) * (max.y - min.y) * (max.z * min.z);
     }
