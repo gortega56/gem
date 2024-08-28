@@ -23,6 +23,8 @@ namespace gem
         bool degenerate() const;
 
         bool GEM_VECTORCALL contains_point(const float2& point) const;
+
+        float2 GEM_VECTORCALL clamp(const float2& point) const;
     };
 
     GEM_INLINE float2 range2f::center() const
@@ -68,6 +70,16 @@ namespace gem
         return *this;
     }
 
+    GEM_INLINE float2 GEM_VECTORCALL range2f::clamp(const float2& point) const
+    {
+        float2 p = point;
+        if (p.x < min.x) p.x = min.x;
+        if (p.y < min.y) p.y = min.y;
+        if (p.x > max.x) p.x = max.x;
+        if (p.y > max.y) p.y = max.y;
+        return p;
+    }
+
     struct range3f
     {
         float3 min = { +FLT_MAX, +FLT_MAX, +FLT_MAX };
@@ -94,6 +106,8 @@ namespace gem
         bool GEM_VECTORCALL contains_point(const float3& point) const;
 
         bool GEM_VECTORCALL intersects_ray(const ray3f& ray, float3* p_point, float tolerance = 0.00f);
+
+        float3 GEM_VECTORCALL clamp(const float3& point) const;
     };
 
     range3f GEM_VECTORCALL transform_range(const range3f& range, const transform3f& transform);
@@ -293,6 +307,18 @@ namespace gem
         o.expand(transform.transform_point({ range.min.x, range.max.y, range.max.z }));
         o.expand(transform.transform_point({ range.max.x, range.max.y, range.max.z }));
         return o;
+    }
+
+    GEM_INLINE float3 GEM_VECTORCALL range3f::clamp(const float3& point) const
+    {
+        float3 p = point;
+        if (p.x < min.x) p.x = min.x;
+        if (p.y < min.y) p.y = min.y;
+        if (p.z < min.z) p.x = min.z;
+        if (p.x > max.x) p.x = max.x;
+        if (p.y > max.y) p.y = max.y;
+        if (p.z > max.z) p.x = max.z;
+        return p;
     }
 
     struct range2d
