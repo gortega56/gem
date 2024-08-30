@@ -1374,7 +1374,7 @@ namespace gem
             2.0f / (right - left), 0.0f, 0.0f, 0.0f,
             0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f / (zFar - zNear), 0.0f,
-            0.0f, 0.0f, zNear / (zNear - zFar), 1.0f
+            0.0f, 0.0f, -zNear / (zFar - zNear), 1.0f
         };
     }
 
@@ -1387,8 +1387,8 @@ namespace gem
         {
             2.0f / (right - left), 0.0f, 0.0f, 0.0f,
             0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
-            0.0f, 0.0f, -1.0f / (zFar - zNear), 0.0f,
-            0.0f, 0.0f, -(zNear / (zNear - zFar)), 1.0f
+            0.0f, 0.0f, 1.0f / (zNear - zFar), 0.0f,
+            0.0f, 0.0f, zNear / (zNear - zFar), 1.0f
         };
     }
 
@@ -1437,8 +1437,8 @@ namespace gem
         {
             zoomX, 0.0f, 0.0f, 0.0f,
             0.0f, zoomY, 0.0f, 0.0f,
-            0.0f, 0.0f, zFar / (zFar - zNear), 1.0f,
-            0.0f, 0.0f, (-zNear * zFar) / (zFar - zNear), 0.0f
+            0.0f, 0.0f,  zFar / (zFar - zNear), 1.0f,
+            0.0f, 0.0f, -zNear * zFar / (zFar - zNear), 0.0f
         };
     }
 
@@ -1453,8 +1453,8 @@ namespace gem
         {
             zoomX, 0.0f, 0.0f, 0.0f,
             0.0f, zoomY, 0.0f, 0.0f,
-            0.0f, 0.0f, -zFar / (zFar - zNear), -1.0f,
-            0.0f, 0.0f, (-zNear * zFar) / (zFar - zNear), 0.0f
+            0.0f, 0.0f, zFar / (zNear - zFar), -1.0f,
+            0.0f, 0.0f, zNear * zFar / (zNear - zFar), 0.0f
         };
     }
 
