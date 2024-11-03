@@ -97,25 +97,22 @@ namespace gem
 
     GEM_INLINE transform3f& GEM_VECTORCALL transform3f::concatenate(const transform3f& b)
     {
-        quatf  _q = q * b.q;
-        float3 _t = b.t + (b.q.transform_point(t * b.s));
-        float3 _s = s * b.s;
-
-        q = _q;
-        t = _t;
-        s = _s;
+        // (A + a)B + b = AB + (aB + b)
+        t = b.q.transform_point(t * b.s) + b.t;   // (aB + b)
+        q = q * b.q;
+        s = s * b.s;
         
         return *this;
     }
 
     GEM_INLINE float3 GEM_VECTORCALL transform3f::transform_vector(const float3& p) const
     {
-        return q.transform_point(p) * s;
+        return q.transform_point(p * s);
     }
 
     GEM_INLINE float3 GEM_VECTORCALL transform3f::transform_point(const float3& p) const
     {
-        return (q.transform_point(p) * s) + t;
+        return q.transform_point(p * s) + t;
     }
 
     GEM_INLINE float4x3 transform3f::matrix4x3() const
@@ -140,7 +137,7 @@ namespace gem
     {
         return transform3f::set(
             a.q * b.q,
-            b.t + (b.q.transform_point(a.t * b.s)),
+            b.q.transform_point(a.t * b.s) + b.t,
             a.s * b.s
         );
     }
