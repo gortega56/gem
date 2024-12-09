@@ -723,6 +723,8 @@ namespace gem
 
     float3 GEM_VECTORCALL operator*(const float3& lhs, const float4x3& rhs);
 
+    float3 GEM_VECTORCALL operator*(const float4& lhs, const float4x3& rhs);
+
     GEM_INLINE float4x3 float4x3::identity()
     {
         return
@@ -1111,6 +1113,16 @@ namespace gem
         };
     }
 
+    GEM_INLINE float3 GEM_VECTORCALL operator*(const float4& lhs, const float4x3& rhs)
+    {
+        return
+        {
+            (lhs.x * rhs.m00) + (lhs.y * rhs.m10) + (lhs.z * rhs.m20) + (lhs.w * rhs.m30),
+            (lhs.x * rhs.m01) + (lhs.y * rhs.m11) + (lhs.z * rhs.m21) + (lhs.w * rhs.m31),
+            (lhs.x * rhs.m02) + (lhs.y * rhs.m12) + (lhs.z * rhs.m22) + (lhs.w * rhs.m32)
+        };
+    }
+
 #pragma endregion
 
 #pragma region float4x4
@@ -1209,6 +1221,8 @@ namespace gem
     float4x4 GEM_VECTORCALL operator-(const float4x4& lhs, const float4x4& rhs);
 
     float4x4 GEM_VECTORCALL operator*(const float4x4& lhs, const float4x4& rhs);
+
+    float4x3 GEM_VECTORCALL operator*(const float4x4& lhs, const float4x3& rhs);
 
     float4x4 GEM_VECTORCALL operator*(const float4x4& lhs, const float rhs);
 
@@ -1742,6 +1756,25 @@ namespace gem
             (lhs.m30 * rhs.m01) + (lhs.m31 * rhs.m11) + (lhs.m32 * rhs.m21) + (lhs.m33 * rhs.m31),
             (lhs.m30 * rhs.m02) + (lhs.m31 * rhs.m12) + (lhs.m32 * rhs.m22) + (lhs.m33 * rhs.m32),
             (lhs.m30 * rhs.m03) + (lhs.m31 * rhs.m13) + (lhs.m32 * rhs.m23) + (lhs.m33 * rhs.m33)
+        };
+    }
+
+    GEM_INLINE float4x3 GEM_VECTORCALL operator*(const float4x4& lhs, const float4x3& rhs)
+    {
+        return
+        {
+            (lhs.m00 * rhs.m00) + (lhs.m01 * rhs.m10) + (lhs.m02 * rhs.m20) + (lhs.m03 * rhs.m30),
+            (lhs.m00 * rhs.m01) + (lhs.m01 * rhs.m11) + (lhs.m02 * rhs.m21) + (lhs.m03 * rhs.m31),
+            (lhs.m00 * rhs.m02) + (lhs.m01 * rhs.m12) + (lhs.m02 * rhs.m22) + (lhs.m03 * rhs.m32),
+            (lhs.m10 * rhs.m00) + (lhs.m11 * rhs.m10) + (lhs.m12 * rhs.m20) + (lhs.m13 * rhs.m30),
+            (lhs.m10 * rhs.m01) + (lhs.m11 * rhs.m11) + (lhs.m12 * rhs.m21) + (lhs.m13 * rhs.m31),
+            (lhs.m10 * rhs.m02) + (lhs.m11 * rhs.m12) + (lhs.m12 * rhs.m22) + (lhs.m13 * rhs.m32),
+            (lhs.m20 * rhs.m00) + (lhs.m21 * rhs.m10) + (lhs.m22 * rhs.m20) + (lhs.m23 * rhs.m30),
+            (lhs.m20 * rhs.m01) + (lhs.m21 * rhs.m11) + (lhs.m22 * rhs.m21) + (lhs.m23 * rhs.m31),
+            (lhs.m20 * rhs.m02) + (lhs.m21 * rhs.m12) + (lhs.m22 * rhs.m22) + (lhs.m23 * rhs.m32),
+            (lhs.m30 * rhs.m00) + (lhs.m31 * rhs.m10) + (lhs.m32 * rhs.m20) + (lhs.m33 * rhs.m30),
+            (lhs.m30 * rhs.m01) + (lhs.m31 * rhs.m11) + (lhs.m32 * rhs.m21) + (lhs.m33 * rhs.m31),
+            (lhs.m30 * rhs.m02) + (lhs.m31 * rhs.m12) + (lhs.m32 * rhs.m22) + (lhs.m33 * rhs.m32),
         };
     }
 
