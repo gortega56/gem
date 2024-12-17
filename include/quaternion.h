@@ -45,6 +45,12 @@ namespace gem
 
         float3 euler() const;
 
+        float3 axis_x() const;
+
+        float3 axis_y() const;
+
+        float3 axis_z() const;
+
         float3 GEM_VECTORCALL transform_point(const float3& p) const;
 
         quatf& GEM_VECTORCALL operator=(const quatf& rhs);
@@ -393,6 +399,54 @@ namespace gem
             o.z = atan2((x * y) + (w * z), 0.5f - (x * x) - (z * z));
         }
         return o;
+    }
+
+    GEM_INLINE float3 quatf::axis_x() const
+    {
+        float y2 = y * y;
+        float z2 = z * z;
+        float wy = w * y;
+        float wz = w * z;
+        float xy = x * y;
+        float xz = x * z;
+        return  
+        {
+            1.0f - (2.0f * y2) - (2.0f * z2),
+            (2.0f * xy) + (2.0f * wz),
+            (2.0f * xz) - (2.0f * wy)
+        };
+    }
+
+    GEM_INLINE float3 quatf::axis_y() const
+    {
+        float x2 = x * x;
+        float z2 = z * z;
+        float wx = w * x;
+        float wz = w * z;
+        float xy = x * y;
+        float yz = y * z;
+        return
+        {
+            (2.0f * xy) - (2.0f * wz),
+            1.0f - (2.0f * x2) - (2.0f * z2),
+            (2.0f * yz) + (2.0f * wx),
+        };
+    }
+
+    GEM_INLINE float3 quatf::axis_z() const
+    {
+        float x2 = x * x;
+        float y2 = y * y;
+        float wx = w * x;
+        float wy = w * y;
+        float xz = x * z;
+        float yz = y * z;
+        return
+        {
+            (2.0f * xz) + (2.0f * wy),
+            (2.0f * yz) - (2.0f * wx),
+            1.0f - (2.0f * x2) - (2.0f * y2)
+        };
     }
 
     GEM_INLINE float3 GEM_VECTORCALL quatf::transform_point(const float3& p) const
