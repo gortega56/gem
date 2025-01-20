@@ -17,6 +17,8 @@ namespace gem
 
         static quatf GEM_VECTORCALL rotate_matrix(const float3x3& m);
 
+        static quatf GEM_VECTORCALL rotate_align(const float3 u, const float3 v);
+
         quatf(const float ix, const float iy, const float iz, const float iw);
 
         quatf(const float* o);
@@ -44,6 +46,8 @@ namespace gem
         float4x4 matrix4x4() const;
 
         float3 euler() const;
+
+        float4 axis_angle() const;
 
         float3 axis_x() const;
 
@@ -213,6 +217,20 @@ namespace gem
             break;
         }
         return o;
+    }
+
+    GEM_INLINE quatf GEM_VECTORCALL quatf::rotate_align(const float3 u, const float3 v)
+    {
+        float c = sqrtf((1.f + dot(u, v)) * 0.5f);
+        float s = 1.f / (2.f * c);
+        float3 a = cross(u, v);
+        return
+        {
+            a.x * s,
+            a.y * s,
+            a.z * s,
+            c
+        };
     }
 
     GEM_INLINE quatf::quatf(const float ix, const float iy, const float iz, const float iw)
@@ -401,6 +419,19 @@ namespace gem
         return o;
     }
 
+    GEM_INLINE float4 quatf::axis_angle() const
+    {
+        float half_angle = acosf(w);
+        float s = 1.f / sinf(half_angle);
+        return
+        {
+            x * s,
+            y * s,
+            z * s,
+            w * half_angle * 2.f
+        };
+    }
+
     GEM_INLINE float3 quatf::axis_x() const
     {
         float y2 = y * y;
@@ -526,12 +557,13 @@ namespace gem
 
     GEM_INLINE quatf quatf::operator-() const
     {
-        quatf out;
-        out.x = -x;
-        out.y = -y;
-        out.z = -z;
-        out.w = -w;
-        return out;
+        return
+        {
+            -x,
+            -y,
+            -z,
+            -w
+        };
     }
 
     GEM_INLINE float GEM_VECTORCALL dot(const quatf& lhs, const quatf& rhs)
