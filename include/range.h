@@ -105,7 +105,7 @@ namespace gem
 
         bool GEM_VECTORCALL contains_point(const float3& point) const;
 
-        bool GEM_VECTORCALL intersects_ray(const ray3f& ray, float3* p_point, float tolerance = 0.00f);
+        bool GEM_VECTORCALL intersects_ray(const ray3f& ray, float3* phit, float* thit, float tolerance = 0.01f);
 
         float3 GEM_VECTORCALL clamp(const float3& point) const;
     };
@@ -225,7 +225,7 @@ namespace gem
             && min.z <= point.z && point.z <= max.z;
     }
 
-    GEM_INLINE bool GEM_VECTORCALL range3f::intersects_ray(const ray3f& ray, float3* p_point, float tolerance /*= 0.00f*/)
+    GEM_INLINE bool GEM_VECTORCALL range3f::intersects_ray(const ray3f& ray, float3* p, float* t, float tolerance /*= 0.01f*/)
     {
         https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
         float3 iv =
@@ -271,8 +271,11 @@ namespace gem
         if (tzmax < tmax)
             tmax = tzmax;
 
-        if (p_point)
-            *p_point = ray.p + tmin * ray.v;
+        if (p)
+            *p = ray.p + tmin * ray.v;
+
+        if (t)
+            *t = tmin;
 
         return true;
     }
