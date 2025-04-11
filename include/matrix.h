@@ -1154,13 +1154,13 @@ namespace gem
 
         static float4x4 GEM_VECTORCALL translate(const float3& t);
 
-        static float4x4 GEM_VECTORCALL orthographic_lh(const float left, const float right, const float bottom, const float top, const float zNear, const float zFar);
+        static float4x4 GEM_VECTORCALL orthographic_lh(const float l, const float r, const float b, const float t, const float zn, const float zf);
 
-        static float4x4 GEM_VECTORCALL orthographic_rh(const float left, const float right, const float bottom, const float top, const float zNear, const float zFar);
+        static float4x4 GEM_VECTORCALL orthographic_rh(const float l, const float r, const float b, const float t, const float zn, const float zf);
 
-        static float4x4 GEM_VECTORCALL orthographic_normalized_lh(const float left, const float right, const float bottom, const float top, const float zNear, const float zFar);
+        static float4x4 GEM_VECTORCALL orthographic_normalized_lh(const float l, const float r, const float b, const float t, const float zn, const float zf);
 
-        static float4x4 GEM_VECTORCALL orthographic_normalized_rh(const float left, const float right, const float bottom, const float top, const float zNear, const float zFar);
+        static float4x4 GEM_VECTORCALL orthographic_normalized_rh(const float l, const float r, const float b, const float t, const float zn, const float zf);
 
         static float4x4 GEM_VECTORCALL perspective_lh(const float fovy, const float aspectRatio, const float zNear, const float zFar);
 
@@ -1351,58 +1351,58 @@ namespace gem
     }
 
     GEM_INLINE float4x4 GEM_VECTORCALL float4x4::orthographic_lh(
-        const float left, const float right,
-        const float bottom, const float top,
-        const float zNear, const float zFar)
+        const float l, const float r, 
+        const float b, const float t, 
+        const float zn, const float zf)
     {
         return
         {
-            2.0f / (right - left), 0.0f, 0.0f, 0.0f,
-            0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
-            0.0f, 0.0f, 2.0f / (zFar - zNear), 0.0f,
-            0.0f, 0.0f, -((zFar + zNear) / (zFar - zNear)), 1.0f
+            2.0f / (r - l), 0.0f, 0.0f, 0.0f,
+            0.0f, 2.0f / (t - b), 0.0f, 0.0f,
+            0.0f, 0.0f, 2.0f / (zf - zn), 0.0f,
+            (r + l) / (l - r),  (t + b) / (b - t), -((zf + zn) / (zf - zn)), 1.0f
         };
     }
 
     GEM_INLINE float4x4 GEM_VECTORCALL float4x4::orthographic_rh(
-        const float left, const float right,
-        const float bottom, const float top,
-        const float zNear, const float zFar)
+        const float l, const float r,
+        const float b, const float t,
+        const float zn, const float zf)
     {
         return
         {
-            2.0f / (right - left), 0.0f, 0.0f, 0.0f,
-            0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
-            0.0f, 0.0f, -2.0f / (zFar - zNear), 0.0f,
-            0.0f, 0.0f, -((zFar + zNear) / (zFar - zNear)), 1.0f
+            2.0f / (r - l), 0.0f, 0.0f, 0.0f,
+            0.0f, 2.0f / (t - b), 0.0f, 0.0f,
+            0.0f, 0.0f, -2.0f / (zf - zn), 0.0f,
+            (r + l) / (l - r),  (t + b) / (b - t), -((zf + zn) / (zf - zn)), 1.0f
         };
     }
 
     GEM_INLINE float4x4 GEM_VECTORCALL float4x4::orthographic_normalized_lh(
-        const float left, const float right,
-        const float bottom, const float top,
-        const float zNear, const float zFar)
+        const float l, const float r,
+        const float b, const float t,
+        const float zn, const float zf)
     {
         return
         {
-            2.0f / (right - left), 0.0f, 0.0f, 0.0f,
-            0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
-            0.0f, 0.0f, 1.0f / (zFar - zNear), 0.0f,
-            0.0f, 0.0f, -zNear / (zFar - zNear), 1.0f
+            2.0f / (r - l), 0.0f, 0.0f, 0.0f,
+            0.0f, 2.0f / (t - b), 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f / (zf - zn), 0.0f,
+            (r + l) / (l - r),  (t + b) / (b - t), zn / (zn - zf), 1.0f
         };
     }
 
     GEM_INLINE float4x4 GEM_VECTORCALL float4x4::orthographic_normalized_rh(
-        const float left, const float right,
-        const float bottom, const float top,
-        const float zNear, const float zFar)
+        const float l, const float r,
+        const float b, const float t,
+        const float zn, const float zf)
     {
         return
         {
-            2.0f / (right - left), 0.0f, 0.0f, 0.0f,
-            0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
-            0.0f, 0.0f, 1.0f / (zNear - zFar), 0.0f,
-            0.0f, 0.0f, zNear / (zNear - zFar), 1.0f
+            2.0f / (r - l), 0.0f, 0.0f, 0.0f,
+            0.0f, 2.0f / (t - b), 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f / (zn - zf), 0.0f,
+            (r + l) / (l - r),  (t + b) / (b - t), zn / (zn - zf), 1.0f
         };
     }
 
