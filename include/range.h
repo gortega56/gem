@@ -103,6 +103,8 @@ namespace gem
 
         bool degenerate() const;
 
+        bool GEM_VECTORCALL overlaps(const range3f& range);
+
         bool GEM_VECTORCALL contains_point(const float3& point) const;
 
         bool GEM_VECTORCALL intersects_ray(const ray3f& ray, float3* phit, float* thit, float tolerance = 0.01f);
@@ -167,8 +169,8 @@ namespace gem
             { max.x, max.y, max.z },
         };
 
-        min = { FLT_MAX, FLT_MAX, FLT_MAX };
-        max = { FLT_MIN, FLT_MIN, FLT_MIN };
+        min = { +FLT_MAX, +FLT_MAX, +FLT_MAX };
+        max = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
         
         expand(transform.transform_point(points[0]));
         expand(transform.transform_point(points[1]));
@@ -196,8 +198,8 @@ namespace gem
             { max.x, max.y, max.z },
         };
 
-        min = { FLT_MAX, FLT_MAX, FLT_MAX };
-        max = { FLT_MIN, FLT_MIN, FLT_MIN };
+        min = { +FLT_MAX, +FLT_MAX, +FLT_MAX };
+        max = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
 
         expand(transform.transform_point(points[0]));
         expand(transform.transform_point(points[1]));
@@ -216,6 +218,13 @@ namespace gem
         return min.x > max.x 
             || min.y > max.y
             || min.z > min.z;
+    }
+
+    GEM_INLINE bool GEM_VECTORCALL range3f::overlaps(const range3f& range)
+    {
+        return (min.x <= range.max.x && max.x >= range.min.x)
+            && (min.y <= range.max.y && max.y >= range.min.y)
+            && (min.z <= range.max.z && max.z >= range.min.z);
     }
 
     GEM_INLINE bool GEM_VECTORCALL range3f::contains_point(const float3& point) const
@@ -283,8 +292,6 @@ namespace gem
     GEM_INLINE range3f GEM_VECTORCALL transform_range(const range3f& range, const transform3f& transform)
     {
         range3f o;
-        o.min = { FLT_MAX, FLT_MAX, FLT_MAX };
-        o.max = { FLT_MIN, FLT_MIN, FLT_MIN };
         o.expand(transform.transform_point({ range.min.x, range.min.y, range.min.z }));
         o.expand(transform.transform_point({ range.max.x, range.min.y, range.min.z }));
         o.expand(transform.transform_point({ range.min.x, range.max.y, range.min.z }));
@@ -299,8 +306,6 @@ namespace gem
     GEM_INLINE range3f GEM_VECTORCALL transform_range(const range3f& range, const transform1f& transform)
     {
         range3f o;
-        o.min = { FLT_MAX, FLT_MAX, FLT_MAX };
-        o.max = { FLT_MIN, FLT_MIN, FLT_MIN };
         o.expand(transform.transform_point({ range.min.x, range.min.y, range.min.z }));
         o.expand(transform.transform_point({ range.max.x, range.min.y, range.min.z }));
         o.expand(transform.transform_point({ range.min.x, range.max.y, range.min.z }));
