@@ -110,6 +110,8 @@ namespace gem
         bool GEM_VECTORCALL intersects_ray(const ray3f& ray, float3* phit, float* thit, float tolerance = 0.01f);
 
         float3 GEM_VECTORCALL clamp(const float3& point) const;
+
+        float3 GEM_VECTORCALL closest_point(const float3& point) const;
     };
 
     range3f GEM_VECTORCALL transform_range(const range3f& range, const transform3f& transform);
@@ -327,6 +329,18 @@ namespace gem
         if (p.y > max.y) p.y = max.y;
         if (p.z > max.z) p.x = max.z;
         return p;
+    }
+
+    GEM_INLINE float3 GEM_VECTORCALL range3f::closest_point(const float3& point) const
+    {
+        float3 result = point;
+        if (result.x < min.x) result.x = min.x;
+        if (result.x > max.x) result.x = max.x;
+        if (result.y < min.y) result.y = min.y;
+        if (result.y > max.y) result.y = max.y;
+        if (result.z < min.z) result.z = min.z;
+        if (result.z > max.z) result.z = max.z;
+        return result;
     }
 
     struct range2d
