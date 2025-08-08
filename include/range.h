@@ -334,12 +334,9 @@ namespace gem
     GEM_INLINE float3 GEM_VECTORCALL range3f::closest_point(const float3& point) const
     {
         float3 result = point;
-        if (result.x < min.x) result.x = min.x;
-        if (result.x > max.x) result.x = max.x;
-        if (result.y < min.y) result.y = min.y;
-        if (result.y > max.y) result.y = max.y;
-        if (result.z < min.z) result.z = min.z;
-        if (result.z > max.z) result.z = max.z;
+        if (result.x < min.x) result.x = min.x; else if (result.x > max.x) result.x = max.x;
+        if (result.y < min.y) result.y = min.y; else if (result.y > max.y) result.y = max.y;
+        if (result.z < min.z) result.z = min.z; else if (result.z > max.z) result.z = max.z;
         return result;
     }
 
