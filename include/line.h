@@ -49,7 +49,7 @@ namespace gem
     {
         float3 v, m;
 
-        float3 GEM_VECTORCALL point_closest_to_line(const line3f& line, const float tolerance = 0.001f) const;
+     //   float3 GEM_VECTORCALL point_closest_to_line(const line3f& line, const float tolerance = 0.001f) const;
 
         float GEM_VECTORCALL distance_to_line(const line3f& line, const float tolerance = 0.001f) const;
 
@@ -68,26 +68,26 @@ namespace gem
 
     line3f GEM_VECTORCALL transform_line(const line3f& line, const transform1f& transform);
 
-    GEM_INLINE float3 GEM_VECTORCALL line3f::point_closest_to_line(const line3f& line, const float tolerance /*= 0.001f*/) const
-    {
-        float3 v0 = v;
-        float3 v1 = line.v;
-        float3 p0 = cross(v0, m) * (1.0f / length_squared(v0));
-        float3 p1 = cross(v1, line.m) * (1.0f / length_squared(v1));
-        float3 dp = p1 - p0;
-        float v00 = length_squared(v0);
-        float v11 = length_squared(v1);
-        float v01 = dot(v0, v1);
-        float det = (v01 * v01) - (v00 * v11);
-        if (det < tolerance)
-            return sqrtf(length_squared(cross(dp, v1)) / v01);
+    //GEM_INLINE float3 GEM_VECTORCALL line3f::point_closest_to_line(const line3f& line, const float tolerance /*= 0.001f*/) const
+    //{
+    //    float3 v0 = v;
+    //    float3 v1 = line.v;
+    //    float3 p0 = cross(v0, m) * (1.0f / length_squared(v0));
+    //    float3 p1 = cross(v1, line.m) * (1.0f / length_squared(v1));
+    //    float3 dp = p1 - p0;
+    //    float v00 = length_squared(v0);
+    //    float v11 = length_squared(v1);
+    //    float v01 = dot(v0, v1);
+    //    float det = (v01 * v01) - (v00 * v11);
+    //    if (det < tolerance)
+    //        return sqrtf(length_squared(cross(dp, v1)) / v01);
 
-        det = 1.0f / det;
-        float dpv0 = dot(dp, v0);
-        float dpv1 = dot(dp, v1);
-        float t = ((v01 * dpv1) - (v11 * dpv0)) * det;
-        return p0 + v0 * t;
-    }
+    //    det = 1.0f / det;
+    //    float dpv0 = dot(dp, v0);
+    //    float dpv1 = dot(dp, v1);
+    //    float t = ((v01 * dpv1) - (v11 * dpv0)) * det;
+    //    return p0 + v0 * t;
+    //}
 
     GEM_INLINE float GEM_VECTORCALL line3f::distance_to_line(const line3f& line, const float tolerance /*= 0.001f*/) const
     {
@@ -213,7 +213,7 @@ namespace gem
     {
         float3 a, b;
 
-        float3 GEM_VECTORCALL point_closest_to_line(const line_segment3f& line, const float tolerance = 0.001f) const;
+      //  float3 GEM_VECTORCALL point_closest_to_line(const line_segment3f& line, const float tolerance = 0.001f) const;
         
         float GEM_VECTORCALL distance_to_line(const line_segment3f& line, const float tolerance = 0.001f) const;
 
@@ -232,26 +232,26 @@ namespace gem
 
     GEM_INLINE line_segment3f GEM_VECTORCALL transform_line_segment(const line_segment3f& line, const transform1f& transform);
 
-    GEM_INLINE float3 GEM_VECTORCALL line_segment3f::point_closest_to_line(const line_segment3f& line, const float tolerance /*= 0.001f*/) const
-    {
-        float3 v0 = b - a;
-        float3 v1 = line.b - line.a;
-        float3 dp = line.a - a;
-        float v00 = length_squared(v0);
-        float v11 = length_squared(v1);
-        float v01 = dot(v0, v1);
-        float det = (v01 * v01) - (v00 * v11);
-        if (det < tolerance)
-            return sqrtf(length_squared(cross(dp, v1)) / v01);
-
-        det = 1.0f / det;
-        float dpv0 = dot(dp, v0);
-        float dpv1 = dot(dp, v1);
-        float t = ((v01 * dpv1) - (v11 * dpv0)) * det;
-        if (t < 0) t = 0;
-        if (t > 1) t = 1;
-        return line.a + v0 * t;
-    }
+    //GEM_INLINE float3 GEM_VECTORCALL line_segment3f::point_closest_to_line(const line_segment3f& line, const float tolerance /*= 0.001f*/) const
+    //{
+    //    float3 v0 = b - a;
+    //    float3 v1 = line.b - line.a;
+    //    float3 dp = line.a - a;
+    //    float v00 = length_squared(v0);
+    //    float v11 = length_squared(v1);
+    //    float v01 = dot(v0, v1);
+    //    float det = (v01 * v01) - (v00 * v11);
+    //    if (det < tolerance)
+    //        return sqrtf(length_squared(cross(dp, v1)) / v01);
+    //
+    //    det = 1.0f / det;
+    //    float dpv0 = dot(dp, v0);
+    //    float dpv1 = dot(dp, v1);
+    //    float t = ((v01 * dpv1) - (v11 * dpv0)) * det;
+    //    if (t < 0) t = 0;
+    //    if (t > 1) t = 1;
+    //    return line.a + v0 * t;
+    //}
 
     GEM_INLINE float GEM_VECTORCALL line_segment3f::distance_to_line(const line_segment3f& line, const float tolerance /*= 0.001f*/) const
     {

@@ -350,17 +350,17 @@ namespace gem
     {
         float x, y, z;
 
-        float3(const float ix, const float iy, const float iz);
+        static float3 zero();
 
-        float3(const float* p_components);
+        static float3 one();
 
-        float3(const float component);
+        static float3 components(const float x, const float y, const float z);
 
-        float3(const float2& component, const float z);
+        static float3 components(const float* xyz);
 
-        float3(const float3& o);
+        static float3 components(const float2 xy, const float z);
 
-        float3() = default;
+        static float3 scalar(const float s);
 
         float length_squared() const;
 
@@ -375,8 +375,6 @@ namespace gem
         float3& GEM_VECTORCALL operator-=(const float3& rhs);
 
         float3& GEM_VECTORCALL operator*=(const float3& rhs);
-
-        float3& GEM_VECTORCALL operator=(const float3& rhs);
 
         float3& operator*=(const float rhs);
 
@@ -427,44 +425,34 @@ namespace gem
 
     float3 GEM_VECTORCALL operator*(const float lhs, const float3& rhs);
 
-    GEM_INLINE float3::float3(const float ix, const float iy, const float iz)
-        : x(ix)
-        , y(iy)
-        , z(iz)
+    GEM_INLINE float3 float3::zero()
     {
-
+        return { 0, 0, 0 };
     }
 
-    GEM_INLINE float3::float3(const float* p_components)
-        : x(p_components[0])
-        , y(p_components[1])
-        , z(p_components[2])
+    GEM_INLINE float3 float3::one()
     {
-
+        return { 1, 1, 1 };
     }
 
-    GEM_INLINE float3::float3(const float component)
-        : x(component)
-        , y(component)
-        , z(component)
+    GEM_INLINE float3 float3::components(const float x, const float y, const float z)
     {
-
+        return { x, y, z };
     }
 
-    GEM_INLINE float3::float3(const float2& component, const float z)
-        : x(component.x)
-        , y(component.y)
-        , z(z)
+    GEM_INLINE float3 float3::components(const float* xyz)
     {
-
+        return { xyz[0], xyz[1], xyz[2] };
     }
 
-    GEM_INLINE float3::float3(const float3& o)
-        : x(o.x)
-        , y(o.y)
-        , z(o.z)
+    GEM_INLINE float3 float3::components(const float2 xy, const float z)
     {
+        return { xy.x, xy.y, z };
+    }
 
+    GEM_INLINE float3 float3::scalar(const float s)
+    {
+        return { s, s, s };
     }
 
     GEM_INLINE float float3::length_squared() const
@@ -521,14 +509,6 @@ namespace gem
         x *= rhs.x;
         y *= rhs.y;
         z *= rhs.z;
-        return *this;
-    }
-
-    GEM_INLINE float3& GEM_VECTORCALL float3::operator=(const float3& rhs)
-    {
-        x = rhs.x;
-        y = rhs.y;
-        z = rhs.z;
         return *this;
     }
 
