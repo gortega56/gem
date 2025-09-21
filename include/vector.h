@@ -354,13 +354,13 @@ namespace gem
 
         static float3 one();
 
-        static float3 components(const float x, const float y, const float z);
+        static float3 init(const float x, const float y, const float z);
 
-        static float3 components(const float* xyz);
+        static float3 init(const float xyz);
 
-        static float3 components(const float2 xy, const float z);
+        static float3 init(const float* xyz);
 
-        static float3 scalar(const float s);
+        static float3 init(const float2 xy, const float z);
 
         float length_squared() const;
 
@@ -435,24 +435,24 @@ namespace gem
         return { 1, 1, 1 };
     }
 
-    GEM_INLINE float3 float3::components(const float x, const float y, const float z)
+    GEM_INLINE float3 float3::init(const float x, const float y, const float z)
     {
         return { x, y, z };
     }
 
-    GEM_INLINE float3 float3::components(const float* xyz)
+    GEM_INLINE float3 float3::init(const float xyz)
+    {
+        return { xyz, xyz, xyz };
+    }
+
+    GEM_INLINE float3 float3::init(const float* xyz)
     {
         return { xyz[0], xyz[1], xyz[2] };
     }
 
-    GEM_INLINE float3 float3::components(const float2 xy, const float z)
+    GEM_INLINE float3 float3::init(const float2 xy, const float z)
     {
         return { xy.x, xy.y, z };
-    }
-
-    GEM_INLINE float3 float3::scalar(const float s)
-    {
-        return { s, s, s };
     }
 
     GEM_INLINE float float3::length_squared() const

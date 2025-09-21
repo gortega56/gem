@@ -668,6 +668,10 @@ namespace gem
 
         static float4x3 GEM_VECTORCALL scale(const float3& s);
 
+        static float4x3 GEM_VECTORCALL scale(const float x, const float y, const float z);
+
+        static float4x3 GEM_VECTORCALL scale(const float xyz);
+
         static float4x3 GEM_VECTORCALL translate(const float3& t);
 
         float4x3(const float u1, const float u2, const float u3,
@@ -828,13 +832,33 @@ namespace gem
     {
         return
         {
-            s.x, 0.0f, 0.0f,
-            0.0f, s.y, 0.0f,
+            s.x,  0.0f, 0.0f,
+            0.0f, s.y,  0.0f,
             0.0f, 0.0f, s.z,
-            0.0f, 0.0f, 0.0
+            0.0f, 0.0f, 0.0f
         };
     }
 
+    GEM_INLINE float4x3 GEM_VECTORCALL float4x3::scale(const float sx, const float sy, const float sz)
+    {
+        return
+        {
+            sx,   0.0f, 0.0f,
+            0.0f, sy,   0.0f,
+            0.0f, 0.0f, sz,
+            0.0f, 0.0f, 0.0f
+        };
+    }
+    GEM_INLINE float4x3 GEM_VECTORCALL float4x3::scale(const float s)
+    {
+        return
+        {
+            s,    0.0f, 0.0f,
+            0.0f, s,    0.0f,
+            0.0f, 0.0f, s,
+            0.0f, 0.0f, 0.0
+        };
+    }
     GEM_INLINE float4x3 GEM_VECTORCALL float4x3::translate(const float3& t)
     {
         return
@@ -1152,6 +1176,10 @@ namespace gem
 
         static float4x4 GEM_VECTORCALL scale(const float3& s);
 
+        static float4x4 GEM_VECTORCALL scale(const float sx, const float sy, const float sz);
+
+        static float4x4 GEM_VECTORCALL scale(const float s);
+
         static float4x4 GEM_VECTORCALL translate(const float3& t);
 
         static float4x4 GEM_VECTORCALL orthographic_lh(const float l, const float r, const float b, const float t, const float zn, const float zf);
@@ -1336,6 +1364,28 @@ namespace gem
             0.0f, s.y, 0.0f, 0.0f,
             0.0f, 0.0f, s.z, 0.0f,
             0.0f, 0.0f, 0.0, 1.0f
+        };
+    }
+
+    GEM_INLINE float4x4 GEM_VECTORCALL float4x4::scale(const float sx, const float sy, const float sz)
+    {
+        return
+        {
+            sx,   0.0f, 0.0f, 0.0f,
+            0.0f, sy,   0.0f, 0.0f,
+            0.0f, 0.0f, sz,   0.0f,
+            0.0f, 0.0f, 0.0,  1.0f
+        };
+    }
+
+    GEM_INLINE float4x4 GEM_VECTORCALL float4x4::scale(const float s)
+    {
+        return
+        {
+            s,    0.0f, 0.0f, 0.0f,
+            0.0f, s,    0.0f, 0.0f,
+            0.0f, 0.0f, s,    0.0f,
+            0.0f, 0.0f, 0.0,  1.0f
         };
     }
 

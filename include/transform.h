@@ -242,12 +242,12 @@ namespace gem
 
     GEM_INLINE float4x3 transform1f::matrix4x3() const
     {
-        return q.matrix4x3() * float4x3::scale(float3::scalar(s)) * float4x3::translate(t);
+        return q.matrix4x3() * float4x3::scale(s) * float4x3::translate(t);
     }
 
     GEM_INLINE float4x4 transform1f::matrix4x4() const
     {
-        return q.matrix4x4() * float4x4::scale(float3::scalar(s)) * float4x4::translate(t);
+        return q.matrix4x4() * float4x4::scale(s) * float4x4::translate(t);
     }
 
     GEM_INLINE transform1f& GEM_VECTORCALL transform1f::operator=(const transform1f& o)
