@@ -5,6 +5,12 @@
 
 namespace gem
 {
+    struct range1f
+    {
+        float min = +FLT_MAX;
+        float max = -FLT_MAX;
+    };
+
     struct range2f
     {
         float2 min = { +FLT_MAX, +FLT_MAX };
