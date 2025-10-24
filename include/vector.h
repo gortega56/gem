@@ -399,6 +399,8 @@ namespace gem
 
     float GEM_VECTORCALL length(const float3& rhs);
 
+    float3 GEM_VECTORCALL normalize(const float x, const float y, const float z);
+
     float3 GEM_VECTORCALL normalize(const float3& rhs);
 
     float3 GEM_VECTORCALL safe_normalize(const float3& rhs, const float tolerance = 0.001f);
@@ -577,6 +579,17 @@ namespace gem
     GEM_INLINE float GEM_VECTORCALL length(const float3& rhs)
     {
         return sqrtf((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z));
+    }
+
+    GEM_INLINE float3 GEM_VECTORCALL normalize(const float x, const float y, const float z)
+    {
+        float il = 1.0f / sqrtf((x * x) + (y * y) + (z * z));
+        return
+        {
+            x * il,
+            y * il,
+            z * il
+        };
     }
 
     GEM_INLINE float3 GEM_VECTORCALL normalize(const float3& rhs)
