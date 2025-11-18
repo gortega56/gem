@@ -230,9 +230,9 @@ namespace gem
 
     GEM_INLINE bool GEM_VECTORCALL range3f::overlaps(const range3f& range)
     {
-        return (min.x <= range.max.x && max.x >= range.min.x)
-            && (min.y <= range.max.y && max.y >= range.min.y)
-            && (min.z <= range.max.z && max.z >= range.min.z);
+        return (min.x <= range.max.x && range.min.x <= max.x)
+            && (min.y <= range.max.y && range.min.y <= max.y)
+            && (min.z <= range.max.z && range.min.z <= max.z);
     }
 
     GEM_INLINE bool GEM_VECTORCALL range3f::contains_point(const float3& point) const
