@@ -19,6 +19,9 @@ target_sources(gem
     ${CMAKE_CURRENT_SOURCE_DIR}/include/line.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/plane.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/range.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/sphere.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/cylinder.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/capsule.h
 )
 
 target_include_directories(gem
