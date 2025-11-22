@@ -97,6 +97,8 @@ namespace gem
 
         float3 extent() const;
     
+        float3 dimension() const;
+
         float volume() const;
 
         range3f& GEM_VECTORCALL expand(const float3& point);
@@ -137,6 +139,11 @@ namespace gem
     GEM_INLINE float3 range3f::extent() const
     {
         return (max - min) * 0.5f;
+    }
+
+    GEM_INLINE float3 range3f::dimension() const
+    {
+        return (max - min);
     }
 
     GEM_INLINE float range3f::volume() const

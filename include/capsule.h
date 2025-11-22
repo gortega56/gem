@@ -12,6 +12,8 @@ namespace gem
         float3 b = {};
         float r = 0;
 
+        static capsule3f unit();
+
         float3 center() const;
 
         capsule3f& GEM_VECTORCALL transform(const transform3f& transform);
@@ -24,6 +26,15 @@ namespace gem
 
         float3 GEM_VECTORCALL closest_point(const float3& point) const;
     };
+
+    GEM_INLINE capsule3f capsule3f::unit()
+    {
+        return {
+            { 0, 0, -1 },
+            { 0, 0, +1 },
+            1.f
+        };
+    }
 
     GEM_INLINE float3 capsule3f::center() const
     {
@@ -53,7 +64,7 @@ namespace gem
         if (t < 0.f) t = 0.f;
         if (t > 1.f) t = 1.f;
         float3 d = lerp(a, b, t);
-        bool l = length_squared(d - c);
+        float l = length_squared(d - c);
         return l <= (r * r);
     }
 
