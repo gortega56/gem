@@ -9,12 +9,19 @@ namespace gem
         float3 c = {};
         float r = 0;
 
+        static sphere3f unit();
+
         bool GEM_VECTORCALL contains_point(const float3& point) const;
 
         bool GEM_VECTORCALL intersects_ray(const ray3f& ray, float3* phit, float* thit);
 
         float3 GEM_VECTORCALL closest_point(const float3& point) const;
     };
+
+    GEM_INLINE sphere3f sphere3f::unit()
+    {
+        return { { 0.f, 0.f, 0.f }, 1.f };
+    }
 
     GEM_INLINE bool GEM_VECTORCALL sphere3f::contains_point(const float3& point) const
     {
@@ -56,8 +63,8 @@ namespace gem
             }
         }
 
-        t[0] = t0;
-        p[0] = ray.p + ray.v * t[0];
+        if (t) t[0] = t0;
+        if (p) p[0] = ray.p + ray.v * t0;
 
         return true;
     }

@@ -7,8 +7,8 @@ namespace gem
 {
     struct cylinder3f
     {
-        float3 a = {};
-        float3 b = {};
+        float3 min = {};
+        float3 max = {};
         float r = 0;
 
         static cylinder3f unit();
@@ -29,8 +29,8 @@ namespace gem
     GEM_INLINE cylinder3f cylinder3f::unit()
     {
         return {
-            { 0, 0, -1 },
-            { 0, 0, +1 },
+            { 0, 0, -0.5f },
+            { 0, 0, +0.5f },
             1.f
         };
     }
@@ -38,34 +38,34 @@ namespace gem
 
     GEM_INLINE float3 cylinder3f::center() const
     {
-        return (a + b) * 0.5f;
+        return (min + max) * 0.5f;
     }
 
     GEM_INLINE cylinder3f& GEM_VECTORCALL cylinder3f::transform(const transform3f& transform)
     {
-        a = transform.transform_point(a);
-        b = transform.transform_point(b);
+        min = transform.transform_point(min);
+        max = transform.transform_point(max);
 
-        // NOTE(gortega): Ignore scale for radius since nonuniform scale would no longer be a capsule
+        // NOTE(gortega): Ignore scale for radius since nonuniform scale would no longer be min capsule
     }
 
     GEM_INLINE cylinder3f& GEM_VECTORCALL cylinder3f::transform(const transform1f& transform)
     {
-        a = transform.transform_point(a);
-        b = transform.transform_point(b);
+        min = transform.transform_point(min);
+        max = transform.transform_point(max);
         r = r * transform.s;
     }
 
     GEM_INLINE bool GEM_VECTORCALL cylinder3f::contains_point(const float3& point) const
     {
         float3 c = point;
-        float3 ab = b - a;
-        float3 ac = c - a;
+        float3 ab = max - min;
+        float3 ac = c - min;
         float t = dot(ac, ab) / length_squared(ab);
         bool result = false;
         if (0.f <= t && t <= 1)
         {
-            float3 d = lerp(a, b, t);
+            float3 d = lerp(min, max, t);
             float l = length_squared(d - c);
             result = (l <= (r * r));
         }
@@ -73,27 +73,31 @@ namespace gem
         return result;
     }
 
-    GEM_INLINE bool GEM_VECTORCALL cylinder3f::intersects_ray(const ray3f& ray, float3* p, float* t, float tolerance /*= 0.01f*/)
+    GEM_INLINE bool GEM_VECTORCALL cylinder3f::intersects_ray(const ray3f& ray, float3* p, float* thit, float tolerance /*= 0.01f*/)
     {
         // NOTE(gortega): RTCD p197
-        float3 d = b - a;
-        float3 m = ray.p - a;
+        float3 d = max - min;
+        float3 m = ray.p - min;
         float3 n = ray.v;
         float md = dot(m, d);
         float nd = dot(n, d);
         float dd = dot(d, d);
 
         // Test if ray is fully outside each end of the cylinder
-        if (md < 0.f && md + nd < 0.f) return false;
-        if (md > dd && md + nd > dd) return false;
+        if (md < 0.f && nd < 0.f) return false;
+        if (md > dd  && nd > 0.f) return false;
+        
+        /*if (md < 0.f && md + nd < 0.f) return false;
+        if (md > dd && md + nd > dd) return false;*/
 
         float nn = dot(n, n);
         float mn = dot(m, n);
         float a = dd * nn - nd * nd;
         float k = dot(m, m) - r * r;
         float c = dd * k - md * md;
+        float t = FLT_MAX;
 
-        // Test if ray is parallel
+        // Test if ray is parallel    
         if (fabsf(a) < tolerance)
         {
             // Test if outide
@@ -104,16 +108,19 @@ namespace gem
 
             if (md < 0.f)
             {
-                t[0] = -mn / nn;
+                t = -mn / nn;
             }
             else if (md > dd)
             {
-                t[0] = (nd - mn) / nn;
+                t = (nd - mn) / nn;
             }
             else
             {
-                t[0] = 0.f;
+                t = 0.f;
             }
+
+            if (thit) thit[0] = t;
+            if (p) p[0] = ray.p * ray.v * t;
 
             return true;
         }
@@ -126,36 +133,47 @@ namespace gem
             return false;
         }
 
-        t[0] = (-b - sqrtf(discr)) / a;
-        if (t[0] < 0.f)
+        t = (-b - sqrtf(discr)) / a;
+        if (t < 0.f /*|| t > 1.f*/)
         {
             return false;
         }
 
-        if (md + t[0] * nd < 0.f)
+        if (md + t * nd < 0.f)
         {
             if (nd <= 0.f)
             {
                 return false;
             }
 
-            t[0] = -md / nd;
+            t = -md / nd;
 
-            return k + 2 * t[0] * (mn + t[0] * nn) <= 0.f;
+            if (thit) thit[0] = t;
+            if (p) p[0] = ray.p * ray.v * t;
+
+            //return k + 2 * t * (mn + t * nn) <= 0.f;
+            return length_squared((ray.p + ray.v * t) - min) <= r * r;
+
         }
-        else if (md + t[0] * nd > dd)
+        else if (md + t * nd > dd)
         {
             if (nd >= 0.f)
             {
                 return false;
             }
 
-            t[0] = (dd - md) / nd;
+            t = (dd - md) / nd;
 
-            return k + dd - 2 * md + t[0] * (2 * (mn - nd) + t[0] * nn) <= 0.f;
+            if (thit) thit[0] = t;
+            if (p) p[0] = ray.p * ray.v * t;
+
+            //return k + dd - 2 * md + t * (2 * (mn - nd) + t * nn) <= 0.f;
+            return length_squared((ray.p + ray.v * t) - max) <= r * r;
+
         }
 
-        p[0] = ray.p * ray.v * t[0];
+        if (thit) thit[0] = t;
+        if (p) p[0] = ray.p * ray.v * t;
 
         return true;
     }
@@ -163,12 +181,12 @@ namespace gem
     GEM_INLINE float3 GEM_VECTORCALL cylinder3f::closest_point(const float3& point) const
     {
         float3 c = point;
-        float3 ab = b - a;
-        float3 ac = c - a;
+        float3 ab = max - min;
+        float3 ac = c - min;
         float t = dot(ac, ab) / length_squared(ab);
         if (t < 0.f) t = 0.f;
         if (t > 1.f) t = 1.f;
-        float3 ac_para_ab = lerp(a, b, t);
+        float3 ac_para_ab = lerp(min, max, t);
         float3 ac_perb_ab = ac - ac_para_ab;
         float l = ac_perb_ab.length();
         ac_perb_ab *= (1.f / l);

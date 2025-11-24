@@ -91,6 +91,10 @@ namespace gem
         float3 min = { +FLT_MAX, +FLT_MAX, +FLT_MAX };
         float3 max = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
 
+        static range3f GEM_VECTORCALL transform(const transform3f& transform, const range3f& range);
+
+        static range3f GEM_VECTORCALL transform(const transform1f& transform, const range3f& range);
+
         static range3f unit();
 
         float3 center() const;
@@ -101,13 +105,13 @@ namespace gem
 
         float volume() const;
 
-        range3f& GEM_VECTORCALL expand(const float3& point);
+        void GEM_VECTORCALL expand(const float3& point);
 
-        range3f& GEM_VECTORCALL expand(const range3f& range);
+        void GEM_VECTORCALL expand(const range3f& range);
 
-        range3f& GEM_VECTORCALL transform(const transform3f& transform);
+        void GEM_VECTORCALL transform(const transform3f& transform);
 
-        range3f& GEM_VECTORCALL transform(const transform1f& transform);
+        void GEM_VECTORCALL transform(const transform1f& transform);
 
         bool degenerate() const;
 
@@ -121,10 +125,6 @@ namespace gem
 
         float3 GEM_VECTORCALL closest_point(const float3& point) const;
     };
-
-    range3f GEM_VECTORCALL transform_range(const range3f& range, const transform3f& transform);
-
-    range3f GEM_VECTORCALL transform_range(const range3f& range, const transform1f& transform);
 
     GEM_INLINE range3f range3f::unit()
     {
@@ -152,7 +152,7 @@ namespace gem
 
     }
 
-    GEM_INLINE range3f& GEM_VECTORCALL range3f::expand(const float3& point)
+    GEM_INLINE void GEM_VECTORCALL range3f::expand(const float3& point)
     {
         if (point.x < min.x) min.x = point.x;
         if (point.y < min.y) min.y = point.y;
@@ -160,17 +160,15 @@ namespace gem
         if (point.x > max.x) max.x = point.x;
         if (point.y > max.y) max.y = point.y;
         if (point.z > max.z) max.z = point.z;
-        return *this;
     }
 
-    GEM_INLINE range3f& GEM_VECTORCALL range3f::expand(const range3f& range)
+    GEM_INLINE void GEM_VECTORCALL range3f::expand(const range3f& range)
     {
         expand(range.min);
         expand(range.max);
-        return *this;
     }
 
-    GEM_INLINE range3f& GEM_VECTORCALL range3f::transform(const transform3f& transform)
+    GEM_INLINE void GEM_VECTORCALL range3f::transform(const transform3f& transform)
     {
         float3 points[8] =
         {
@@ -195,11 +193,9 @@ namespace gem
         expand(transform.transform_point(points[5]));
         expand(transform.transform_point(points[6]));
         expand(transform.transform_point(points[7]));
-
-        return *this;
     }
 
-    GEM_INLINE range3f& GEM_VECTORCALL range3f::transform(const transform1f& transform)
+    GEM_INLINE void GEM_VECTORCALL range3f::transform(const transform1f& transform)
     {
         float3 points[8] =
         {
@@ -224,8 +220,6 @@ namespace gem
         expand(transform.transform_point(points[5]));
         expand(transform.transform_point(points[6]));
         expand(transform.transform_point(points[7]));
-
-        return *this;
     }
 
     GEM_INLINE bool range3f::degenerate() const
@@ -304,7 +298,7 @@ namespace gem
         return true;
     }
 
-    GEM_INLINE range3f GEM_VECTORCALL transform_range(const range3f& range, const transform3f& transform)
+    GEM_INLINE range3f GEM_VECTORCALL range3f::transform(const transform3f& transform, const range3f& range)
     {
         range3f o;
         o.expand(transform.transform_point({ range.min.x, range.min.y, range.min.z }));
@@ -318,7 +312,7 @@ namespace gem
         return o;
     }
 
-    GEM_INLINE range3f GEM_VECTORCALL transform_range(const range3f& range, const transform1f& transform)
+    GEM_INLINE range3f GEM_VECTORCALL range3f::transform(const transform1f& transform, const range3f& range)
     {
         range3f o;
         o.expand(transform.transform_point({ range.min.x, range.min.y, range.min.z }));
