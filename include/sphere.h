@@ -16,6 +16,8 @@ namespace gem
         bool GEM_VECTORCALL intersects_ray(const ray3f& ray, float3* phit, float* thit);
 
         float3 GEM_VECTORCALL closest_point(const float3& point) const;
+
+        float3 GEM_VECTORCALL support(const float3& d) const;
     };
 
     GEM_INLINE sphere3f sphere3f::unit()
@@ -79,5 +81,10 @@ namespace gem
         }
 
         return c + cp * (1.f / l) * r;
+    }
+
+    GEM_INLINE float3 GEM_VECTORCALL sphere3f::support(const float3& d) const
+    {
+        return normalize(d);
     }
 }

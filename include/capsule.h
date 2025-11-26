@@ -16,6 +16,8 @@ namespace gem
 
         float3 center() const;
 
+        float3 axis() const;
+
         capsule3f& GEM_VECTORCALL transform(const transform3f& transform);
 
         capsule3f& GEM_VECTORCALL transform(const transform1f& transform);
@@ -25,6 +27,8 @@ namespace gem
         bool GEM_VECTORCALL intersects_ray(const ray3f& ray, float3* phit, float* thit, float tolerance = 0.01f);
 
         float3 GEM_VECTORCALL closest_point(const float3& point) const;
+
+        float3 GEM_VECTORCALL support(const float3& d) const;
     };
 
     GEM_INLINE capsule3f capsule3f::unit()
@@ -39,6 +43,11 @@ namespace gem
     GEM_INLINE float3 capsule3f::center() const
     {
         return (min + max) * 0.5f;
+    }
+
+    GEM_INLINE float3 capsule3f::axis() const
+    {
+        return max - min;
     }
 
     GEM_INLINE capsule3f& GEM_VECTORCALL capsule3f::transform(const transform3f& transform)
@@ -106,5 +115,14 @@ namespace gem
         ac_perb_ab *= (1.f / l);
         if (l > r) l = r;
         return ac_para_ab + ac_perb_ab * l;
+    }
+
+    GEM_INLINE float3 GEM_VECTORCALL capsule3f::support(const float3& d) const
+    {
+        float dab = dot(d, axis());
+        float3 o = (dab < 0.f)
+            ? min
+            : max;
+        return o + gem::normalize(d) * r;
     }
 }

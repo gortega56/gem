@@ -124,6 +124,8 @@ namespace gem
         float3 GEM_VECTORCALL clamp(const float3& point) const;
 
         float3 GEM_VECTORCALL closest_point(const float3& point) const;
+
+        float3 GEM_VECTORCALL support(const float3& d) const;
     };
 
     GEM_INLINE range3f range3f::unit()
@@ -346,6 +348,12 @@ namespace gem
         if (result.z < min.z) result.z = min.z; else if (result.z > max.z) result.z = max.z;
         return result;
     }
+
+    GEM_INLINE float3 GEM_VECTORCALL  range3f::support(const float3& d) const
+    {
+        return gem::sgn(d) * extent();
+    }
+
 
     struct range2d
     {

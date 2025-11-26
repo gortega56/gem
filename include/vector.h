@@ -415,6 +415,8 @@ namespace gem
 
     float3 GEM_VECTORCALL cross(const float3& lhs, const float3& rhs);
 
+    float3 GEM_VECTORCALL sgn(const float3& rhs);
+
     float3 GEM_VECTORCALL operator+(const float3& lhs, const float3& rhs);
 
     float3 GEM_VECTORCALL operator-(const float3& lhs, const float3& rhs);
@@ -668,6 +670,15 @@ namespace gem
             (lhs.y * rhs.z) - (lhs.z * rhs.y),
             (lhs.z * rhs.x) - (lhs.x * rhs.z),
             (lhs.x * rhs.y) - (lhs.y * rhs.x)
+        };
+    }
+
+    GEM_INLINE float3 GEM_VECTORCALL sgn(const float3& v)
+    {
+        return {
+            v.x < 0 ? -1.f : 1.f,
+            v.y < 0 ? -1.f : 1.f,
+            v.z < 0 ? -1.f : 1.f,
         };
     }
 
