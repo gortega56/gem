@@ -9,6 +9,10 @@ namespace gem
         float3 c = {};
         float r = 0;
 
+        static sphere3f GEM_VECTORCALL transform(const transform3f& transform, const sphere3f& sphere);
+
+        static sphere3f GEM_VECTORCALL transform(const transform1f& transform, const sphere3f& sphere);
+
         static sphere3f unit();
 
         bool GEM_VECTORCALL contains_point(const float3& point) const;
@@ -19,6 +23,22 @@ namespace gem
 
         float3 GEM_VECTORCALL support(const float3& d) const;
     };
+
+    GEM_INLINE sphere3f GEM_VECTORCALL sphere3f::transform(const transform3f& transform, const sphere3f& sphere)
+    {
+        sphere3f o;
+        o.c = transform.transform_point(sphere.c);
+        o.r = sphere.r;
+        return o;
+    }
+
+    GEM_INLINE sphere3f GEM_VECTORCALL sphere3f::transform(const transform1f& transform, const sphere3f& sphere)
+    {
+        sphere3f o;
+        o.c = transform.transform_point(sphere.c);
+        o.r = transform.s * sphere.r;
+        return o;
+    }
 
     GEM_INLINE sphere3f sphere3f::unit()
     {

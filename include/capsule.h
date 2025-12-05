@@ -12,15 +12,19 @@ namespace gem
         float3 max = {};
         float r = 0;
 
+        static capsule3f GEM_VECTORCALL transform(const transform3f& transform, const capsule3f& capsule);
+
+        static capsule3f GEM_VECTORCALL transform(const transform1f& transform, const capsule3f& capsule);
+
         static capsule3f unit();
 
         float3 center() const;
 
         float3 axis() const;
 
-        capsule3f& GEM_VECTORCALL transform(const transform3f& transform);
+        void GEM_VECTORCALL transform(const transform3f& transform);
 
-        capsule3f& GEM_VECTORCALL transform(const transform1f& transform);
+        void GEM_VECTORCALL transform(const transform1f& transform);
 
         bool GEM_VECTORCALL contains_point(const float3& point) const;
 
@@ -30,6 +34,25 @@ namespace gem
 
         float3 GEM_VECTORCALL support(const float3& d) const;
     };
+
+    GEM_INLINE capsule3f GEM_VECTORCALL capsule3f::transform(const transform3f& transform, const capsule3f& capsule)
+    {
+        // NOTE(gortega): Ignore scale for radius since nonuniform scale would no longer be min capsule
+        capsule3f o;
+        o.min = transform.transform_point(capsule.min);
+        o.max = transform.transform_point(capsule.max);
+        o.r = capsule.r;
+        return o;
+    }
+
+    GEM_INLINE capsule3f GEM_VECTORCALL capsule3f::transform(const transform1f& transform, const capsule3f& capsule)
+    {
+        capsule3f o;
+        o.min = transform.transform_point(capsule.min);
+        o.max = transform.transform_point(capsule.max);
+        o.r = capsule.r * transform.s;
+        return o;
+    }
 
     GEM_INLINE capsule3f capsule3f::unit()
     {
@@ -50,14 +73,14 @@ namespace gem
         return max - min;
     }
 
-    GEM_INLINE capsule3f& GEM_VECTORCALL capsule3f::transform(const transform3f& transform)
+    GEM_INLINE void GEM_VECTORCALL capsule3f::transform(const transform3f& transform)
     {
         min = transform.transform_point(min);
         max = transform.transform_point(max);
         // NOTE(gortega): Ignore scale for radius since nonuniform scale would no longer be min capsule
     }
 
-    GEM_INLINE capsule3f& GEM_VECTORCALL capsule3f::transform(const transform1f& transform)
+    GEM_INLINE void GEM_VECTORCALL capsule3f::transform(const transform1f& transform)
     {
         min = transform.transform_point(min);
         max = transform.transform_point(max);
