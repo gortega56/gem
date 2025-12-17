@@ -1,5 +1,6 @@
 #pragma once
 #include "transform.h"
+#include "range.h"
 #include "ray.h"
 #include "sphere.h"
 #include "cylinder.h"
@@ -26,9 +27,9 @@ namespace gem
 
         void GEM_VECTORCALL transform(const transform1f& transform);
 
-        bool GEM_VECTORCALL contains_point(const float3& point) const;
+        bool GEM_VECTORCALL contains(const float3& point) const;
 
-        bool GEM_VECTORCALL intersects_ray(const ray3f& ray, float3* phit, float* thit, float tolerance = 0.01f);
+        bool GEM_VECTORCALL intersects(const ray3f& ray, float3* phit, float* thit, float tolerance = 0.01f);
 
         float3 GEM_VECTORCALL closest_point(const float3& point) const;
 
@@ -87,7 +88,7 @@ namespace gem
         r = r * transform.s;
     }
 
-    GEM_INLINE bool GEM_VECTORCALL capsule3f::contains_point(const float3& point) const
+    GEM_INLINE bool GEM_VECTORCALL capsule3f::contains(const float3& point) const
     {
         float3 c = point;
         float3 ab = max - min;
@@ -100,7 +101,7 @@ namespace gem
         return l <= (r * r);
     }
 
-    GEM_INLINE bool GEM_VECTORCALL capsule3f::intersects_ray(const ray3f& ray, float3* p, float* t, float tolerance /*= 0.01f*/)
+    GEM_INLINE bool GEM_VECTORCALL capsule3f::intersects(const ray3f& ray, float3* p, float* t, float tolerance /*= 0.01f*/)
     {
         sphere3f c0 = { min, r };
         sphere3f c1 = { max, r };
@@ -119,9 +120,8 @@ namespace gem
 
     GEM_INLINE float3 GEM_VECTORCALL capsule3f::closest_point(const float3& point) const
     {
-        float3 c = point;
         float3 ab = max - min;
-        float3 ac = c - min;
+        float3 ac = point - min;
         float t = dot(ac, ab) / length_squared(ab);
         if (t < 0.f)
         {

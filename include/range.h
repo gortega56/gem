@@ -1,6 +1,8 @@
 #pragma once
 #include "transform.h"
-#include "ray.h"
+#include "sphere.h"
+#include "capsule.h"
+
 #include <float.h>
 
 namespace gem
@@ -115,11 +117,15 @@ namespace gem
 
         bool degenerate() const;
 
-        bool GEM_VECTORCALL overlaps(const range3f& range);
+        bool GEM_VECTORCALL contains(const float3& point) const;
 
-        bool GEM_VECTORCALL contains_point(const float3& point) const;
+        bool GEM_VECTORCALL intersects(const range3f& o);
+        
+        bool GEM_VECTORCALL intersects(const sphere3f& o);
 
-        bool GEM_VECTORCALL intersects_ray(const ray3f& ray, float3* phit, float* thit, float tolerance = 0.01f);
+        bool GEM_VECTORCALL intersects(const capsule3f& o);
+
+        bool GEM_VECTORCALL intersects(const ray3f& ray, float3* phit, float* thit, float tolerance = 0.01f);
 
         float3 GEM_VECTORCALL clamp(const float3& point) const;
 
@@ -127,6 +133,34 @@ namespace gem
 
         float3 GEM_VECTORCALL support(const float3& d) const;
     };
+
+    GEM_INLINE range3f GEM_VECTORCALL range3f::transform(const transform3f& transform, const range3f& range)
+    {
+        range3f o;
+        o.expand(transform.transform_point({ range.min.x, range.min.y, range.min.z }));
+        o.expand(transform.transform_point({ range.max.x, range.min.y, range.min.z }));
+        o.expand(transform.transform_point({ range.min.x, range.max.y, range.min.z }));
+        o.expand(transform.transform_point({ range.max.x, range.max.y, range.min.z }));
+        o.expand(transform.transform_point({ range.min.x, range.min.y, range.max.z }));
+        o.expand(transform.transform_point({ range.max.x, range.min.y, range.max.z }));
+        o.expand(transform.transform_point({ range.min.x, range.max.y, range.max.z }));
+        o.expand(transform.transform_point({ range.max.x, range.max.y, range.max.z }));
+        return o;
+    }
+
+    GEM_INLINE range3f GEM_VECTORCALL range3f::transform(const transform1f& transform, const range3f& range)
+    {
+        range3f o;
+        o.expand(transform.transform_point({ range.min.x, range.min.y, range.min.z }));
+        o.expand(transform.transform_point({ range.max.x, range.min.y, range.min.z }));
+        o.expand(transform.transform_point({ range.min.x, range.max.y, range.min.z }));
+        o.expand(transform.transform_point({ range.max.x, range.max.y, range.min.z }));
+        o.expand(transform.transform_point({ range.min.x, range.min.y, range.max.z }));
+        o.expand(transform.transform_point({ range.max.x, range.min.y, range.max.z }));
+        o.expand(transform.transform_point({ range.min.x, range.max.y, range.max.z }));
+        o.expand(transform.transform_point({ range.max.x, range.max.y, range.max.z }));
+        return o;
+    }
 
     GEM_INLINE range3f range3f::unit()
     {
@@ -231,21 +265,37 @@ namespace gem
             || min.z > min.z;
     }
 
-    GEM_INLINE bool GEM_VECTORCALL range3f::overlaps(const range3f& range)
-    {
-        return (min.x <= range.max.x && range.min.x <= max.x)
-            && (min.y <= range.max.y && range.min.y <= max.y)
-            && (min.z <= range.max.z && range.min.z <= max.z);
-    }
-
-    GEM_INLINE bool GEM_VECTORCALL range3f::contains_point(const float3& point) const
+    GEM_INLINE bool GEM_VECTORCALL range3f::contains(const float3& point) const
     {
         return min.x <= point.x && point.x <= max.x
             && min.y <= point.y && point.y <= max.y
             && min.z <= point.z && point.z <= max.z;
     }
 
-    GEM_INLINE bool GEM_VECTORCALL range3f::intersects_ray(const ray3f& ray, float3* p, float* t, float tolerance /*= 0.01f*/)
+    GEM_INLINE bool GEM_VECTORCALL range3f::intersects(const range3f& o)
+    {
+        return (min.x <= o.max.x && o.min.x <= max.x)
+            && (min.y <= o.max.y && o.min.y <= max.y)
+            && (min.z <= o.max.z && o.min.z <= max.z);
+    }
+
+    GEM_INLINE bool GEM_VECTORCALL range3f::intersects(const sphere3f& o)
+    {
+        bool result = false;
+        float3 p = o.closest_point(center());
+        result = contains(p);
+        return result;
+    }
+
+    GEM_INLINE bool GEM_VECTORCALL range3f::intersects(const capsule3f& o)
+    {
+        bool result = false;
+        float3 p = o.closest_point(center());
+        result = contains(p);
+        return result;
+    }
+
+    GEM_INLINE bool GEM_VECTORCALL range3f::intersects(const ray3f& ray, float3* p, float* t, float tolerance /*= 0.01f*/)
     {
         https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
         float3 iv =
@@ -300,33 +350,6 @@ namespace gem
         return true;
     }
 
-    GEM_INLINE range3f GEM_VECTORCALL range3f::transform(const transform3f& transform, const range3f& range)
-    {
-        range3f o;
-        o.expand(transform.transform_point({ range.min.x, range.min.y, range.min.z }));
-        o.expand(transform.transform_point({ range.max.x, range.min.y, range.min.z }));
-        o.expand(transform.transform_point({ range.min.x, range.max.y, range.min.z }));
-        o.expand(transform.transform_point({ range.max.x, range.max.y, range.min.z }));
-        o.expand(transform.transform_point({ range.min.x, range.min.y, range.max.z }));
-        o.expand(transform.transform_point({ range.max.x, range.min.y, range.max.z }));
-        o.expand(transform.transform_point({ range.min.x, range.max.y, range.max.z }));
-        o.expand(transform.transform_point({ range.max.x, range.max.y, range.max.z }));
-        return o;
-    }
-
-    GEM_INLINE range3f GEM_VECTORCALL range3f::transform(const transform1f& transform, const range3f& range)
-    {
-        range3f o;
-        o.expand(transform.transform_point({ range.min.x, range.min.y, range.min.z }));
-        o.expand(transform.transform_point({ range.max.x, range.min.y, range.min.z }));
-        o.expand(transform.transform_point({ range.min.x, range.max.y, range.min.z }));
-        o.expand(transform.transform_point({ range.max.x, range.max.y, range.min.z }));
-        o.expand(transform.transform_point({ range.min.x, range.min.y, range.max.z }));
-        o.expand(transform.transform_point({ range.max.x, range.min.y, range.max.z }));
-        o.expand(transform.transform_point({ range.min.x, range.max.y, range.max.z }));
-        o.expand(transform.transform_point({ range.max.x, range.max.y, range.max.z }));
-        return o;
-    }
 
     GEM_INLINE float3 GEM_VECTORCALL range3f::clamp(const float3& point) const
     {

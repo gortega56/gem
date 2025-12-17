@@ -105,6 +105,6 @@ namespace gem
 
     GEM_INLINE float3 GEM_VECTORCALL sphere3f::support(const float3& d) const
     {
-        return normalize(d);
+        return normalize(d) * r;
     }
 }
