@@ -282,8 +282,8 @@ namespace gem
     GEM_INLINE bool GEM_VECTORCALL range3f::intersects(const sphere3f& o)
     {
         bool result = false;
-        float3 p = o.closest_point(center());
-        result = contains(p);
+        float3 p = closest_point(o.c);
+        result = o.contains_point(p);
         return result;
     }
 
