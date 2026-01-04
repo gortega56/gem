@@ -47,7 +47,9 @@ namespace gem
 
     GEM_INLINE bool GEM_VECTORCALL sphere3f::contains_point(const float3& point) const
     {
-        return length_squared(point - c) <= r * r;
+        float l2 = length_squared(point - c);
+        float r2 = r * r;
+        return l2 <= r2;
     }
 
     GEM_INLINE bool GEM_VECTORCALL sphere3f::intersects_ray(const ray3f& ray, float3* p, float* t)
