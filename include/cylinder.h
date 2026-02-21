@@ -21,7 +21,7 @@ namespace gem
 
         bool GEM_VECTORCALL contains_point(const float3& point) const;
 
-        bool GEM_VECTORCALL intersects_ray(const ray3f& ray, float3* phit, float* thit, float tolerance = 0.01f);
+        bool GEM_VECTORCALL intersects(const ray3f& ray, float3* phit, float* thit, float tolerance = 0.01f);
 
         float3 GEM_VECTORCALL closest_point(const float3& point) const;
     };
@@ -73,7 +73,7 @@ namespace gem
         return result;
     }
 
-    GEM_INLINE bool GEM_VECTORCALL cylinder3f::intersects_ray(const ray3f& ray, float3* p, float* thit, float tolerance /*= 0.01f*/)
+    GEM_INLINE bool GEM_VECTORCALL cylinder3f::intersects(const ray3f& ray, float3* p, float* thit, float tolerance /*= 0.01f*/)
     {
         // NOTE(gortega): RTCD p197
         float3 d = max - min;

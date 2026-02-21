@@ -17,7 +17,7 @@ namespace gem
 
         bool GEM_VECTORCALL contains_point(const float3& point) const;
 
-        bool GEM_VECTORCALL intersects_ray(const ray3f& ray, float3* phit, float* thit);
+        bool GEM_VECTORCALL intersects(const ray3f& ray, float3* phit, float* thit);
 
         float3 GEM_VECTORCALL closest_point(const float3& point) const;
 
@@ -52,7 +52,7 @@ namespace gem
         return l2 <= r2;
     }
 
-    GEM_INLINE bool GEM_VECTORCALL sphere3f::intersects_ray(const ray3f& ray, float3* p, float* t)
+    GEM_INLINE bool GEM_VECTORCALL sphere3f::intersects(const ray3f& ray, float3* p, float* t)
     {
         // NOTE(gortega): https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection.html
         float3 l = c - ray.p;

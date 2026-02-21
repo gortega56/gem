@@ -109,9 +109,9 @@ namespace gem
         float3 p0, p1, p2;
         float t0, t1, t2;
         bool b0, b1, b2;
-        b0 = c0.intersects_ray(ray, &p0, &t0);
-        b1 = c1.intersects_ray(ray, &p1, &t1);
-        b2 = c2.intersects_ray(ray, &p2, &t2, tolerance);
+        b0 = c0.intersects(ray, &p0, &t0);
+        b1 = c1.intersects(ray, &p1, &t1);
+        b2 = c2.intersects(ray, &p2, &t2, tolerance);
         float tmin = (t0 < t1) ? ((t0 < t2) ? t0 : t2) : ((t1 < t2) ? t1 : t2);
         if (t) t[0] = tmin;
         if (p) p[0] = ray.p * ray.v * tmin;
