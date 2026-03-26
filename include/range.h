@@ -97,6 +97,10 @@ namespace gem
 
         static range3f GEM_VECTORCALL transform(const transform1f& transform, const range3f& range);
 
+        static range3f GEM_VECTORCALL transform(const float4x4& m, const range3f& range);
+
+        static range3f GEM_VECTORCALL transform(const float4x3& m, const range3f& range);
+
         static range3f unit();
 
         float3 center() const;
@@ -160,6 +164,45 @@ namespace gem
         o.expand(transform.transform_point({ range.min.x, range.max.y, range.max.z }));
         o.expand(transform.transform_point({ range.max.x, range.max.y, range.max.z }));
         return o;
+    }
+
+    GEM_INLINE range3f GEM_VECTORCALL range3f::transform(const float4x4& m, const range3f& range)
+    {
+        float4x3 m4x3 = float4x3(
+            m.m00, m.m01, m.m02,
+            m.m10, m.m11, m.m12,
+            m.m20, m.m21, m.m22,
+            m.m30, m.m31, m.m32
+            );
+        return transform(m4x3, range);
+    }
+
+
+    GEM_INLINE range3f GEM_VECTORCALL range3f::transform(const float4x3& m, const range3f& range)
+    {
+        float3 points[8] =
+        {
+            { range.min.x, range.min.y, range.min.z },
+            { range.max.x, range.min.y, range.min.z },
+            { range.min.x, range.max.y, range.min.z },
+            { range.max.x, range.max.y, range.min.z },
+            { range.min.x, range.min.y, range.max.z },
+            { range.max.x, range.min.y, range.max.z },
+            { range.min.x, range.max.y, range.max.z },
+            { range.max.x, range.max.y, range.max.z },
+        };
+
+        range3f o;
+        o.expand(points[0] * m);
+        o.expand(points[1] * m);
+        o.expand(points[2] * m);
+        o.expand(points[3] * m);
+        o.expand(points[4] * m);
+        o.expand(points[5] * m);
+        o.expand(points[6] * m);
+        o.expand(points[7] * m);
+        return o;
+
     }
 
     GEM_INLINE range3f range3f::unit()
