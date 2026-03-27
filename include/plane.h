@@ -113,13 +113,13 @@ namespace gem
 
     GEM_INLINE bool GEM_VECTORCALL plane4f::intersects_ray(const ray3f& ray, float3* p_point, const float tolerance /*= 0.001f*/)
     {
-        float3 n = normal();
-        float ndotv = dot(n, ray.v);
-        if (abs(ndotv) < tolerance)
+        float fv = dot(x, y, z, ray.v.x, ray.v.y, ray.v.z);
+        if (abs(fv) < tolerance)
             return false;
 
+        float fp = dot(x, y, z, w, ray.p.x, ray.p.y, ray.p.z, 1);
         if (p_point)
-            *p_point = ray.p - ray.v * (dot(n, ray.p) / ndotv);
+            *p_point = ray.p - ray.v * (fp / fv);
 
         return true;
     }
