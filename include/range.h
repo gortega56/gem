@@ -399,10 +399,10 @@ namespace gem
         float3 p = point;
         if (p.x < min.x) p.x = min.x;
         if (p.y < min.y) p.y = min.y;
-        if (p.z < min.z) p.x = min.z;
+        if (p.z < min.z) p.z = min.z;
         if (p.x > max.x) p.x = max.x;
         if (p.y > max.y) p.y = max.y;
-        if (p.z > max.z) p.x = max.z;
+        if (p.z > max.z) p.z = max.z;
         return p;
     }
 
