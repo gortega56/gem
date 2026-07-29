@@ -130,12 +130,9 @@ namespace gem
     GEM_INLINE float2& float2::safe_normalize(const float tolerance /*= 0.001f*/)
     {
         float l = sqrtf((x * x) + (y * y));
-        if (l > tolerance)
-        {
-            float il = 1.0f / l;
-            x *= il;
-            y *= il;
-        }
+        float il = (l > tolerance) ? (1.0 / l) : 0.0;
+        x *= il;
+        y *= il;
 
         return *this;
     }
@@ -245,7 +242,7 @@ namespace gem
     GEM_INLINE float2 GEM_VECTORCALL safe_normalize(const float2& rhs, const float tolerance /*= 0.001f*/)
     {
         float l = sqrtf((rhs.x * rhs.x) + (rhs.y * rhs.y));
-        float il = (l > tolerance) ? (1.0f / l) : 1.0f;
+        float il = (l > tolerance) ? (1.0f / l) : 0.0f;
         return
         {
             rhs.x * il,
@@ -481,13 +478,10 @@ namespace gem
     GEM_INLINE float3& float3::safe_normalize(const float tolerance /*= 0.001f*/)
     {
         float l = sqrtf((x * x) + (y * y) + (z * z));
-        if (l > tolerance)
-        {
-            float il = 1.0f / l;
-            x *= il;
-            y *= il;
-            z *= il;
-        }
+        float il = (l > tolerance) ? (1.0 / l) : 0.0;
+        x *= il;
+        y *= il;
+        z *= il;
 
         return *this;
     }
@@ -608,7 +602,7 @@ namespace gem
     GEM_INLINE float3 GEM_VECTORCALL safe_normalize(const float3& rhs, const float tolerance /*= 0.001f*/)
     {
         float l = sqrtf((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z));
-        float il = (l > tolerance) ? (1.0f / l) : 1.0f;
+        float il = (l > tolerance) ? (1.0f / l) : 0.0f;
         return
         {
             rhs.x * il,
@@ -903,14 +897,11 @@ namespace gem
     GEM_INLINE float4& float4::safe_normalize(const float tolerance /*= 0.001f*/)
     {
         float l = sqrtf((x * x) + (y * y) + (z * z) + (w * w));
-        if (l > tolerance)
-        {
-            float il = 1.0f / l;
-            x *= il;
-            y *= il;
-            z *= il;
-            w *= il;
-        }
+        float il = (l > tolerance) ? (1.0 / l) : 0.0;
+        x *= il;
+        y *= il;
+        z *= il;
+        w *= il;
 
         return *this;
     }
@@ -1036,7 +1027,7 @@ namespace gem
     GEM_INLINE float4 GEM_VECTORCALL safe_normalize(const float4& rhs, const float tolerance /*= 0.001f*/)
     {
         float l = sqrtf((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
-        float il = (l > tolerance) ? (1.0f / l) : 1.0f;
+        float il = (l > tolerance) ? (1.0f / l) : 0.0f;
         return
         {
             rhs.x * il,
@@ -1281,12 +1272,9 @@ namespace gem
     GEM_INLINE double2& double2::safe_normalize(const double tolerance /*= 0.001f*/)
     {
         double l = sqrt((x * x) + (y * y));
-        if (l > tolerance)
-        {
-            double il = 1.0f / l;
-            x *= il;
-            y *= il;
-        }
+        double il = (l > tolerance) ? (1.0 / l) : 0.0;
+        x *= il;
+        y *= il;
 
         return *this;
     }
@@ -1396,7 +1384,7 @@ namespace gem
     GEM_INLINE double2 GEM_VECTORCALL safe_normalize(const double2& rhs, const double tolerance /*= 0.001f*/)
     {
         double l = sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y));
-        double il = (l > tolerance) ? (1.0f / l) : 1.0f;
+        double il = (l > tolerance) ? (1.0f / l) : 0.0f;
         return
         {
             rhs.x * il,
@@ -1640,13 +1628,10 @@ namespace gem
     GEM_INLINE double3& double3::safe_normalize(const double tolerance /*= 0.001f*/)
     {
         double l = sqrt((x * x) + (y * y) + (z * z));
-        if (l > tolerance)
-        {
-            double il = 1.0f / l;
-            x *= il;
-            y *= il;
-            z *= il;
-        }
+        double il = (l > tolerance) ? (1.0 / l) : 0.0;
+        x *= il;
+        y *= il;
+        z *= il;
 
         return *this;
     }
@@ -1764,7 +1749,7 @@ namespace gem
     GEM_INLINE double3 GEM_VECTORCALL safe_normalize(const double3& rhs, const double tolerance /*= 0.001f*/)
     {
         double l = sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z));
-        double il = (l > tolerance) ? (1.0f / l) : 1.0f;
+        double il = (l > tolerance) ? (1.0f / l) : 0.0f;
         return
         {
             rhs.x * il,
@@ -2050,14 +2035,11 @@ namespace gem
     GEM_INLINE double4& double4::safe_normalize(const double tolerance /*= 0.001f*/)
     {
         double l = sqrt((x * x) + (y * y) + (z * z) + (w * w));
-        if (l > tolerance)
-        {
-            double il = 1.0f / l;
-            x *= il;
-            y *= il;
-            z *= il;
-            w *= il;
-        }
+        double il = (l > tolerance) ? (1.0 / l) : 0.0;
+        x *= il;
+        y *= il;
+        z *= il;
+        w *= il;
 
         return *this;
     }
@@ -2183,7 +2165,7 @@ namespace gem
     GEM_INLINE double4 GEM_VECTORCALL safe_normalize(const double4& rhs, const double tolerance /*= 0.001f*/)
     {
         double l = sqrt((rhs.x * rhs.x) + (rhs.y * rhs.y) + (rhs.z * rhs.z) + (rhs.w * rhs.w));
-        double il = (l > tolerance) ? (1.0f / l) : 1.0f;
+        double il = (l > tolerance) ? (1.0f / l) : 0.0f;
         return
         {
             rhs.x * il,
