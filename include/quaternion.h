@@ -88,6 +88,8 @@ namespace gem
 
     quatf GEM_VECTORCALL slerp(quatf q0, quatf q1, const float t);
 
+    quatf GEM_VECTORCALL nlerp(quatf q0, quatf q1, const float t);
+
     quatf GEM_VECTORCALL operator+(const quatf& lhs, const quatf& rhs);
 
     quatf GEM_VECTORCALL operator-(const quatf& lhs, const quatf& rhs);
@@ -644,6 +646,24 @@ namespace gem
         q1 = q1 * k1;
 
         return q0 + q1;
+    }
+
+    GEM_INLINE quatf GEM_VECTORCALL nlerp(quatf q1, quatf q2, const float t)
+    {
+        if (dot(q1, q2) < 0.0f)
+        {
+            q1 = {  -q1.x, -q1.y, -q1.z , -q1.w };
+        }
+
+        float one_minus_t = 1.f - t;
+
+        quatf q;
+        q.x = one_minus_t * q1.x + t * q2.x;
+        q.y = one_minus_t * q1.y + t * q2.y;
+        q.z = one_minus_t * q1.z + t * q2.z;
+        q.w = one_minus_t * q1.w + t * q2.w;
+
+        return normalize(q);
     }
 
     GEM_INLINE quatf GEM_VECTORCALL operator+(const quatf& lhs, const quatf& rhs)

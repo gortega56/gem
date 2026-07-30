@@ -402,6 +402,8 @@ namespace gem
 
     float3 GEM_VECTORCALL safe_normalize(const float3& rhs, const float tolerance = 0.001f);
 
+    float3 GEM_VECTORCALL lerp(const float lx, const float ly, const float lz, const float rx, const float ry, const float rz, const float t);
+
     float3 GEM_VECTORCALL lerp(const float3& lhs, const float3& rhs, const float t);
 
     float3 GEM_VECTORCALL project(const float3& lhs, const float3& rhs);
@@ -608,6 +610,17 @@ namespace gem
             rhs.x * il,
             rhs.y * il,
             rhs.z * il
+        };
+    }
+
+    GEM_INLINE float3 GEM_VECTORCALL lerp(const float lx, const float ly, const float lz, const float rx, const float ry, const float rz, const float t)
+    {
+        float oneMinusT = 1.0f - t;
+        return
+        {
+            (oneMinusT * lx) + (rx * t),
+            (oneMinusT * ly) + (ry * t),
+            (oneMinusT * lz) + (rz * t)
         };
     }
 
