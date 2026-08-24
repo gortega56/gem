@@ -228,13 +228,22 @@ namespace gem
         bool GEM_VECTORCALL intersects_line(const line_segment3f& line, float3* p_point, const float tolerance = 0.001f) const;
     };
 
-    GEM_INLINE float2 GEM_VECTORCALL closest_points(const float3& p0, const float3& v0, const float3& p1, const float3& v1, const float tolerance = 0.001f);
+    GEM_INLINE float GEM_VECTORCALL closest_point_t(const float3& p0, const float3& v0, const float3& p1);
+
+    GEM_INLINE float2 GEM_VECTORCALL closest_points_t(const float3& p0, const float3& v0, const float3& p1, const float3& v1, const float tolerance = 0.001f);
+
+    GEM_INLINE float3 GEM_VECTORCALL closest_point(const float3& p0, const float3& v0, const float3& p1);
 
     GEM_INLINE line_segment3f GEM_VECTORCALL transform_line_segment(const line_segment3f& line, const transform3f& transform);
 
     GEM_INLINE line_segment3f GEM_VECTORCALL transform_line_segment(const line_segment3f& line, const transform1f& transform);
 
-    GEM_INLINE float2 GEM_VECTORCALL closest_points(const float3& p0, const float3& v0, const float3& p1, const float3& v1, const float tolerance /*= 0.001f*/)
+    GEM_INLINE float GEM_VECTORCALL closest_point_t(const float3& p0, const float3& v0, const float3& p1)
+    {
+        return dot(p1-p0, v0);
+    }
+
+    GEM_INLINE float2 GEM_VECTORCALL closest_points_t(const float3& p0, const float3& v0, const float3& p1, const float3& v1, const float tolerance /*= 0.001f*/)
     {
         float3 w = p1 - p0;
         float m0 = v0.length_squared();
@@ -258,9 +267,19 @@ namespace gem
         return { t0, t1 };
     }
 
+    GEM_INLINE float3 GEM_VECTORCALL closest_point(const float3& p0, const float3& p1, const float3& q)
+    {
+        float3 ab = p1 - p0;
+        float3 ac = q  - p0;
+        float t = dot(ac, ab);
+        if (t < 0) t = 0;
+        if (t > 1) t = 1;
+        return p0 + ab * t;
+    }
+
     GEM_INLINE float2 GEM_VECTORCALL line_segment3f::closest_points(const line_segment3f& l1, const float tolerance /*= 0.001f*/) const
     {
-        return gem::closest_points(a, b-a, l1.a, l1.b - l1.a, tolerance);
+        return gem::closest_points_t(a, b-a, l1.a, l1.b - l1.a, tolerance);
     }
 
     GEM_INLINE float GEM_VECTORCALL line_segment3f::distance_to_line(const line_segment3f& line, const float tolerance /*= 0.001f*/) const
