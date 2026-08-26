@@ -1,6 +1,8 @@
 #pragma once
 #include "transform.h"
 
+#define PLUCKER 0
+
 namespace gem
 {
     struct line2f
@@ -45,120 +47,435 @@ namespace gem
         return true;
     }
 
-    struct line3f
+    #pragma region plucker
+   
+    struct plucker3f
     {
-        float3 v, m;
+        float3 v; // direction
+        float3 m; // moment
+    
+        static float GEM_VECTORCALL distance(const float3& v0, const float3& m0, const float3& v1, const float3& m1, const float tolerance = 0.001f);
 
-     //   float3 GEM_VECTORCALL point_closest_to_line(const line3f& line, const float tolerance = 0.001f) const;
+        static float GEM_VECTORCALL distance(const float3& v, const float3& m, const float3& p);
 
-        float GEM_VECTORCALL distance_to_line(const line3f& line, const float tolerance = 0.001f) const;
+        static bool GEM_VECTORCALL intersects(const float3& v0, const float3& m0, const float3& v1, const float3& m1, float3* p, const float threshold, const float tolerance = 0.001f);
 
-        float3 GEM_VECTORCALL point_closest_to_point(const float3& point) const;
+        static plucker3f GEM_VECTORCALL transform(const plucker3f& l, const transform3f& transform);
 
-        float GEM_VECTORCALL distance_to_point(const float3& point) const;
+        static plucker3f GEM_VECTORCALL transform(const plucker3f& l, const transform1f& transform);
 
-        line3f& GEM_VECTORCALL transform(const transform3f& transform);
+        static plucker3f GEM_VECTORCALL transform(const plucker3f& l, const float4x4& m);
 
-        line3f& GEM_VECTORCALL transform(const transform1f& transform);
+        static plucker3f GEM_VECTORCALL transform(const plucker3f& l, const float4x3& m);
 
-        bool GEM_VECTORCALL intersects_line(const line3f& line, float3* p_point, const float tolerance = 0.001f) const;
+        static plucker3f GEM_VECTORCALL transform(const plucker3f& l, const float3x3& m);
+
+        static plucker3f GEM_VECTORCALL make(const float3 p0, const float3 p1);
+    
+        float GEM_VECTORCALL distance(const plucker3f& l, const float tolerance = 0.001f);
+
+        float GEM_VECTORCALL distance(const float3& p);
+
+        bool GEM_VECTORCALL intersects(const plucker3f& l, float3* p, const float threshold, const float tolerance = 0.001f);
+
+        void GEM_VECTORCALL transform(const transform3f& transform);
+
+        void GEM_VECTORCALL transform(const transform1f& transform);
+
+        void GEM_VECTORCALL transform(const float4x4& m);
+
+        void GEM_VECTORCALL transform(const float4x3& m);
+
+        void GEM_VECTORCALL transform(const float3x3& m);
     };
 
-    line3f GEM_VECTORCALL transform_line(const line3f& line, const transform3f& transform);
-
-    line3f GEM_VECTORCALL transform_line(const line3f& line, const transform1f& transform);
-
-    //GEM_INLINE float3 GEM_VECTORCALL line3f::point_closest_to_line(const line3f& line, const float tolerance /*= 0.001f*/) const
-    //{
-    //    float3 v0 = v;
-    //    float3 v1 = line.v;
-    //    float3 p0 = cross(v0, m) * (1.0f / length_squared(v0));
-    //    float3 p1 = cross(v1, line.m) * (1.0f / length_squared(v1));
-    //    float3 dp = p1 - p0;
-    //    float v00 = length_squared(v0);
-    //    float v11 = length_squared(v1);
-    //    float v01 = dot(v0, v1);
-    //    float det = (v01 * v01) - (v00 * v11);
-    //    if (det < tolerance)
-    //        return sqrtf(length_squared(cross(dp, v1)) / v01);
-
-    //    det = 1.0f / det;
-    //    float dpv0 = dot(dp, v0);
-    //    float dpv1 = dot(dp, v1);
-    //    float t = ((v01 * dpv1) - (v11 * dpv0)) * det;
-    //    return p0 + v0 * t;
-    //}
-
-    GEM_INLINE float GEM_VECTORCALL line3f::distance_to_line(const line3f& line, const float tolerance /*= 0.001f*/) const
+    GEM_INLINE plucker3f GEM_VECTORCALL plucker3f::make(const float3 p0, const float3 p1)
     {
-        return (dot(v, line.m) + dot(line.v, m)) / length(cross(v, line.v));
+        return { p1 - p0, cross(p0, p1) };
     }
 
-    GEM_INLINE float3 GEM_VECTORCALL line3f::point_closest_to_point(const float3& point) const
+    GEM_INLINE float GEM_VECTORCALL plucker3f::distance(const float3& v0, const float3& m0, const float3& v1, const float3& m1, const float tolerance /*= 0.001f*/)
     {
-        float3 closest_to_origin = cross(v, m) * (1.0f / length_squared(v));
-        return project(closest_to_origin - point, v);
+        float l0 = length(v0);
+        float l1 = length(v1);
+        float v0xv1 = length(cross(v0, v1));
+        if (v0xv1 <= (l0 * l1 * tolerance))
+        {
+            float3 q = cross(v1, m1) / dot(v1, v1);
+            return distance(v0, m0, q);
+        }
+
+        return fabsf(dot(v0, m1) + dot(v1, m0)) / v0xv1;
     }
 
-    GEM_INLINE float GEM_VECTORCALL line3f::distance_to_point(const float3& point) const
+    GEM_INLINE float GEM_VECTORCALL plucker3f::distance(const float3& v, const float3& m, const float3& p)
     {
-        return length(cross(v, point) + m) / length(v);
+        return length(cross(v, p) + m) / length(v);
     }
 
-    GEM_INLINE line3f& GEM_VECTORCALL line3f::transform(const transform3f& transform)
+    GEM_INLINE bool GEM_VECTORCALL plucker3f::intersects(const float3& v0, const float3& m0, const float3& v1, const float3& m1, float3* p, const float threshold, const float tolerance /*= 0.001f*/)
     {
-        float4x3 h = transform.matrix4x3().inverse().transpose();
-        v = transform.transform_vector(v);
-        m = m * h;
-        return *this;
+        if (distance(v0, m0, v1, m1, tolerance) < threshold)
+        {
+            if (p)
+            {
+                float3 v0xv1 = cross(v0, v1);
+                float nn = dot(v0xv1, v0xv1);
+                float lim = length(v0) * length(v1) * tolerance;
+                if (nn <= (lim * lim))
+                {
+                    return false;
+                }
+
+                float3 a = cross(v0, m0) / dot(v0, v0);
+                float3 b = cross(v1, m1) / dot(v1, v1);
+                *p = a + v0 * (dot(cross(b - a, v1), v0xv1) / nn);
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
-    GEM_INLINE line3f& GEM_VECTORCALL line3f::transform(const transform1f& transform)
+    GEM_INLINE plucker3f GEM_VECTORCALL plucker3f::transform(const plucker3f& l, const transform3f& x)
     {
-        float4x3 h = transform.matrix4x3().inverse().transpose();
-        v = transform.transform_vector(v);
-        m = m * h;
-        return *this;
+        return transform(l, x.matrix4x3());
     }
 
-    GEM_INLINE bool GEM_VECTORCALL line3f::intersects_line(const line3f& line, float3* p_point, const float tolerance /*= 0.001f*/) const
+    GEM_INLINE plucker3f GEM_VECTORCALL plucker3f::transform(const plucker3f& l, const transform1f& x)
     {
-        float3 v0 = v;
-        float3 v1 = line.v;
-        float3 p0 = cross(v0, m) * (1.0f / length_squared(v0));
-        float3 p1 = cross(v1, line.m) * (1.0f / length_squared(v1));
-        float3 dp = p1 - p0;
-        float v00 = length_squared(v0);
-        float v11 = length_squared(v1);
-        float v01 = dot(v0, v1);
-        float det = (v01 * v01) - (v00 * v11);
-        if (det < tolerance)
-            return false;
-
-        det = 1.0f / det;
-        float dpv0 = dot(dp, v0);
-        float dpv1 = dot(dp, v1);
-        float t = ((v01 * dpv1) - (v11 * dpv0)) * det;
-
-        if (p_point)
-            *p_point = p0 + v0 * t;
-
-        return true;
+        return transform(l, x.matrix4x3());
     }
 
-    GEM_INLINE line3f GEM_VECTORCALL transform_line(const line3f& line, const transform3f& transform)
+    GEM_INLINE plucker3f GEM_VECTORCALL plucker3f::transform(const plucker3f& l, const float4x4& m)
     {
-        float4x3 h = transform.matrix4x3().inverse().transpose();
-        return { transform.transform_vector(line.v), line.m * h };
+        float4 vM = float4(l.v, 0) * m;
+        float4 mA = float4(l.m, 0) * m.adj();
+        float3 t = { m.m30, m.m31, m.m32 };
+        float3 v = { vM.x, vM.y, vM.z };
+        float3 n = { mA.x, mA.y, mA.z };
+        return {
+            v, 
+            n + cross(t, v)
+        };
     }
 
-    GEM_INLINE line3f GEM_VECTORCALL transform_line(const line3f& line, const transform1f& transform)
+    GEM_INLINE plucker3f GEM_VECTORCALL plucker3f::transform(const plucker3f& l, const float4x3& m)
     {
-        float4x3 h = transform.matrix4x3().inverse().transpose();
-        return { transform.transform_vector(line.v), line.m * h };
+        float3 vM = l.v * m;
+        float3 t = { m.m30, m.m31, m.m32 };
+        return {
+            vM,
+            l.m * m.adj() + cross(t, vM)
+        };
     }
 
-    struct line_segment2f
+    GEM_INLINE plucker3f GEM_VECTORCALL plucker3f::transform(const plucker3f& l, const float3x3& m)
+    {
+        return {
+            l.v * m,
+            l.m * m.adj()
+        };
+    }
+
+    GEM_INLINE float GEM_VECTORCALL plucker3f::distance(const plucker3f& l, const float tolerance /*= 0.001f*/)
+    {
+        return distance(v, m, l.v, l.m, tolerance);
+    }
+
+    GEM_INLINE float GEM_VECTORCALL plucker3f::distance(const float3& p)
+    {
+        return distance(v, m, p);
+    }
+
+    GEM_INLINE bool GEM_VECTORCALL plucker3f::intersects(const plucker3f& l, float3* p, const float threshold, const float tolerance /*= 0.001f*/)
+    {
+        return intersects(v, m, l.v, l.m, p, threshold, tolerance);
+    }
+
+    GEM_INLINE void GEM_VECTORCALL plucker3f::transform(const transform3f& x)
+    {
+        *this = transform(*this, x);
+    }
+
+    GEM_INLINE void GEM_VECTORCALL plucker3f::transform(const transform1f& x)
+    {
+        *this = transform(*this, x);
+    }
+
+    GEM_INLINE void GEM_VECTORCALL plucker3f::transform(const float4x4& m)
+    {
+        *this = transform(*this, m);
+    }
+
+    GEM_INLINE void GEM_VECTORCALL plucker3f::transform(const float4x3& m)
+    {
+        *this = transform(*this, m);
+    }
+
+    GEM_INLINE void GEM_VECTORCALL plucker3f::transform(const float3x3& m)
+    {
+        *this = transform(*this, m);
+    }
+
+    #pragma endregion
+
+    #pragma region line3f
+
+    struct line3f
+    {
+        float3 p0, p1;
+
+        static line3f GEM_VECTORCALL closest(const float3& p0, const float3& p1, const float3& q0, const float3& q1, const float tolerance = 0.001f);
+
+        static float2 GEM_VECTORCALL closest_t(const float3& p0, const float3& p1, const float3& q0, const float3& q1, const float tolerance = 0.001f);
+
+        static float GEM_VECTORCALL closest_t(const float3& p0, const float3& p1, const float3& q);
+
+        static float GEM_VECTORCALL distance(const float3& p0, const float3& p1, const float3& q0, const float3& q1, const float tolerance = 0.001f);
+
+        static float GEM_VECTORCALL distance(const float3& p0, const float3& p1, const float3& q);
+
+        static bool GEM_VECTORCALL intersects(const float3& p0, const float3& p1, const float3& q0, const float3& q1, float3* p, const float threshold, const float tolerance = 0.001f);
+
+        static line3f GEM_VECTORCALL transform(const line3f& l, const transform3f& transform);
+
+        static line3f GEM_VECTORCALL transform(const line3f& l, const transform1f& transform);
+
+        static line3f GEM_VECTORCALL transform(const line3f& l, const float4x4& m);
+
+        static line3f GEM_VECTORCALL transform(const line3f& l, const float4x3& m);
+
+        static line3f GEM_VECTORCALL transform(const line3f& l, const float3x3& m);
+
+        line3f GEM_VECTORCALL closest(const line3f& l, const float tolerance = 0.001f);
+
+        float3 GEM_VECTORCALL closest(const float3& p);
+
+        float GEM_VECTORCALL distance(const line3f& l, const float tolerance = 0.001f);
+
+        float GEM_VECTORCALL distance(const float3& p);
+
+        bool GEM_VECTORCALL intersects(const line3f& l, float3* p, const float threshold, const float tolerance = 0.001f);
+
+        void GEM_VECTORCALL transform(const transform3f& transform);
+
+        void GEM_VECTORCALL transform(const transform1f& transform);
+
+        void GEM_VECTORCALL transform(const float4x4& m);
+
+        void GEM_VECTORCALL transform(const float4x3& m);
+
+        void GEM_VECTORCALL transform(const float3x3& m);
+    };
+
+    GEM_INLINE line3f GEM_VECTORCALL line3f::closest(const float3& p0, const float3& p1, const float3& q0, const float3& q1, const float tolerance /*=0.001f*/)
+    {
+        float2 t = closest_t(p0, p1, q0, q1, tolerance);
+        return 
+        {
+           gem::lerp(p0, p1, t.x),
+           gem::lerp(q0, q1, t.y)
+        };
+    }
+
+    GEM_INLINE float2 GEM_VECTORCALL line3f::closest_t(const float3& p0, const float3& p1, const float3& q0, const float3& q1, const float tolerance /*=0.001f*/)
+    {
+        float3 d1 = p1 - p0;
+        float3 d2 = q1 - q0;
+        float3 r = p0 - q0;
+        float a = dot(d1,d1);
+        float b = dot(d1,d2);
+        float e = dot(d2,d2);
+        float d = (a*e) - (b*b);
+        if (d <= (a * e * tolerance))   // sin^2(theta) <= tolerance : parallel (scale invariant)
+        {
+            float s = 0;
+            float t = (e > 0.f) ? closest_t(q0, q1, p0) : 0.f;
+            return { s, t };
+        }
+
+        float c = dot(d1, r);
+        float f = dot(d2, r);
+        float s = ((b*f)-(c*e))/d;
+        float t = ((a*f)-(b*c))/d;
+        return { s, t };
+        /*float3 v0 = p1 - p0;
+        float3 v1 = q1 - q0;
+        float3 w = q0 - p0;
+        float m0 = v0.length_squared();
+        float m1 = v1.length_squared();
+        float v0v1 = dot(v0, v1);
+        float s0 = dot(w, v0);
+        float s1 = dot(w, v1);
+        float d = (v0v1 * v0v1) - (m0 * m1);
+        if (d > -tolerance)
+        {
+            return {
+                0.0f,
+                -s1 / m1
+            };
+        }
+
+        d = 1.f / d;
+        float t0 = d * ((v0v1 * s1) - (m1 * s0));
+        float t1 = d * ((m0 * s1) - (v0v1 * s0));
+
+        return { t0, t1 };*/
+    }
+
+    GEM_INLINE float GEM_VECTORCALL line3f::closest_t(const float3& p0, const float3& p1, const float3& q)
+    {
+        float3 ab = p1 - p0;
+        float3 ac = q  - p0;
+        return dot(ac, ab) / dot(ab, ab);
+    }
+
+    GEM_INLINE float GEM_VECTORCALL line3f::distance(const float3& p0, const float3& p1, const float3& q)
+    {
+    #if PLUCKER
+        return plucker3f::distance(p1 - p0, cross(p0, p1), q);
+    #else
+        float t = closest_t(p0, p1, q);
+        return length(q - lerp(p0, p1, t));
+    #endif
+    }
+
+    GEM_INLINE float GEM_VECTORCALL line3f::distance(const float3& p0, const float3& p1, const float3& q0, const float3& q1, const float tolerance /*=0.001f*/)
+    {
+#if PLUCKER
+        return plucker3f::distance(p1 - p0, cross(p0, p1), q1 - q0, cross(q0, q1), tolerance);
+#else
+        float3 d1 = p1 - p0;
+        float3 d2 = q1 - q0;
+        float3 d1xd2 = cross(d1, d2);
+        float l1 = length(d1);
+        float l2 = length(d2);
+        float denom = length(d1xd2);
+        if (denom <= (l1 * l2 * tolerance))   // sin(theta) <= tolerance : parallel (scale invariant)
+        {
+            return length(cross(q0 - p0, d1)) / l1;
+        }
+
+        return fabsf(dot(q0 - p0, d1xd2)) / denom;
+#endif
+    }
+
+    GEM_INLINE bool GEM_VECTORCALL line3f::intersects(const float3& p0, const float3& p1, const float3& q0, const float3& q1, float3* p, const float threshold, const float tolerance /*=0.001f*/)
+    {
+#if PLUCKER
+        return plucker3f::intersects(p1 - p0, cross(p0, p1), q1 - q0, cross(q0, q1), p, threshold, tolerance);
+#else
+        line3f cp = closest(p0, p1, q0, q1, tolerance);
+        if (length_squared(cp.p1 - cp.p0) < threshold * threshold)
+        {
+            *p = (cp.p0 + cp.p1) * 0.5f;
+            return true;
+        }
+
+        return false;
+#endif
+    }
+
+    GEM_INLINE line3f GEM_VECTORCALL line3f::transform(const line3f& l, const transform3f& transform)
+    {
+        return {
+            transform.transform_point(l.p0),
+            transform.transform_point(l.p1)
+        };
+    }
+
+    GEM_INLINE line3f GEM_VECTORCALL line3f::transform(const line3f& l, const transform1f& transform)
+    {
+        return {
+            transform.transform_point(l.p0),
+            transform.transform_point(l.p1)
+        };
+    }
+
+    GEM_INLINE line3f GEM_VECTORCALL line3f::transform(const line3f& l, const float4x4& m)
+    {
+        float4 p0 = float4(l.p0, 1) * m;
+        float4 p1 = float4(l.p1, 1) * m;
+        return {
+            { p0.x, p0.y, p0.z },
+            { p1.x, p1.y, p1.z }
+        };
+    }
+
+    GEM_INLINE line3f GEM_VECTORCALL line3f::transform(const line3f& l, const float4x3& m)
+    {
+        return {
+            l.p0 * m,
+            l.p1 * m
+        };
+    }
+    
+    GEM_INLINE line3f GEM_VECTORCALL line3f::transform(const line3f& l, const float3x3& m)
+    {
+        return {
+            l.p0 * m,
+            l.p1 * m
+        };
+    }
+
+    GEM_INLINE line3f GEM_VECTORCALL line3f::closest(const line3f& l, const float tolerance /*=0.001f*/)
+    {
+        return closest(p0, p1, l.p0, l.p1, tolerance);
+    }
+
+    GEM_INLINE float3 GEM_VECTORCALL line3f::closest(const float3& p)
+    {
+        float3 ab = p1 - p0;
+        float3 ac = p  - p0;
+        float t = dot(ac, ab) / dot(ab, ab);
+        return p0 + ab * t;
+    }
+
+    GEM_INLINE float GEM_VECTORCALL line3f::distance(const line3f& l, const float tolerance /*=0.001f*/)
+    {
+        return distance(p0, p1, l.p0, l.p1, tolerance);
+    }
+
+    GEM_INLINE float GEM_VECTORCALL line3f::distance(const float3& p)
+    {
+        return distance(p0, p1, p);
+    }
+
+    GEM_INLINE bool GEM_VECTORCALL line3f::intersects(const line3f& l, float3* p, const float threshold, const float tolerance /*=0.001f*/)
+    {
+        return intersects(p0, p1, l.p0, l.p1, p, threshold, tolerance);
+    }
+
+    GEM_INLINE void GEM_VECTORCALL line3f::transform(const transform3f& x)
+    {
+        *this = transform(*this, x.matrix4x3());
+    }
+
+    GEM_INLINE void GEM_VECTORCALL line3f::transform(const transform1f& x)
+    {
+        *this = transform(*this, x.matrix4x3());
+    }
+
+    GEM_INLINE void GEM_VECTORCALL line3f::transform(const float4x4& m)
+    {
+        *this = transform(*this, m);
+    }
+
+    GEM_INLINE void GEM_VECTORCALL line3f::transform(const float4x3& m)
+    {
+        *this = transform(*this, m);
+    }
+
+    GEM_INLINE void GEM_VECTORCALL line3f::transform(const float3x3& m)
+    {
+       *this = transform(*this, m);
+    }
+
+    #pragma endregion
+
+    struct segment2f
     {
         float2 a, b;
 
@@ -166,22 +483,22 @@ namespace gem
         
         float GEM_VECTORCALL distance_to_point(const float2& point) const;
 
-        bool GEM_VECTORCALL intersects_line(const line_segment2f& line, float2* p_point, const float tolerance = 0.001f) const;
+        bool GEM_VECTORCALL intersects_line(const segment2f& line, float2* p_point, const float tolerance = 0.001f) const;
     };
 
-    GEM_INLINE float2 GEM_VECTORCALL line_segment2f::point_closest_to_point(const float2& point) const
+    GEM_INLINE float2 GEM_VECTORCALL segment2f::point_closest_to_point(const float2& point) const
     {
         return project(point - a, b - a);
     }
 
-    GEM_INLINE float GEM_VECTORCALL line_segment2f::distance_to_point(const float2& point) const
+    GEM_INLINE float GEM_VECTORCALL segment2f::distance_to_point(const float2& point) const
     {
         float d = (point.x * a.y) - (point.y * a.x);
         float l = length_squared(b - a);
         return sqrtf((d * d) / l);
     }
 
-    GEM_INLINE bool GEM_VECTORCALL line_segment2f::intersects_line(const line_segment2f& line, float2* p_point, const float tolerance /*= 0.001f*/) const
+    GEM_INLINE bool GEM_VECTORCALL segment2f::intersects_line(const segment2f& line, float2* p_point, const float tolerance /*= 0.001f*/) const
     {
         float2 v0 = b - a;
         float2 v1 = line.b - line.a;
@@ -209,164 +526,251 @@ namespace gem
         return true;
     }
 
-    struct line_segment3f
+    struct segment3f
     {
-        float3 a, b;
+        float3 p0, p1;
 
-        float2 GEM_VECTORCALL closest_points(const line_segment3f& l1, const float tolerance = 0.001f) const;
-        
-        float GEM_VECTORCALL distance_to_line(const line_segment3f& line, const float tolerance = 0.001f) const;
+        static segment3f GEM_VECTORCALL closest(const float3 p0, const float3 p1, const float3 q0, const float3 q1, const float tolerance = 0.001f);
 
-        float3 GEM_VECTORCALL point_closest_to_point(const float3& point) const;
-        
-        float GEM_VECTORCALL distance_to_point(const float3& point) const;
+        static float3 GEM_VECTORCALL closest(const float3 p0, const float3 p1, const float3 p);
 
-        line_segment3f& GEM_VECTORCALL transform(const transform3f& transform);
+        static float2 GEM_VECTORCALL closest_t(const float3 p0, const float3 p1, const float3 q0, const float3 q1, const float tolerance = 0.001f);
+    
+        static float GEM_VECTORCALL closest_t(const float3 p0, const float3 p1, const float3 p);
 
-        line_segment3f& GEM_VECTORCALL transform(const transform1f& transform);
+        static float GEM_VECTORCALL distance(const float3 p0, const float3 p1, const float3 q0, const float3 q1, const float tolerance = 0.001f);
 
-        bool GEM_VECTORCALL intersects_line(const line_segment3f& line, float3* p_point, const float tolerance = 0.001f) const;
+        static float GEM_VECTORCALL distance(const float3 p0, const float3 p1, const float3 p);
+
+        static bool GEM_VECTORCALL intersects(const float3 p0, const float3 p1, const float3 q0, const float3 q1, float3* p, const float threshold, const float tolerance = 0.001f);
+
+        static segment3f GEM_VECTORCALL transform(const segment3f& l, const transform3f& transform);
+
+        static segment3f GEM_VECTORCALL transform(const segment3f& l, const transform1f& transform);
+
+        static segment3f GEM_VECTORCALL transform(const segment3f& l, const float4x4& m);
+
+        static segment3f GEM_VECTORCALL transform(const segment3f& l, const float4x3& m);
+
+        static segment3f GEM_VECTORCALL transform(const segment3f& l, const float3x3& m);
+
+        segment3f GEM_VECTORCALL closest(const segment3f& l, const float tolerance = 0.001f);
+
+        float3 GEM_VECTORCALL closest(const float3 p);
+
+        float GEM_VECTORCALL distance(const segment3f& l, const float tolerance = 0.001f);
+
+        float GEM_VECTORCALL distance(const float3 p);
+
+        bool GEM_VECTORCALL intersects(const float3 q0, const float3 q1, float3* p, const float threshold, const float tolerance = 0.001f);
+
+        void GEM_VECTORCALL transform(const transform3f& m);
+
+        void GEM_VECTORCALL transform(const transform1f& m);
+
+        void GEM_VECTORCALL transform(const float4x4& m);
+
+        void GEM_VECTORCALL transform(const float4x3& m);
+
+        void GEM_VECTORCALL transform(const float3x3& m);
     };
 
-    GEM_INLINE float GEM_VECTORCALL closest_point_t(const float3& p0, const float3& v0, const float3& p1);
-
-    GEM_INLINE float2 GEM_VECTORCALL closest_points_t(const float3& p0, const float3& v0, const float3& p1, const float3& v1, const float tolerance = 0.001f);
-
-    GEM_INLINE float3 GEM_VECTORCALL closest_point(const float3& p0, const float3& v0, const float3& p1);
-
-    GEM_INLINE line_segment3f GEM_VECTORCALL transform_line_segment(const line_segment3f& line, const transform3f& transform);
-
-    GEM_INLINE line_segment3f GEM_VECTORCALL transform_line_segment(const line_segment3f& line, const transform1f& transform);
-
-    GEM_INLINE float GEM_VECTORCALL closest_point_t(const float3& p0, const float3& v0, const float3& p1)
+    GEM_INLINE segment3f GEM_VECTORCALL segment3f::closest(const float3 p0, const float3 p1, const float3 q0, const float3 q1, const float tolerance /*=0.001f*/)
     {
-        return dot(p1-p0, v0);
+        float2 t = closest_t(p0, p1, q0, q1, tolerance);
+        return {
+            lerp(p0, p1, t.x),
+            lerp(q0, q1, t.y)
+        };
     }
 
-    GEM_INLINE float2 GEM_VECTORCALL closest_points_t(const float3& p0, const float3& v0, const float3& p1, const float3& v1, const float tolerance /*= 0.001f*/)
+    GEM_INLINE float3 GEM_VECTORCALL segment3f::closest(const float3 p0, const float3 p1, const float3 p)
     {
-        float3 w = p1 - p0;
-        float m0 = v0.length_squared();
-        float m1 = v1.length_squared();
-        float v0v1 = dot(v0, v1);
-        float q0 = dot(w, v0);
-        float q1 = dot(w, v1);
-        float d = (v0v1 * v0v1) - (m0 * m1);
-        if (d > -tolerance)
+        float t = closest_t(p0, p1, p);
+        return lerp(p0, p1, t);
+    }
+
+    GEM_INLINE float clamp01(float v)
+    {
+        if (v < 0.f) return 0.f;
+        if (v > 1.f) return 1.f;
+        return v;
+    }
+
+    GEM_INLINE float2 GEM_VECTORCALL segment3f::closest_t(const float3 p0, const float3 p1, const float3 q0, const float3 q1, const float tolerance /*=0.001f*/)
+    {
+        float3 d1 = p1 - p0;
+        float3 d2 = q1 - q0;
+        float3 r = p0 - q0;
+        float a = dot(d1,d1);
+        float e = dot(d2,d2);
+        float f = dot(d2, r);
+        float tol = tolerance * tolerance;
+        if (a <= tol && e <= tol)
         {
-            return {
-                0.0f,
-                -q1 / m1
-            };
+            return { 0, 0 };
         }
 
-        d = 1.f / d;
-        float t0 = d * ((v0v1 * q1) - (m1 * q0));
-        float t1 = d * ((m0 * q1) - (v0v1 * q0));
+        float s, t;
+        if (a <= tol)
+        {
+            s = 0.f;
+            t = f / e;
+            t = clamp01(t);
+        }
+        else
+        {
+            float c = dot(d1, r);
+            if (e <= tol)
+            {
+                t = 0.f;
+                s = clamp01(-c / a);
+            }
+            else
+            {
+                float b = dot(d1,d2);
+                float denom = (a*e) - (b*b);
+                if (denom != 0.f)
+                {
+                    s = clamp01(((b*f) - (c*e)) / denom);
+                }
+                else
+                {
+                    s = 0.f;
+                }
 
-        return { t0, t1 };
+                t = ((b*s) + f) / e;
+
+                if (t < 0.f)
+                {
+                    t = 0.f;
+                    s = clamp01(-c/a);
+                }
+                else if (t > 1.f)
+                {
+                    t = 1.f;
+                    s = clamp01((b-c)/a);
+                }
+            }
+        }
+
+        return { s, t };
     }
 
-    GEM_INLINE float3 GEM_VECTORCALL closest_point(const float3& p0, const float3& p1, const float3& q)
+    GEM_INLINE float GEM_VECTORCALL segment3f::closest_t(const float3 p0, const float3 p1, const float3 p)
     {
         float3 ab = p1 - p0;
-        float3 ac = q  - p0;
-        float t = dot(ac, ab);
-        if (t < 0) t = 0;
-        if (t > 1) t = 1;
-        return p0 + ab * t;
+        float3 ac = p  - p0;
+        return clamp01(dot(ac, ab)/dot(ab,ab));
     }
 
-    GEM_INLINE float2 GEM_VECTORCALL line_segment3f::closest_points(const line_segment3f& l1, const float tolerance /*= 0.001f*/) const
+    GEM_INLINE float GEM_VECTORCALL segment3f::distance(const float3 p0, const float3 p1, const float3 q0, const float3 q1, const float tolerance /*=0.001f*/)
     {
-        return gem::closest_points_t(a, b-a, l1.a, l1.b - l1.a, tolerance);
+        segment3f s = closest(p0, p1, q0, q1, tolerance);
+        return length(s.p1 - s.p0);
     }
 
-    GEM_INLINE float GEM_VECTORCALL line_segment3f::distance_to_line(const line_segment3f& line, const float tolerance /*= 0.001f*/) const
+    GEM_INLINE float GEM_VECTORCALL segment3f::distance(const float3 p0, const float3 p1, const float3 p)
     {
-        float3 v0 = b - a;
-        float3 v1 = line.b - line.a;
-        float3 dp = line.a - a;
-        float v00 = length_squared(v0);
-        float v11 = length_squared(v1);
-        float v01 = dot(v0, v1);
-        float det = (v01 * v01) - (v00 * v11);
-        if (det < tolerance)
-            return sqrtf(length_squared(cross(dp, v1)) / v01);
-
-        det = 1.0f / det;
-        float dpv0 = dot(dp, v0);
-        float dpv1 = dot(dp, v1);
-        float t0 = ((v01 * dpv1) - (v11 * dpv0)) * det;
-        float t1 = ((v00 * dpv1) - (v01 * dpv0)) * det;
-        if (t0 < 0) t0 = 0;
-        if (t0 > 1) t0 = 1;
-        if (t1 < 0) t1 = 0;
-        if (t1 > 1) t1 = 1;
-        return length(dp + (v1 * t1) - (v0 * t0));
+        float t = closest_t(p0, p1, p);
+        return length(p - lerp(p0, p1, t));
     }
 
-    GEM_INLINE float3 GEM_VECTORCALL line_segment3f::point_closest_to_point(const float3& point) const
+    GEM_INLINE bool GEM_VECTORCALL segment3f::intersects(const float3 p0, const float3 p1, const float3 q0, const float3 q1, float3* p, const float threshold, const float tolerance /*=0.001f*/)
     {
-        return project(point - a, b - a);
+        segment3f cp = closest(p0, p1, q0, q1, tolerance);
+        if (length_squared(cp.p1 - cp.p0) < threshold * threshold)
+        {
+            *p = (cp.p0 + cp.p1) * 0.5f;
+            return true;
+        }
+
+        return false;
     }
 
-    GEM_INLINE float GEM_VECTORCALL line_segment3f::distance_to_point(const float3& point) const
+    GEM_INLINE segment3f GEM_VECTORCALL segment3f::transform(const segment3f& l, const transform3f& m)
     {
-        float d = length_squared(cross(point, a));
-        float l = length_squared(b - a);
-        return sqrtf(d / l);
+        return {
+                m.transform_point(l.p0),
+                m.transform_point(l.p1)
+        };
     }
 
-    GEM_INLINE bool GEM_VECTORCALL line_segment3f::intersects_line(const line_segment3f& line, float3* p_point, const float tolerance /*= 0.001f*/) const
+    GEM_INLINE segment3f GEM_VECTORCALL segment3f::transform(const segment3f& l, const transform1f& m)
     {
-        float3 v0 = b - a;
-        float3 v1 = line.b - line.a;
-        float3 dp = line.a - a;
-        float v00 = length_squared(v0);
-        float v11 = length_squared(v1);
-        float v01 = dot(v0, v1);
-        float det = (v01 * v01) - (v00 * v11);
-        if (det < tolerance)
-            return false;
-
-        det = 1.0f / det;
-        float dpv0 = dot(dp, v0);
-        float dpv1 = dot(dp, v1);
-        float t = ((v01 * dpv1) - (v11 * dpv0)) * det;
-        if (t < 0)
-            return false;
-
-        if (t > 1)
-            return false;
-
-        if (p_point)
-            *p_point = line.a + v0 * t;
-
-        return true;
+        return {
+            m.transform_point(l.p0),
+            m.transform_point(l.p1)
+        };
     }
 
-    GEM_INLINE line_segment3f& GEM_VECTORCALL line_segment3f::transform(const transform3f& transform)
+    GEM_INLINE segment3f GEM_VECTORCALL segment3f::transform(const segment3f& l, const float4x4& m)
     {
-        a = transform.transform_point(a);
-        b = transform.transform_point(b);
-        return *this;
+        float4 p0 = float4(l.p0, 1) * m;
+        float4 p1 = float4(l.p1, 1) * m;
+        return {
+            { p0.x, p0.y, p0.z },
+            { p1.x, p1.y, p1.z }
+        };
     }
 
-    GEM_INLINE line_segment3f& GEM_VECTORCALL line_segment3f::transform(const transform1f& transform)
+    GEM_INLINE segment3f GEM_VECTORCALL segment3f::transform(const segment3f& l, const float4x3& m)
     {
-        a = transform.transform_point(a);
-        b = transform.transform_point(b);
-        return *this;
+        return { l.p0 * m, l.p1 * m };
     }
 
-    GEM_INLINE line_segment3f GEM_VECTORCALL transform_line_segment(const line_segment3f& line, const transform3f& transform)
+    GEM_INLINE segment3f GEM_VECTORCALL segment3f::transform(const segment3f& l, const float3x3& m)
     {
-        return { transform.transform_point(line.a), transform.transform_point(line.b) };
-    }
-    GEM_INLINE line_segment3f GEM_VECTORCALL transform_line_segment(const line_segment3f& line, const transform1f& transform)
-    {
-        return { transform.transform_point(line.a), transform.transform_point(line.b) };
+        return { l.p0 * m, l.p1 * m };
     }
 
+    GEM_INLINE segment3f GEM_VECTORCALL segment3f::closest(const segment3f& l, const float tolerance /*=0.001f*/)
+    {
+        return closest(p0, p1, l.p0, l.p1, tolerance);
+    }
+
+    GEM_INLINE float3 GEM_VECTORCALL segment3f::closest(const float3 p)
+    {
+        return closest(p0, p1, p);
+    }
+
+    GEM_INLINE float GEM_VECTORCALL segment3f::distance(const segment3f& l, const float tolerance /*=0.001f*/)
+    {
+        return distance(p0, p1, l.p0, l.p1, tolerance);
+    }
+
+    GEM_INLINE float GEM_VECTORCALL segment3f::distance(const float3 p)
+    {
+        return distance(p0, p1, p);
+    }
+
+    GEM_INLINE bool GEM_VECTORCALL segment3f::intersects(const float3 q0, const float3 q1, float3* p, const float threshold, const float tolerance /*=0.001f*/)
+    {
+        return intersects(p0, p1, q0, q1, p, threshold, tolerance);
+    }
+
+    GEM_INLINE void GEM_VECTORCALL segment3f::transform(const transform3f& m)
+    {
+        *this = transform(*this, m);
+    }
+
+    GEM_INLINE void GEM_VECTORCALL segment3f::transform(const transform1f& m)
+    {
+        *this = transform(*this, m);
+    }
+
+    GEM_INLINE void GEM_VECTORCALL segment3f::transform(const float4x4& m)
+    {
+        *this = transform(*this, m);
+    }
+
+    GEM_INLINE void GEM_VECTORCALL segment3f::transform(const float4x3& m)
+    {
+        *this = transform(*this, m);
+    }
+
+    GEM_INLINE void GEM_VECTORCALL segment3f::transform(const float3x3& m)
+    {
+        *this = transform(*this, m);
+    }
 }

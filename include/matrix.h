@@ -261,6 +261,8 @@ namespace gem
 
         float3x3 inverse() const;
 
+        float3x3 adj() const;
+
         float determinant()	const;
 
         float3 euler() const;
@@ -438,6 +440,22 @@ namespace gem
             m01, m11, m21,
             m02, m12, m22
         };
+    }
+
+    GEM_INLINE float3x3 float3x3::adj() const
+    {
+        float3x3 out;
+
+        out.m00 = +((m11 * m22) - (m12 * m21));
+        out.m01 = -((m01 * m22) - (m02 * m21));
+        out.m02 = +((m01 * m12) - (m02 * m11));
+        out.m10 = -((m10 * m22) - (m12 * m20));
+        out.m11 = +((m00 * m22) - (m02 * m20));
+        out.m12 = -((m00 * m12) - (m02 * m10));
+        out.m20 = +((m10 * m21) - (m11 * m20));
+        out.m21 = -((m00 * m21) - (m01 * m20));
+        out.m22 = +((m00 * m11) - (m01 * m10));
+        return out;
     }
 
     GEM_INLINE float3x3 float3x3::inverse() const
@@ -694,6 +712,8 @@ namespace gem
 
         float4x3 inverse() const;
 
+        float4x3 adj() const;
+
         float determinant()	const;
 
         float3 euler() const;
@@ -918,6 +938,26 @@ namespace gem
             m01, m11, m12, m31,
             m02, m12, m22, m32
         };
+    }
+
+    GEM_INLINE float4x3 float4x3::adj() const
+    {
+        // the omitted fourth column of the 4x4 adjugate is (0, 0, 0, determinant())
+        float4x3 out;
+
+        out.m00 = +((m11 * m22) - (m12 * m21));
+        out.m01 = -((m01 * m22) - (m02 * m21));
+        out.m02 = +((m01 * m12) - (m02 * m11));
+        out.m10 = -((m10 * m22) - (m12 * m20));
+        out.m11 = +((m00 * m22) - (m02 * m20));
+        out.m12 = -((m00 * m12) - (m02 * m10));
+        out.m20 = +((m10 * m21) - (m11 * m20));
+        out.m21 = -((m00 * m21) - (m01 * m20));
+        out.m22 = +((m00 * m11) - (m01 * m10));
+        out.m30 = -((((m11 * m22) - (m12 * m21)) * m30) + (((m12 * m20) - (m10 * m22)) * m31) + (((m10 * m21) - (m11 * m20)) * m32));
+        out.m31 = +((((m01 * m22) - (m02 * m21)) * m30) + (((m02 * m20) - (m00 * m22)) * m31) + (((m00 * m21) - (m01 * m20)) * m32));
+        out.m32 = -((((m01 * m12) - (m02 * m11)) * m30) + (((m02 * m10) - (m00 * m12)) * m31) + (((m00 * m11) - (m01 * m10)) * m32));
+        return out;
     }
 
     GEM_INLINE float4x3 float4x3::inverse() const
@@ -1222,6 +1262,8 @@ namespace gem
         float4x4 transpose() const;
 
         float4x4 inverse() const;
+
+        float4x4 adj() const;
 
         float determinant()	const;
 
@@ -1612,6 +1654,30 @@ namespace gem
             m02, m12, m22, m32,
             m03, m13, m23, m33
         };
+    }
+
+    GEM_INLINE float4x4 float4x4::adj() const
+    {
+        float4x4 out;
+
+        out.m00 = +((((m12 * m23) - (m13 * m22)) * m31) + (((m13 * m21) - (m11 * m23)) * m32) + (((m11 * m22) - (m12 * m21)) * m33));
+        out.m01 = -((((m02 * m23) - (m03 * m22)) * m31) + (((m03 * m21) - (m01 * m23)) * m32) + (((m01 * m22) - (m02 * m21)) * m33));
+        out.m02 = +((((m02 * m13) - (m03 * m12)) * m31) + (((m03 * m11) - (m01 * m13)) * m32) + (((m01 * m12) - (m02 * m11)) * m33));
+        out.m03 = -((((m02 * m13) - (m03 * m12)) * m21) + (((m03 * m11) - (m01 * m13)) * m22) + (((m01 * m12) - (m02 * m11)) * m23));
+        out.m10 = -((((m12 * m23) - (m13 * m22)) * m30) + (((m13 * m20) - (m10 * m23)) * m32) + (((m10 * m22) - (m12 * m20)) * m33));
+        out.m11 = +((((m02 * m23) - (m03 * m22)) * m30) + (((m03 * m20) - (m00 * m23)) * m32) + (((m00 * m22) - (m02 * m20)) * m33));
+        out.m12 = -((((m02 * m13) - (m03 * m12)) * m30) + (((m03 * m10) - (m00 * m13)) * m32) + (((m00 * m12) - (m02 * m10)) * m33));
+        out.m13 = +((((m02 * m13) - (m03 * m12)) * m20) + (((m03 * m10) - (m00 * m13)) * m22) + (((m00 * m12) - (m02 * m10)) * m23));
+        out.m20 = +((((m11 * m23) - (m13 * m21)) * m30) + (((m13 * m20) - (m10 * m23)) * m31) + (((m10 * m21) - (m11 * m20)) * m33));
+        out.m21 = -((((m01 * m23) - (m03 * m21)) * m30) + (((m03 * m20) - (m00 * m23)) * m31) + (((m00 * m21) - (m01 * m20)) * m33));
+        out.m22 = +((((m01 * m13) - (m03 * m11)) * m30) + (((m03 * m10) - (m00 * m13)) * m31) + (((m00 * m11) - (m01 * m10)) * m33));
+        out.m23 = -((((m01 * m13) - (m03 * m11)) * m20) + (((m03 * m10) - (m00 * m13)) * m21) + (((m00 * m11) - (m01 * m10)) * m23));
+        out.m30 = -((((m11 * m22) - (m12 * m21)) * m30) + (((m12 * m20) - (m10 * m22)) * m31) + (((m10 * m21) - (m11 * m20)) * m32));
+        out.m31 = +((((m01 * m22) - (m02 * m21)) * m30) + (((m02 * m20) - (m00 * m22)) * m31) + (((m00 * m21) - (m01 * m20)) * m32));
+        out.m32 = -((((m01 * m12) - (m02 * m11)) * m30) + (((m02 * m10) - (m00 * m12)) * m31) + (((m00 * m11) - (m01 * m10)) * m32));
+        out.m33 = +((((m01 * m12) - (m02 * m11)) * m20) + (((m02 * m10) - (m00 * m12)) * m21) + (((m00 * m11) - (m01 * m10)) * m22));
+
+        return out;
     }
 
     GEM_INLINE float4x4 float4x4::inverse() const
