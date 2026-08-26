@@ -60,9 +60,9 @@ namespace gem
 
         static bool GEM_VECTORCALL intersects(const float3& v0, const float3& m0, const float3& v1, const float3& m1, float3* p, const float threshold, const float tolerance = 0.001f);
 
-        static plucker3f GEM_VECTORCALL transform(const plucker3f& l, const transform3f& transform);
+        static plucker3f GEM_VECTORCALL transform(const plucker3f& l, const affine3f& transform);
 
-        static plucker3f GEM_VECTORCALL transform(const plucker3f& l, const transform1f& transform);
+        static plucker3f GEM_VECTORCALL transform(const plucker3f& l, const similarity3f& transform);
 
         static plucker3f GEM_VECTORCALL transform(const plucker3f& l, const float4x4& m);
 
@@ -78,9 +78,9 @@ namespace gem
 
         bool GEM_VECTORCALL intersects(const plucker3f& l, float3* p, const float threshold, const float tolerance = 0.001f);
 
-        void GEM_VECTORCALL transform(const transform3f& transform);
+        void GEM_VECTORCALL transform(const affine3f& transform);
 
-        void GEM_VECTORCALL transform(const transform1f& transform);
+        void GEM_VECTORCALL transform(const similarity3f& transform);
 
         void GEM_VECTORCALL transform(const float4x4& m);
 
@@ -138,12 +138,12 @@ namespace gem
         return false;
     }
 
-    GEM_INLINE plucker3f GEM_VECTORCALL plucker3f::transform(const plucker3f& l, const transform3f& x)
+    GEM_INLINE plucker3f GEM_VECTORCALL plucker3f::transform(const plucker3f& l, const affine3f& x)
     {
         return transform(l, x.matrix4x3());
     }
 
-    GEM_INLINE plucker3f GEM_VECTORCALL plucker3f::transform(const plucker3f& l, const transform1f& x)
+    GEM_INLINE plucker3f GEM_VECTORCALL plucker3f::transform(const plucker3f& l, const similarity3f& x)
     {
         return transform(l, x.matrix4x3());
     }
@@ -194,12 +194,12 @@ namespace gem
         return intersects(v, m, l.v, l.m, p, threshold, tolerance);
     }
 
-    GEM_INLINE void GEM_VECTORCALL plucker3f::transform(const transform3f& x)
+    GEM_INLINE void GEM_VECTORCALL plucker3f::transform(const affine3f& x)
     {
         *this = transform(*this, x);
     }
 
-    GEM_INLINE void GEM_VECTORCALL plucker3f::transform(const transform1f& x)
+    GEM_INLINE void GEM_VECTORCALL plucker3f::transform(const similarity3f& x)
     {
         *this = transform(*this, x);
     }
@@ -239,9 +239,9 @@ namespace gem
 
         static bool GEM_VECTORCALL intersects(const float3& p0, const float3& p1, const float3& q0, const float3& q1, float3* p, const float threshold, const float tolerance = 0.001f);
 
-        static line3f GEM_VECTORCALL transform(const line3f& l, const transform3f& transform);
+        static line3f GEM_VECTORCALL transform(const line3f& l, const affine3f& transform);
 
-        static line3f GEM_VECTORCALL transform(const line3f& l, const transform1f& transform);
+        static line3f GEM_VECTORCALL transform(const line3f& l, const similarity3f& transform);
 
         static line3f GEM_VECTORCALL transform(const line3f& l, const float4x4& m);
 
@@ -259,9 +259,9 @@ namespace gem
 
         bool GEM_VECTORCALL intersects(const line3f& l, float3* p, const float threshold, const float tolerance = 0.001f);
 
-        void GEM_VECTORCALL transform(const transform3f& transform);
+        void GEM_VECTORCALL transform(const affine3f& transform);
 
-        void GEM_VECTORCALL transform(const transform1f& transform);
+        void GEM_VECTORCALL transform(const similarity3f& transform);
 
         void GEM_VECTORCALL transform(const float4x4& m);
 
@@ -378,19 +378,19 @@ namespace gem
 #endif
     }
 
-    GEM_INLINE line3f GEM_VECTORCALL line3f::transform(const line3f& l, const transform3f& transform)
+    GEM_INLINE line3f GEM_VECTORCALL line3f::transform(const line3f& l, const affine3f& transform)
     {
         return {
-            transform.transform_point(l.p0),
-            transform.transform_point(l.p1)
+            transform.mulp(l.p0),
+            transform.mulp(l.p1)
         };
     }
 
-    GEM_INLINE line3f GEM_VECTORCALL line3f::transform(const line3f& l, const transform1f& transform)
+    GEM_INLINE line3f GEM_VECTORCALL line3f::transform(const line3f& l, const similarity3f& transform)
     {
         return {
-            transform.transform_point(l.p0),
-            transform.transform_point(l.p1)
+            transform.mulp(l.p0),
+            transform.mulp(l.p1)
         };
     }
 
@@ -448,12 +448,12 @@ namespace gem
         return intersects(p0, p1, l.p0, l.p1, p, threshold, tolerance);
     }
 
-    GEM_INLINE void GEM_VECTORCALL line3f::transform(const transform3f& x)
+    GEM_INLINE void GEM_VECTORCALL line3f::transform(const affine3f& x)
     {
         *this = transform(*this, x.matrix4x3());
     }
 
-    GEM_INLINE void GEM_VECTORCALL line3f::transform(const transform1f& x)
+    GEM_INLINE void GEM_VECTORCALL line3f::transform(const similarity3f& x)
     {
         *this = transform(*this, x.matrix4x3());
     }
@@ -544,9 +544,9 @@ namespace gem
 
         static bool GEM_VECTORCALL intersects(const float3 p0, const float3 p1, const float3 q0, const float3 q1, float3* p, const float threshold, const float tolerance = 0.001f);
 
-        static segment3f GEM_VECTORCALL transform(const segment3f& l, const transform3f& transform);
+        static segment3f GEM_VECTORCALL transform(const segment3f& l, const affine3f& transform);
 
-        static segment3f GEM_VECTORCALL transform(const segment3f& l, const transform1f& transform);
+        static segment3f GEM_VECTORCALL transform(const segment3f& l, const similarity3f& transform);
 
         static segment3f GEM_VECTORCALL transform(const segment3f& l, const float4x4& m);
 
@@ -564,9 +564,9 @@ namespace gem
 
         bool GEM_VECTORCALL intersects(const float3 q0, const float3 q1, float3* p, const float threshold, const float tolerance = 0.001f);
 
-        void GEM_VECTORCALL transform(const transform3f& m);
+        void GEM_VECTORCALL transform(const affine3f& m);
 
-        void GEM_VECTORCALL transform(const transform1f& m);
+        void GEM_VECTORCALL transform(const similarity3f& m);
 
         void GEM_VECTORCALL transform(const float4x4& m);
 
@@ -688,19 +688,19 @@ namespace gem
         return false;
     }
 
-    GEM_INLINE segment3f GEM_VECTORCALL segment3f::transform(const segment3f& l, const transform3f& m)
+    GEM_INLINE segment3f GEM_VECTORCALL segment3f::transform(const segment3f& l, const affine3f& m)
     {
         return {
-                m.transform_point(l.p0),
-                m.transform_point(l.p1)
+                m.mulp(l.p0),
+                m.mulp(l.p1)
         };
     }
 
-    GEM_INLINE segment3f GEM_VECTORCALL segment3f::transform(const segment3f& l, const transform1f& m)
+    GEM_INLINE segment3f GEM_VECTORCALL segment3f::transform(const segment3f& l, const similarity3f& m)
     {
         return {
-            m.transform_point(l.p0),
-            m.transform_point(l.p1)
+            m.mulp(l.p0),
+            m.mulp(l.p1)
         };
     }
 
@@ -749,12 +749,12 @@ namespace gem
         return intersects(p0, p1, q0, q1, p, threshold, tolerance);
     }
 
-    GEM_INLINE void GEM_VECTORCALL segment3f::transform(const transform3f& m)
+    GEM_INLINE void GEM_VECTORCALL segment3f::transform(const affine3f& m)
     {
         *this = transform(*this, m);
     }
 
-    GEM_INLINE void GEM_VECTORCALL segment3f::transform(const transform1f& m)
+    GEM_INLINE void GEM_VECTORCALL segment3f::transform(const similarity3f& m)
     {
         *this = transform(*this, m);
     }

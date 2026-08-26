@@ -14,9 +14,9 @@ namespace gem
 
         static plane4f implicit(float a, float b, float c, float d);
 
-        static plane4f GEM_VECTORCALL transform(const transform3f& transform, const plane4f& plane);
+        static plane4f GEM_VECTORCALL transform(const affine3f& transform, const plane4f& plane);
 
-        static plane4f GEM_VECTORCALL transform(const transform1f& transform, const plane4f& plane);
+        static plane4f GEM_VECTORCALL transform(const similarity3f& transform, const plane4f& plane);
 
         static plane4f GEM_VECTORCALL transform(const float4x4& m, const plane4f& plane);
 
@@ -61,53 +61,39 @@ namespace gem
         return { { a, b, c }, -d };
     }
 
-    GEM_INLINE plane4f GEM_VECTORCALL plane4f::transform(const transform3f& transform, const plane4f& plane)
+    GEM_INLINE plane4f GEM_VECTORCALL plane4f::transform(const affine3f& x, const plane4f& plane)
     {
-        const float3& s = transform.s;
-        float3 n = transform.q.transform_point(plane.n * float3{ 1.f / s.x, 1.f / s.y, 1.f / s.z });
-        float l = n.length();
-        float d = plane.d + dot(n, transform.t);
-        return { n / l, d / l };
+        return transform(x.matrix4x3(), plane);
     }
 
-    GEM_INLINE plane4f GEM_VECTORCALL plane4f::transform(const transform1f& transform, const plane4f& plane)
+    GEM_INLINE plane4f GEM_VECTORCALL plane4f::transform(const similarity3f& x, const plane4f& plane)
     {
-        float3 n = transform.transform_vector(plane.n);
-        float l = n.length();
-        float d = plane.d + dot(n, transform.t);
-        return { n / l, d / l};
+        return transform(x.matrix4x3(), plane);
     }
 
     GEM_INLINE plane4f GEM_VECTORCALL plane4f::transform(const float4x4& m, const plane4f& plane)
     {
-        // TODO(gortega): Replace with adj
-        float4x4 adj = m.inverse().transpose();
-        float4 h = float4(plane.n, 0) * adj;
+        float4 h = float4(plane.n, 0) * m.adj();
         float3 n = { h.x, h.y, h.z };
         float3 t = { m.m30, m.m31, m.m32 };
-        float l = n.length();
-        float d = plane.d + dot(t, n);
-        return { n / l, d / l };
+        float d = (m.determinant() * plane.d) + dot(t, n);
+        return { n , d };
         
     }
 
     GEM_INLINE plane4f GEM_VECTORCALL plane4f::transform(const float4x3& m, const plane4f& plane)
     {
-        float4x3 adj = m.inverse().transpose();
-        float3 n = float4(plane.n, 0) * adj;
+        float3 n = plane.n * m.adj();
         float3 t = { m.m30, m.m31, m.m32 };
-        float l = n.length();
-        float d = plane.d + dot(t, n);
-        return { n / l, d / l };
+        float d = (m.determinant() * plane.d) + dot(t, n);
+        return { n , d };
     }
 
     GEM_INLINE plane4f GEM_VECTORCALL plane4f::transform(const float3x3& m, const plane4f& plane)
     {
-        float3x3 adj = m.inverse().transpose();
-        float3 n = plane.n * adj;
-        float l = n.length();
-        float d = plane.d;
-        return { n / l, d / l };
+        float3 n = plane.n * m.adj();
+        float d = (m.determinant() * plane.d);
+        return { n , d };
     }
 
     GEM_INLINE void plane4f::normalize()

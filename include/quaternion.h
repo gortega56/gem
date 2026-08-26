@@ -19,6 +19,10 @@ namespace gem
 
         static quatf GEM_VECTORCALL rotate_align(const float3 u, const float3 v);
 
+        static quatf GEM_VECTORCALL concat(const quatf q0, const quatf q1);
+
+        static float3 GEM_VECTORCALL mul(const float3 v, const quatf q);
+
         quatf(const float ix, const float iy, const float iz, const float iw);
 
         quatf(const float* o);
@@ -55,7 +59,7 @@ namespace gem
 
         float3 axis_z() const;
 
-        float3 GEM_VECTORCALL transform_point(const float3& p) const;
+        float3 GEM_VECTORCALL mul(const float3 p) const;
 
         quatf& GEM_VECTORCALL operator=(const quatf& rhs);
 
@@ -232,6 +236,27 @@ namespace gem
             a.y * s,
             a.z * s,
             c
+        };
+    }
+
+    GEM_INLINE quatf GEM_VECTORCALL quatf::concat(const quatf q0, const quatf q1)
+    {
+        return q1 * q0;
+    }
+
+    GEM_INLINE float3 GEM_VECTORCALL quatf::mul(const float3 p, const quatf q)
+    {
+        // Given q is a unit vector:
+        // qvq* = (b + c)(v + 0)(-b + c)
+        //      = v + 2c(bxv) + 2(bxbxv)
+        float3 v = { q.x, q.y, q.z };
+        float3 bxv = cross(v, p);
+        float3 bxbxv = cross(v, bxv);
+        return
+        {
+            p.x + ((bxv.x * q.w) + bxbxv.x) * 2.0f,
+            p.y + ((bxv.y * q.w) + bxbxv.y) * 2.0f,
+            p.z + ((bxv.z * q.w) + bxbxv.z) * 2.0f
         };
     }
 
@@ -482,7 +507,7 @@ namespace gem
         };
     }
 
-    GEM_INLINE float3 GEM_VECTORCALL quatf::transform_point(const float3& p) const
+    GEM_INLINE float3 GEM_VECTORCALL quatf::mul(const float3 p) const
     {
         // Given q is a unit vector:
         // qvq* = (b + c)(v + 0)(-b + c)

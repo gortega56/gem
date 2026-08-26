@@ -15,9 +15,9 @@ namespace gem
 
         float3 center() const;
 
-        cylinder3f& GEM_VECTORCALL transform(const transform3f& transform);
+        cylinder3f& GEM_VECTORCALL transform(const affine3f& transform);
 
-        cylinder3f& GEM_VECTORCALL transform(const transform1f& transform);
+        cylinder3f& GEM_VECTORCALL transform(const similarity3f& transform);
 
         bool GEM_VECTORCALL contains_point(const float3& point) const;
 
@@ -41,18 +41,18 @@ namespace gem
         return (min + max) * 0.5f;
     }
 
-    GEM_INLINE cylinder3f& GEM_VECTORCALL cylinder3f::transform(const transform3f& transform)
+    GEM_INLINE cylinder3f& GEM_VECTORCALL cylinder3f::transform(const affine3f& transform)
     {
-        min = transform.transform_point(min);
-        max = transform.transform_point(max);
+        min = transform.mulp(min);
+        max = transform.mulp(max);
 
         // NOTE(gortega): Ignore scale for radius since nonuniform scale would no longer be min capsule
     }
 
-    GEM_INLINE cylinder3f& GEM_VECTORCALL cylinder3f::transform(const transform1f& transform)
+    GEM_INLINE cylinder3f& GEM_VECTORCALL cylinder3f::transform(const similarity3f& transform)
     {
-        min = transform.transform_point(min);
-        max = transform.transform_point(max);
+        min = transform.mulp(min);
+        max = transform.mulp(max);
         r = r * transform.s;
     }
 

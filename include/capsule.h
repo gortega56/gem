@@ -13,9 +13,9 @@ namespace gem
         float3 max = {};
         float r = 0;
 
-        static capsule3f GEM_VECTORCALL transform(const transform3f& transform, const capsule3f& capsule);
+        static capsule3f GEM_VECTORCALL transform(const affine3f& transform, const capsule3f& capsule);
 
-        static capsule3f GEM_VECTORCALL transform(const transform1f& transform, const capsule3f& capsule);
+        static capsule3f GEM_VECTORCALL transform(const similarity3f& transform, const capsule3f& capsule);
 
         static capsule3f unit();
 
@@ -23,34 +23,32 @@ namespace gem
 
         float3 axis() const;
 
-        void GEM_VECTORCALL transform(const transform3f& transform);
+        void GEM_VECTORCALL transform(const affine3f& transform);
 
-        void GEM_VECTORCALL transform(const transform1f& transform);
+        void GEM_VECTORCALL transform(const similarity3f& transform);
 
         bool GEM_VECTORCALL contains(const float3& point) const;
 
         bool GEM_VECTORCALL intersects(const ray3f& ray, float3* phit, float* thit, float tolerance = 0.01f);
 
-        float3 GEM_VECTORCALL closest_point(const float3& point) const;
-
-        float3 GEM_VECTORCALL support(const float3& d) const;
+        float3 GEM_VECTORCALL closest(const float3& point) const;
     };
 
-    GEM_INLINE capsule3f GEM_VECTORCALL capsule3f::transform(const transform3f& transform, const capsule3f& capsule)
+    GEM_INLINE capsule3f GEM_VECTORCALL capsule3f::transform(const affine3f& transform, const capsule3f& capsule)
     {
         // NOTE(gortega): Ignore scale for radius since nonuniform scale would no longer be min capsule
         capsule3f o;
-        o.min = transform.transform_point(capsule.min);
-        o.max = transform.transform_point(capsule.max);
+        o.min = transform.mulp(capsule.min);
+        o.max = transform.mulp(capsule.max);
         o.r = capsule.r;
         return o;
     }
 
-    GEM_INLINE capsule3f GEM_VECTORCALL capsule3f::transform(const transform1f& transform, const capsule3f& capsule)
+    GEM_INLINE capsule3f GEM_VECTORCALL capsule3f::transform(const similarity3f& transform, const capsule3f& capsule)
     {
         capsule3f o;
-        o.min = transform.transform_point(capsule.min);
-        o.max = transform.transform_point(capsule.max);
+        o.min = transform.mulp(capsule.min);
+        o.max = transform.mulp(capsule.max);
         o.r = capsule.r * transform.s;
         return o;
     }
@@ -74,17 +72,17 @@ namespace gem
         return max - min;
     }
 
-    GEM_INLINE void GEM_VECTORCALL capsule3f::transform(const transform3f& transform)
+    GEM_INLINE void GEM_VECTORCALL capsule3f::transform(const affine3f& transform)
     {
-        min = transform.transform_point(min);
-        max = transform.transform_point(max);
+        min = transform.mulp(min);
+        max = transform.mulp(max);
         // NOTE(gortega): Ignore scale for radius since nonuniform scale would no longer be min capsule
     }
 
-    GEM_INLINE void GEM_VECTORCALL capsule3f::transform(const transform1f& transform)
+    GEM_INLINE void GEM_VECTORCALL capsule3f::transform(const similarity3f& transform)
     {
-        min = transform.transform_point(min);
-        max = transform.transform_point(max);
+        min = transform.mulp(min);
+        max = transform.mulp(max);
         r = r * transform.s;
     }
 
@@ -103,8 +101,8 @@ namespace gem
 
     GEM_INLINE bool GEM_VECTORCALL capsule3f::intersects(const ray3f& ray, float3* p, float* t, float tolerance /*= 0.01f*/)
     {
-        sphere3f c0 = { min, r };
-        sphere3f c1 = { max, r };
+        sphere c0 = { min, r };
+        sphere c1 = { max, r };
         cylinder3f c2 = { min, max, r };
         float3 p0, p1, p2;
         float t0, t1, t2;
@@ -118,18 +116,18 @@ namespace gem
         return b0 || b1 || b2;
     }
 
-    GEM_INLINE float3 GEM_VECTORCALL capsule3f::closest_point(const float3& point) const
+    GEM_INLINE float3 GEM_VECTORCALL capsule3f::closest(const float3& point) const
     {
         float3 ab = max - min;
         float3 ac = point - min;
         float t = dot(ac, ab) / length_squared(ab);
         if (t < 0.f)
         {
-            return sphere3f{ min, r }.closest_point(point);
+            return sphere{ min, r }.closest(point);
         }
         else if (t > 1)
         {
-            return sphere3f{ max, r }.closest_point(point);
+            return sphere{ max, r }.closest(point);
         }
 
         float3 ac_para_ab = lerp(min, max, t);
@@ -138,14 +136,5 @@ namespace gem
         ac_perb_ab *= (1.f / l);
         if (l > r) l = r;
         return ac_para_ab + ac_perb_ab * l;
-    }
-
-    GEM_INLINE float3 GEM_VECTORCALL capsule3f::support(const float3& d) const
-    {
-        float dab = dot(d, axis());
-        float3 o = (dab < 0.f)
-            ? min
-            : max;
-        return o + gem::normalize(d) * r;
     }
 }

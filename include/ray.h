@@ -8,30 +8,30 @@ namespace gem
         float3 p;
         float3 v;
     
-        static ray3f GEM_VECTORCALL transform(const transform3f& transform, const ray3f& ray);
+        static ray3f GEM_VECTORCALL transform(const affine3f& transform, const ray3f& ray);
 
-        static ray3f GEM_VECTORCALL transform(const transform1f& transform, const ray3f& ray);
+        static ray3f GEM_VECTORCALL transform(const similarity3f& transform, const ray3f& ray);
 
-        void GEM_VECTORCALL transform(const transform3f& transform);
+        void GEM_VECTORCALL transform(const affine3f& transform);
 
-        void GEM_VECTORCALL transform(const transform1f& transform);
+        void GEM_VECTORCALL transform(const similarity3f& transform);
 
-        bool GEM_VECTORCALL intersects_ray(const ray3f& ray, float3* p_point, const float tolerance = 0.001f) const;
+        bool GEM_VECTORCALL intersects(const ray3f& ray, float3* p_point, const float tolerance = 0.001f) const;
     };
     
-    GEM_INLINE void GEM_VECTORCALL ray3f::transform(const transform3f& transform)
+    GEM_INLINE void GEM_VECTORCALL ray3f::transform(const affine3f& transform)
     {
-        p = transform.transform_point(p);
-        v = transform.transform_vector(v);
+        p = transform.mulp(p);
+        v = transform.mulv(v);
     }
 
-    GEM_INLINE void GEM_VECTORCALL ray3f::transform(const transform1f& transform)
+    GEM_INLINE void GEM_VECTORCALL ray3f::transform(const similarity3f& transform)
     {
-        p = transform.transform_point(p);
-        v = transform.transform_vector(v);
+        p = transform.mulp(p);
+        v = transform.mulv(v);
     }
 
-    GEM_INLINE bool ray3f::intersects_ray(const ray3f& ray, float3* p_point, const float tolerance /*= 0.001f*/) const
+    GEM_INLINE bool ray3f::intersects(const ray3f& ray, float3* p_point, const float tolerance /*= 0.001f*/) const
     {
         float3 v0 = v;
         float3 v1 = ray.v;
@@ -56,13 +56,13 @@ namespace gem
         return true;
     }
 
-    GEM_INLINE ray3f GEM_VECTORCALL ray3f::transform(const transform3f& transform, const ray3f& ray)
+    GEM_INLINE ray3f GEM_VECTORCALL ray3f::transform(const affine3f& transform, const ray3f& ray)
     {
-        return { transform.transform_point(ray.p), transform.transform_vector(ray.v) };
+        return { transform.mulp(ray.p), transform.mulv(ray.v) };
     }
 
-    GEM_INLINE ray3f GEM_VECTORCALL ray3f::transform(const transform1f& transform, const ray3f& ray)
+    GEM_INLINE ray3f GEM_VECTORCALL ray3f::transform(const similarity3f& transform, const ray3f& ray)
     {
-        return { transform.transform_point(ray.p), transform.transform_vector(ray.v) };
+        return { transform.mulp(ray.p), transform.mulv(ray.v) };
     }
 }
