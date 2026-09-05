@@ -231,6 +231,8 @@ namespace gem
 
         static float3x3 identity();
 
+        static float3x3 zero();
+
         static float3x3 GEM_VECTORCALL rotate_euler(const float pitch, const float yaw, const float roll);
 
         static float3x3 GEM_VECTORCALL rotate_axis_angle(const float3& a, const float radians);
@@ -303,6 +305,16 @@ namespace gem
             1.0f, 0.0f, 0.0f,
             0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 1.0f
+        };
+    }
+
+    GEM_INLINE float3x3 float3x3::zero()
+    {
+        return
+        {
+            0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f
         };
     }
 
