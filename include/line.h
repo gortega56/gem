@@ -301,28 +301,6 @@ namespace gem
         float s = ((b*f)-(c*e))/d;
         float t = ((a*f)-(b*c))/d;
         return { s, t };
-        /*float3 v0 = p1 - p0;
-        float3 v1 = q1 - q0;
-        float3 w = q0 - p0;
-        float m0 = v0.length_squared();
-        float m1 = v1.length_squared();
-        float v0v1 = dot(v0, v1);
-        float s0 = dot(w, v0);
-        float s1 = dot(w, v1);
-        float d = (v0v1 * v0v1) - (m0 * m1);
-        if (d > -tolerance)
-        {
-            return {
-                0.0f,
-                -s1 / m1
-            };
-        }
-
-        d = 1.f / d;
-        float t0 = d * ((v0v1 * s1) - (m1 * s0));
-        float t1 = d * ((m0 * s1) - (v0v1 * s0));
-
-        return { t0, t1 };*/
     }
 
     GEM_INLINE float GEM_VECTORCALL line3f::closest_t(const float3& p0, const float3& p1, const float3& q)

@@ -70,12 +70,12 @@ namespace gem
 
     GEM_INLINE float4x3 affine3f::matrix4x3() const
     {
-        return q.matrix4x3() * float4x3::scale(s) * float4x3::translate(t);
+        return float4x3::scale(s) * q.matrix4x3() * float4x3::translate(t);
     }
 
     GEM_INLINE float4x4 affine3f::matrix4x4() const
     {
-        return q.matrix4x4() * float4x4::scale(s) * float4x4::translate(t);
+        return float4x4::scale(s) * q.matrix4x4() * float4x4::translate(t);
     }
 
     GEM_INLINE affine3f& GEM_VECTORCALL affine3f::operator=(const affine3f& o)
@@ -156,12 +156,12 @@ namespace gem
 
     GEM_INLINE float4x3 similarity3f::matrix4x3() const
     {
-        return q.matrix4x3() * float4x3::scale(s) * float4x3::translate(t);
+        return float4x3::scale(s) * q.matrix4x3() * float4x3::translate(t);
     }
 
     GEM_INLINE float4x4 similarity3f::matrix4x4() const
     {
-        return q.matrix4x4() * float4x4::scale(s) * float4x4::translate(t);
+        return float4x4::scale(s) * q.matrix4x4() * float4x4::translate(t);
     }
 
     GEM_INLINE similarity3f& GEM_VECTORCALL similarity3f::operator=(const similarity3f& o)

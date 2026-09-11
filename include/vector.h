@@ -416,6 +416,8 @@ namespace gem
 
     float3 GEM_VECTORCALL sgn(const float3& rhs);
 
+    float3 GEM_VECTORCALL perp(const float3& v);
+
     float3 GEM_VECTORCALL operator+(const float3& lhs, const float3& rhs);
 
     float3 GEM_VECTORCALL operator-(const float3& lhs, const float3& rhs);
@@ -687,6 +689,46 @@ namespace gem
             v.y < 0 ? -1.f : 1.f,
             v.z < 0 ? -1.f : 1.f,
         };
+    }
+
+    // NOTE(gortega): https://github.com/erincatto/box3d/blob/main/src/math_internal.h#L137
+    GEM_INLINE float3 GEM_VECTORCALL perp(const float3& v)
+    {
+        // Suppose vector a has all equal components and is a unit vector: a = (s, s, s)
+        // Then 3*s*s = 1, s = sqrt(1/3) = 0.57735. This means that at least one component
+        // of a unit vector must be greater or equal to 0.57735.
+        float3 p;
+        if (v.x < -0.5f || 0.5f < v.x)
+        {
+            // x is non-zero and it should not go into the x component
+            // dot([ay + bz, cx, dx], [x, y, z]) = ayx + bzx + cxy + dzx
+            // for the dot product to be zero need: c = -a, d = -b
+            float a = 0.67f;
+            float b = -0.42f;
+            p = { a* v.y + b * v.z, -a * v.x, -b * v.x };
+        }
+        else if (v.y < -0.5f || 0.5f < v.y)
+        {
+            // y is non-zero and it should not go into the y component
+            // p = [ay, bx + cz, dy]
+            // axy + bxy + cyz + dyz = 0
+            // b = -a, d = -c
+            float a = 0.67f;
+            float c = -0.42f;
+            p = { a* v.y, -a * v.x + c * v.z, -c * v.y };
+        }
+        else
+        {
+            // z is non-zero and it should not go into the z component
+            // p = [az, bz, cx + dy]
+            // axz + byz + cxz + dyz = 0
+            // c = -a, d = -b
+            float a = 0.67f;
+            float b = -0.42f;
+            p = { a* v.z, b* v.z, -a * v.x - b * v.y };
+        }
+
+        return normalize(p);
     }
 
     GEM_INLINE float3 GEM_VECTORCALL operator+(const float3& lhs, const float3& rhs)
